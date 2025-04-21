@@ -1,0 +1,22 @@
+syntax: glob
+
+*.log
+*.o
+*~
+.deps
+.dirstamp
+aclocal.m4
+autom4te.cache
+build-aux
+compile_flags.txt
+config.h
+config.h.in
+config.status
+configure
+lib*.a
+Makefile
+Makefile.in
+stamp-h1
+
+examples/dvd-logo/dvd-logo{,.exe}
+
