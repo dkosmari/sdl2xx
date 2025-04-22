@@ -14,7 +14,7 @@
 #include "unique_ptr.hpp"
 
 
-namespace sdl::event {
+namespace sdl::events {
 
     void
     pump()
@@ -306,4 +306,4 @@ namespace sdl::event {
         return result;
     }
 
-} // namespace sdl::event
+} // namespace sdl::events

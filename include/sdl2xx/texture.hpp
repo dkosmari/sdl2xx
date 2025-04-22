@@ -42,15 +42,14 @@ namespace sdl {
             noexcept;
 
 
-        texture(SDL_Texture* tex)
-            noexcept;
-
-
     public:
 
         constexpr
         texture()
             noexcept = default;
+
+        texture(SDL_Texture* tex)
+            noexcept;
 
         texture(renderer& ren,
                 SDL_PixelFormatEnum format,

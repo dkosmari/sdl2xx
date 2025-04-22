@@ -118,6 +118,16 @@ namespace sdl {
         }
 
 
+        constexpr
+        void
+        clear()
+            noexcept
+        {
+            w = 0;
+            h = 0;
+        }
+
+
         [[nodiscard]]
         constexpr
         bool
@@ -182,11 +192,21 @@ namespace sdl {
 
         constexpr
         void
+        set_center(int cx,
+                   int cy)
+            noexcept
+        {
+            x = cx - w / 2;
+            y = cy - h / 2;
+        }
+
+
+        constexpr
+        void
         set_center(vec2 center)
             noexcept
         {
-            x = center.x - w / 2;
-            y = center.y - h / 2;
+            set_center(center.x, center.y);
         }
 
 
@@ -420,6 +440,16 @@ namespace sdl {
         }
 
 
+        constexpr
+        void
+        clear()
+            noexcept
+        {
+            w = 0;
+            h = 0;
+        }
+
+
         [[nodiscard]]
         constexpr
         bool
@@ -482,11 +512,21 @@ namespace sdl {
 
         constexpr
         void
+        set_center(float cx,
+                   float cy)
+            noexcept
+        {
+            x = cx - w / 2;
+            y = cy - h / 2;
+        }
+
+
+        constexpr
+        void
         set_center(vec2f center)
             noexcept
         {
-            x = center.x - w / 2;
-            y = center.y - h / 2;
+            set_center(center.x, center.y);
         }
 
 

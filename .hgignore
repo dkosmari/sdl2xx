@@ -19,4 +19,4 @@ Makefile.in
 stamp-h1
 
 examples/dvd-logo/dvd-logo{,.exe}
-
+examples/simple/simple{,.exe}

@@ -83,6 +83,31 @@ namespace sdl {
     }
 
 
+    template<typename T>
+    unique_ptr<T[]>
+    make_unique(std::size_t count)
+    {
+        T* ptr = nullptr;
+        std::size_t constructed = 0;
+        try {
+            ptr = malloc_allocator::allocate_as<T*>(count * sizeof(T));
+            if (!ptr)
+                return {};
+            for (std::size_t i = 0; i < count; ++i) {
+                std::construct_at(ptr + i);
+                ++constructed;
+            }
+            return unique_ptr<T[]>{ptr, count};
+        }
+        catch (...) {
+            // Destroy every constructed object in reverse order.
+            while (constructed > 0)
+                std::destroy_at(ptr + --constructed);
+            malloc_allocator::deallocate(ptr);
+            throw;
+        }
+    }
+
 } // namespace sdl
 
 #endif

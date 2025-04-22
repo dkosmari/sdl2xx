@@ -6,13 +6,15 @@
  * SPDX-License-Identifier: Zlib
  */
 
+#include <exception>
 #include <iostream>
-#include <numbers>
 #include <random>
-#include <stdexcept>
+#include <sstream>
+#include <utility>
 #include <vector>
 
 #include <sdl2xx/sdl.hpp>
+#include <sdl2xx/img.hpp>
 #include <sdl2xx/ttf.hpp>
 
 
@@ -21,9 +23,10 @@ using std::endl;
 
 using namespace sdl::literals;
 
+using sdl::radiansf;
+using sdl::rectf;
 using sdl::vec2;
 using sdl::vec2f;
-using sdl::rectf;
 
 
 std::mt19937_64 rand_eng;
@@ -65,6 +68,27 @@ rand_degree_away_from(sdl::degreesf old)
 }
 
 
+sdl::radiansf
+rand_angle(sdl::radiansf mean,
+           sdl::radiansf dev)
+{
+    std::normal_distribution<float> dist{mean.value(), dev.value()};
+    return radiansf{dist(rand_eng)};
+}
+
+
+vec2f
+rotated(vec2f v,
+        radiansf a)
+{
+    auto [s, c] = sincos(a);
+    return {
+         c * v.x - s * v.y,
+         s * v.x + c * v.y
+    };
+}
+
+
 struct Logo {
 
     sdl::color color;
@@ -73,17 +97,18 @@ struct Logo {
     vec2f velocity;
 
     rectf box;
-    sdl::texture texture;
+    sdl::texture* texture = nullptr;
 
 
     void
-    set_text(sdl::renderer& ren,
-             sdl::ttf::font& font,
-             const std::string& text)
+    set_texture(sdl::texture* tex)
     {
-        sdl::surface surf = font.render_blended(text, sdl::color::white);
-        texture.create(ren, surf);
-        box.set_size(vec2f{texture.get_size()});
+        texture = tex;
+        if (texture)
+            box.set_size(vec2f{texture->get_size()});
+        else
+            box.clear();
+        set_color(color);
     }
 
 
@@ -91,7 +116,8 @@ struct Logo {
     set_color(sdl::color c)
     {
         color = c;
-        texture.set_color_mod(color);
+        if (texture)
+            texture->set_color_mod(color);
     }
 
 
@@ -122,9 +148,15 @@ struct Logo {
     draw(sdl::renderer& ren)
     {
         ren.set_color(color);
-        ren.draw_box(box);
 
-        ren.copy(texture, {}, box);
+#if 0
+        ren.draw_box(box);
+#endif
+
+        if (texture)
+            ren.copy(*texture, {}, box);
+        else
+            ren.draw_point(position);
     }
 
 };
@@ -146,31 +178,43 @@ struct App {
     };
 
     sdl::ttf::init ttf_init;
-    sdl::ttf::font font{"assets/LiberationSans-Regular.ttf", 96};
+    sdl::ttf::font font{"assets/LiberationSans-Regular.ttf", 24};
 
     sdl::color bg_color = sdl::color::black;
 
     rectf boundary;
     Logo logo;
 
+    float logo_speed = 50;
+
+    std::vector<sdl::texture> logo_textures;
+    std::size_t current_texture = 0;
+
+    sdl::texture status_texture;
+    unsigned total_bounces = 0;
+    unsigned total_corner_bounces = 0;
 
     bool running = false;
 
 
     App()
     {
-        using style = sdl::ttf::font::style;
-        font.set_style(style::bold | style::italic);
-
         auto size = window.get_size();
         renderer.set_logical_size(size);
 
-        logo.set_text(renderer, font, "DVD");
+        if (auto tex = sdl::img::try_load_texture(renderer, "assets/dvd-logo.svg"))
+            logo_textures.push_back(std::move(*tex));
+        if (auto tex = sdl::img::try_load_texture(renderer, "assets/blu-ray-logo.svg"))
+            logo_textures.push_back(std::move(*tex));
+
+        set_logo(0);
         logo.set_color(sdl::color::yellow);
         update_boundary(logo.get_size());
 
         logo.set_position(rand_position(boundary));
-        logo.velocity = rand_direction(50);
+        logo.velocity = rand_direction(logo_speed);
+
+        update_status();
     }
 
 
@@ -180,6 +224,31 @@ struct App {
         boundary.set_min_corner(logo_size / 2);
         auto ren_size = vec2f{renderer.get_logical_size()};
         boundary.set_size(ren_size - logo_size);
+    }
+
+
+    void
+    set_logo(std::size_t idx)
+    {
+        if (idx >= logo_textures.size())
+            idx = 0;
+        current_texture = idx;
+        if (!logo_textures.empty()) {
+            logo.set_texture(&logo_textures[current_texture]);
+            update_boundary(logo.get_size());
+        }
+    }
+
+
+    void
+    update_status()
+    {
+        std::ostringstream out;
+        out << "Bounces: " << total_bounces << "\n"
+            << "Corner bounces: " << total_corner_bounces;
+
+        auto status_surf = font.render_blended(out.str(), sdl::color::white, 0);
+        status_texture.create(renderer, status_surf);
     }
 
 
@@ -224,22 +293,16 @@ struct App {
             auto new_h = rand_degree_away_from(h);
             logo.set_color(sdl::color::from_hsl(new_h, s, l));
 
-            // add a random perturbation to the velocity vector
-            float speed = length(logo.velocity);
-            float mag = speed / 10;
-            vec2f delta = rand_position({
-                    -mag,
-                    -mag,
-                    2 * mag,
-                    2 * mag
-                });
-            vec2f new_vel = speed * normalized(logo.velocity + delta);
-            logo.velocity = new_vel;
+            // add a random perturbation to the velocity vector after a bounce
+            radiansf da = rand_angle(0_radf, 2_degf);
+            logo.velocity = with_length(rotated(logo.velocity, da), logo_speed);
+
+            ++total_bounces;
+            if (bounced == 2)
+                ++total_corner_bounces;
+            update_status();
 
             // TODO: play sound
-
-            // TODO: count bounces and corner bounces
-
         }
 
     }
@@ -258,6 +321,13 @@ struct App {
 #endif
         logo.draw(renderer);
 
+        if (status_texture) {
+            auto tex_size = status_texture.get_size();
+            rectf dst = rectf::from_corners(vec2f{0, 0},
+                                            vec2f{tex_size});
+            renderer.copy(status_texture, {}, dst);
+        }
+
         renderer.present();
     }
 
@@ -265,17 +335,33 @@ struct App {
     void
     process_events()
     {
-        while (auto e = sdl::event::poll())
+        while (auto e = sdl::events::poll())
             handle(*e);
     }
 
 
     void
-    handle(const sdl::event::event& e)
+    handle(const sdl::events::event& e)
     {
         switch (e.type) {
             case SDL_QUIT:
                 running = false;
+                break;
+
+            case SDL_KEYDOWN:
+                handle_key_down(e.key);
+                break;
+        }
+    }
+
+
+    void
+    handle_key_down(const sdl::events::keyboard& e)
+    {
+        switch (e.keysym.sym) {
+
+            case SDLK_SPACE:
+                set_logo(current_texture + 1);
                 break;
 
         }

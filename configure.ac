@@ -39,5 +39,6 @@ PKG_CHECK_MODULES([SDL2], [$sdl_libs])
 
 
 AC_CONFIG_FILES([Makefile
-                 examples/dvd-logo/Makefile])
+                 examples/dvd-logo/Makefile
+                 examples/simple/Makefile])
 AC_OUTPUT

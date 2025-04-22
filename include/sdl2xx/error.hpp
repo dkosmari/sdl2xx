@@ -16,16 +16,10 @@ namespace sdl {
 
     struct error : std::runtime_error {
 
-#if 0
-        std::string sdl_msg;
-#endif
-
         error();
 
-#if 0
-        error(const char* prefix);
-        error(const std::string& prefix);
-#endif
+        explicit
+        error(const std::exception& e);
 
     };
 

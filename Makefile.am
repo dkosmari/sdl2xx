@@ -1,11 +1,13 @@
 EXTRA_DIST = \
 	bootstrap \
-	COPYING
+	COPYING \
+	README.md
 
 
 SUBDIRS = \
 	. \
-	examples/dvd-logo
+	examples/dvd-logo \
+	examples/simple
 
 
 AM_CPPFLAGS = $(SDL2_CFLAGS) \
@@ -42,7 +44,7 @@ sdl2xx_HEADERS += include/sdl2xx/ttf.hpp
 endif ENABLE_TTF
 
 if ENABLE_IMAGE
-# sdl2xx_HEADERS += 
+sdl2xx_HEADERS += include/sdl2xx/img.hpp
 endif ENABLE_IMAGE
 
 sdl2xxdir = $(includedir)/sdl2xx
@@ -68,17 +70,17 @@ libsdl2xx_a_SOURCES = \
 	src/window.cpp
 
 
+if ENABLE_IMAGE
+lib_LIBRARIES += libsdl2xx_image.a
+
+libsdl2xx_image_a_SOURCES = src/img.cpp
+endif ENABLE_IMAGE
+
+
 if ENABLE_TTF
 lib_LIBRARIES += libsdl2xx_ttf.a
 libsdl2xx_ttf_a_SOURCES = src/ttf.cpp
 endif ENABLE_TTF
-
-
-if ENABLE_IMAGE
-lib_LIBRARIES += libsdl2xx_image.a
-
-libsdl2xx_image_a_SOURCES = 
-endif ENABLE_IMAGE
 
 
 

@@ -15,11 +15,17 @@
 #include <iosfwd>
 #include <numbers>
 #include <type_traits>
+#include <utility>
 
 #include "string.hpp"
 
 
 namespace sdl {
+
+    struct vec2;
+
+    struct vec2f;
+
 
     enum class angle_unit {
         degrees,
@@ -105,6 +111,7 @@ namespace sdl {
 
         // Accessors
 
+        [[nodiscard]]
         T
         value()
             const noexcept
@@ -113,6 +120,7 @@ namespace sdl {
         }
 
 
+        [[nodiscard]]
         T&
         value()
             noexcept
@@ -121,6 +129,7 @@ namespace sdl {
         }
 
 
+        [[nodiscard]]
         explicit
         constexpr
         operator bool()
@@ -132,6 +141,7 @@ namespace sdl {
 
         // Unit conversions.
 
+        [[nodiscard]]
         constexpr
         basic_angle<T, angle_unit::degrees>
         as_degrees()
@@ -140,6 +150,7 @@ namespace sdl {
             return basic_angle<T, angle_unit::degrees>{*this};
         }
 
+        [[nodiscard]]
         constexpr
         basic_angle<T, angle_unit::radians>
         as_radians()
@@ -237,7 +248,6 @@ namespace sdl {
 
         // Increment/decrement operators
 
-
         constexpr
         basic_angle&
         operator++()
@@ -279,6 +289,7 @@ namespace sdl {
         // Comparison operators
 
         template<typename U>
+        [[nodiscard]]
         constexpr
         bool
         operator ==(const basic_angle<U, Unit>& other)
@@ -289,6 +300,7 @@ namespace sdl {
 
 
         template<typename U>
+        [[nodiscard]]
         constexpr
         std::partial_ordering
         operator <=>(const basic_angle<U, Unit>& other)
@@ -381,6 +393,7 @@ namespace sdl {
     // Arithmetic operators
 
     template<concepts::angle A>
+    [[nodiscard]]
     constexpr
     A
     operator +(A a)
@@ -391,6 +404,7 @@ namespace sdl {
 
 
     template<concepts::angle A>
+    [[nodiscard]]
     constexpr
     A
     operator -(A a)
@@ -402,6 +416,7 @@ namespace sdl {
 
     template<concepts::angle A,
              concepts::angle B>
+    [[nodiscard]]
     constexpr
     std::common_type_t<A, B>
     operator +(A a,
@@ -415,6 +430,7 @@ namespace sdl {
 
     template<concepts::angle A,
              concepts::angle B>
+    [[nodiscard]]
     constexpr
     std::common_type_t<A, B>
     operator -(A a,
@@ -428,6 +444,7 @@ namespace sdl {
 
     template<concepts::angle A,
              concepts::angle B>
+    [[nodiscard]]
     constexpr
     std::common_type_t<A, B>
     operator *(A a,
@@ -440,6 +457,7 @@ namespace sdl {
 
     template<concepts::arithmetic A,
              concepts::angle B>
+    [[nodiscard]]
     constexpr
     std::common_type_t<A, B>
     operator *(A a,
@@ -452,6 +470,7 @@ namespace sdl {
 
     template<concepts::angle A,
              concepts::arithmetic B>
+    [[nodiscard]]
     constexpr
     std::common_type_t<A, B>
     operator *(A a,
@@ -465,6 +484,7 @@ namespace sdl {
 
     template<concepts::angle A,
              concepts::angle B>
+    [[nodiscard]]
     constexpr
     std::common_type_t<A, B>
     operator /(A a,
@@ -477,6 +497,7 @@ namespace sdl {
 
     template<concepts::arithmetic A,
              concepts::angle B>
+    [[nodiscard]]
     constexpr
     std::common_type_t<A, B>
     operator /(A a,
@@ -489,6 +510,7 @@ namespace sdl {
 
     template<concepts::angle A,
              concepts::arithmetic B>
+    [[nodiscard]]
     constexpr
     std::common_type_t<A, B>
     operator /(A a,
@@ -501,6 +523,7 @@ namespace sdl {
 
 
     template<concepts::angle A>
+    [[nodiscard]]
     constexpr
     A
     abs(A a)
@@ -511,6 +534,7 @@ namespace sdl {
 
 
     template<concepts::angle A>
+    [[nodiscard]]
     constexpr
     A
     fabs(A a)
@@ -520,12 +544,27 @@ namespace sdl {
     }
 
 
+    template<concepts::angle A>
+    [[nodiscard]]
+    constexpr
+    std::pair<A, A>
+    modf(A a)
+        noexcept
+    {
+        typename A::value_type integral;
+        typename A::value_type fractional = std::modf(a.value(), &integral);
+        return {A{integral}, A{fractional}};
+    }
+
+
     template<concepts::angle A,
              concepts::angle B>
+    [[nodiscard]]
     constexpr
     std::common_type_t<A, B>
     fmod(A a,
          B b)
+        noexcept
     {
         using C = std::common_type_t<A, B>;
         return C{std::fmod(a.value(), b.value())};
@@ -533,10 +572,12 @@ namespace sdl {
 
     template<concepts::arithmetic A,
              concepts::angle B>
+    [[nodiscard]]
     constexpr
     std::common_type_t<A, B>
     fmod(A a,
          B b)
+        noexcept
     {
         using C = std::common_type_t<A, B>;
         return C{std::fmod(a, b.value())};
@@ -544,10 +585,12 @@ namespace sdl {
 
     template<concepts::angle A,
              concepts::arithmetic B>
+    [[nodiscard]]
     constexpr
     std::common_type_t<A, B>
     fmod(A a,
          B b)
+        noexcept
     {
         using C = std::common_type_t<A, B>;
         return C{std::fmod(a.value(), b)};
@@ -556,10 +599,12 @@ namespace sdl {
 
     template<concepts::angle A,
              concepts::angle B>
+    [[nodiscard]]
     constexpr
     std::common_type_t<A, B>
     remainder(A a,
               B b)
+        noexcept
     {
         using C = std::common_type_t<A, B>;
         return C{std::remainder(a.value(), b.value())};
@@ -567,10 +612,12 @@ namespace sdl {
 
     template<concepts::arithmetic A,
              concepts::angle B>
+    [[nodiscard]]
     constexpr
     std::common_type_t<A, B>
     remainder(A a,
               B b)
+        noexcept
     {
         using C = std::common_type_t<A, B>;
         return C{std::remainder(a, b.value())};
@@ -578,10 +625,12 @@ namespace sdl {
 
     template<concepts::angle A,
              concepts::arithmetic B>
+    [[nodiscard]]
     constexpr
     std::common_type_t<A, B>
     remainder(A a,
               B b)
+        noexcept
     {
         using C = std::common_type_t<A, B>;
         return C{std::remainder(a.value(), b)};
@@ -590,73 +639,34 @@ namespace sdl {
 
     template<concepts::angle A,
              concepts::angle B>
+    [[nodiscard]]
     constexpr
     std::common_type_t<A, B>
     fmax(A a,
          B b)
+        noexcept
     {
         using C = std::common_type_t<A, B>;
         return C{std::fmax(a.value(), b.value())};
     }
 
-    template<concepts::arithmetic A,
-             concepts::angle B>
-    constexpr
-    std::common_type_t<A, B>
-    fmax(A a,
-         B b)
-    {
-        using C = std::common_type_t<A, B>;
-        return C{std::fmax(a, b.value())};
-    }
-
-    template<concepts::angle A,
-             concepts::arithmetic B>
-    constexpr
-    std::common_type_t<A, B>
-    fmax(A a,
-         B b)
-    {
-        using C = std::common_type_t<A, B>;
-        return C{std::fmax(a.value(), b)};
-    }
-
 
     template<concepts::angle A,
              concepts::angle B>
+    [[nodiscard]]
     constexpr
     std::common_type_t<A, B>
     fmin(A a,
          B b)
+        noexcept
     {
         using C = std::common_type_t<A, B>;
         return C{std::fmin(a.value(), b.value())};
     }
 
-    template<concepts::arithmetic A,
-             concepts::angle B>
-    constexpr
-    std::common_type_t<A, B>
-    fmin(A a,
-         B b)
-    {
-        using C = std::common_type_t<A, B>;
-        return C{std::fmin(a, b.value())};
-    }
-
-    template<concepts::angle A,
-             concepts::arithmetic B>
-    constexpr
-    std::common_type_t<A, B>
-    fmin(A a,
-         B b)
-    {
-        using C = std::common_type_t<A, B>;
-        return C{std::fmin(a.value(), b)};
-    }
-
 
     template<concepts::angle A>
+    [[nodiscard]]
     A
     sqrt(A a)
         noexcept
@@ -666,6 +676,7 @@ namespace sdl {
 
 
     template<concepts::angle A>
+    [[nodiscard]]
     A
     cbrt(A a)
         noexcept
@@ -677,6 +688,7 @@ namespace sdl {
     // Trig functions
 
     template<concepts::angle_radians A>
+    [[nodiscard]]
     A::value_type
     sin(A a)
         noexcept
@@ -685,6 +697,7 @@ namespace sdl {
     }
 
     template<concepts::angle_degrees A>
+    [[nodiscard]]
     A::value_type
     sin(A a)
         noexcept
@@ -694,6 +707,7 @@ namespace sdl {
 
 
     template<concepts::angle_radians A>
+    [[nodiscard]]
     A::value_type
     cos(A a)
         noexcept
@@ -702,6 +716,7 @@ namespace sdl {
     }
 
     template<concepts::angle_degrees A>
+    [[nodiscard]]
     A::value_type
     cos(A a)
         noexcept
@@ -710,8 +725,18 @@ namespace sdl {
     }
 
 
+    template<concepts::angle A>
+    [[nodiscard]]
+    std::pair<typename A::value_type, typename A::value_type>
+    sincos(A a)
+        noexcept
+    {
+        return {sin(a), cos(a)};
+    }
+
 
     template<concepts::angle_radians A>
+    [[nodiscard]]
     A::value_type
     tan(A a)
         noexcept
@@ -720,6 +745,7 @@ namespace sdl {
     }
 
     template<concepts::angle_degrees A>
+    [[nodiscard]]
     A::value_type
     tan(A a)
         noexcept
@@ -729,6 +755,7 @@ namespace sdl {
 
 
     template<concepts::arithmetic T>
+    [[nodiscard]]
     basic_angle<T, angle_unit::radians>
     asin(T x)
         noexcept
@@ -738,6 +765,7 @@ namespace sdl {
 
 
     template<concepts::arithmetic T>
+    [[nodiscard]]
     basic_angle<T, angle_unit::radians>
     acos(T x)
         noexcept
@@ -747,6 +775,7 @@ namespace sdl {
 
 
     template<concepts::arithmetic T>
+    [[nodiscard]]
     basic_angle<T, angle_unit::radians>
     atan(T x)
         noexcept
@@ -757,6 +786,7 @@ namespace sdl {
 
     template<concepts::arithmetic T1,
              concepts::arithmetic T2>
+    [[nodiscard]]
     basic_angle<std::common_type_t<T1, T2>, angle_unit::radians>
     atan2(T1 y,
           T2 x)
@@ -768,6 +798,7 @@ namespace sdl {
 
 
     template<concepts::angle A>
+    [[nodiscard]]
     constexpr
     A
     ceil(A a)
@@ -778,6 +809,7 @@ namespace sdl {
 
 
     template<concepts::angle A>
+    [[nodiscard]]
     constexpr
     A
     floor(A a)
@@ -788,6 +820,7 @@ namespace sdl {
 
 
     template<concepts::angle A>
+    [[nodiscard]]
     constexpr
     A
     trunc(A a)
@@ -798,6 +831,7 @@ namespace sdl {
 
 
     template<concepts::angle A>
+    [[nodiscard]]
     constexpr
     A
     round(A a)
@@ -811,6 +845,7 @@ namespace sdl {
 
     /// Return angle wrapped between [-half_circle, +half_circle)
     template<concepts::angle A>
+    [[nodiscard]]
     A
     wrap_zero(A x)
         noexcept
@@ -828,6 +863,7 @@ namespace sdl {
 
     /// Return angle wrapped between [0, 2 * half_circle)
     template<concepts::angle A>
+    [[nodiscard]]
     A
     wrap_positive(A x)
         noexcept
@@ -841,6 +877,8 @@ namespace sdl {
             y += 2 * half_circle;
         return A{std::fabs(y)};
     }
+
+
 
 
 
@@ -990,15 +1028,19 @@ namespace sdl {
 
     // Serialization
 
+    [[nodiscard]]
     string
     to_string(degrees d);
 
+    [[nodiscard]]
     string
     to_string(degreesf d);
 
+    [[nodiscard]]
     string
     to_string(radians d);
 
+    [[nodiscard]]
     string
     to_string(radiansf d);
 

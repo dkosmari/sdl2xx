@@ -23,17 +23,8 @@ namespace sdl {
     {}
 
 
-#if 0
-    error::error(const char* prefix) :
-        runtime_error{prefix + ": "s + SDL_GetError()},
-        sdl_msg{SDL_GetError()}
+    error::error(const std::exception& e) :
+        runtime_error{e.what()}
     {}
-
-
-    error::error(const std::string prefix) :
-        runtime_error{prefix + ": "s + SDL_GetError()},
-        sdl_msg{SDL_GetError()}
-    {}
-#endif
 
 } // namespace sdl

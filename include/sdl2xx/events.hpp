@@ -17,7 +17,7 @@
 #include <SDL_events.h>
 
 
-namespace sdl::event {
+namespace sdl::events {
 
     using audio_device        = SDL_AudioDeviceEvent;
     using controller_axis     = SDL_ControllerAxisEvent;
@@ -27,7 +27,7 @@ namespace sdl::event {
     using controller_touchpad = SDL_ControllerTouchpadEvent;
     using display             = SDL_DisplayEvent;
     using dollar_gesture      = SDL_DollarGestureEvent;
-    using drop_event          = SDL_DropEvent;
+    using drop                = SDL_DropEvent;
     using event               = SDL_Event;
     using joy_axis            = SDL_JoyAxisEvent;
     using joy_ball            = SDL_JoyBallEvent;
@@ -193,10 +193,10 @@ namespace sdl::event {
 
 
     enum class state {
-        query = SDL_QUERY,
-        ignore = SDL_IGNORE,
+        query   = SDL_QUERY,
+        ignore  = SDL_IGNORE,
         disable = SDL_DISABLE,
-        enable = SDL_ENABLE,
+        enable  = SDL_ENABLE,
     };
 
     bool
@@ -216,6 +216,6 @@ namespace sdl::event {
         noexcept;
 
 
-} // namespace sdl::event
+} // namespace sdl::events
 
 #endif

@@ -1,6 +1,3 @@
-EXTRA_DIST = assets
-
-
 AM_CPPFLAGS = \
 	$(SDL2_CFLAGS) \
 	-I$(top_srcdir)/include
@@ -10,15 +7,13 @@ AM_CXXFLAGS = \
 	-Wall -Wextra -Werror
 
 
-noinst_PROGRAMS = dvd-logo
+noinst_PROGRAMS = simple
 
 
-dvd_logo_SOURCES = \
+simple_SOURCES = \
 	src/main.cpp
 
 
-dvd_logo_LDADD = \
-	$(top_builddir)/libsdl2xx_image.a \
-	$(top_builddir)/libsdl2xx_ttf.a \
+simple_LDADD = \
 	$(top_builddir)/libsdl2xx.a \
 	$(SDL2_LIBS)

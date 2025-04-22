@@ -27,29 +27,6 @@ namespace sdl::ttf {
     using std::filesystem::path;
 
 
-    namespace detail {
-
-        // any basic_string
-
-        template<typename T>
-        struct is_string :
-            std::false_type {};
-
-        template<typename CharT,
-                 typename Traits,
-                 typename Allocator>
-        struct is_string<std::basic_string<CharT, Traits, Allocator>> :
-            std::true_type {};
-
-
-        namespace concepts {
-            template<typename T>
-            concept string = is_string<T>::value;
-        }
-
-    } // namespace detail
-
-
     [[nodiscard]]
     SDL_version
     linked_version()
@@ -376,16 +353,18 @@ namespace sdl::ttf {
             const;
 
         [[nodiscard]]
+        inline
         vec2
-        get_size(const detail::concepts::string auto& text)
+        get_size(const concepts::string auto& text)
             const
         {
             return get_size(text.data());
         }
 
         [[nodiscard]]
+        inline
         vec2
-        get_size_utf8(const detail::concepts::string auto& text)
+        get_size_utf8(const concepts::string auto& text)
             const
         {
             return get_size_utf8(text.data());
@@ -417,8 +396,9 @@ namespace sdl::ttf {
             const;
 
         [[nodiscard]]
+        inline
         measure
-        get_measure(const detail::concepts::string auto& text,
+        get_measure(const concepts::string auto& text,
                     int max_width)
             const
         {
@@ -426,8 +406,9 @@ namespace sdl::ttf {
         }
 
         [[nodiscard]]
+        inline
         measure
-        get_measure_utf8(const detail::concepts::string auto& text,
+        get_measure_utf8(const concepts::string auto& text,
                          int max_width)
             const
         {
@@ -456,8 +437,9 @@ namespace sdl::ttf {
             const;
 
         [[nodiscard]]
+        inline
         surface
-        render_solid(const detail::concepts::string auto& text,
+        render_solid(const concepts::string auto& text,
                      color fg)
             const
         {
@@ -465,8 +447,9 @@ namespace sdl::ttf {
         }
 
         [[nodiscard]]
+        inline
         surface
-        render_solid_utf8(const detail::concepts::string auto& text,
+        render_solid_utf8(const concepts::string auto& text,
                           color fg)
             const
         {
@@ -498,8 +481,9 @@ namespace sdl::ttf {
             const;
 
         [[nodiscard]]
+        inline
         surface
-        render_solid(const detail::concepts::string auto& text,
+        render_solid(const concepts::string auto& text,
                      color fg,
                      Uint32 max_width)
             const
@@ -508,8 +492,9 @@ namespace sdl::ttf {
         }
 
         [[nodiscard]]
+        inline
         surface
-        render_solid_utf8(const detail::concepts::string auto& text,
+        render_solid_utf8(const concepts::string auto& text,
                           color fg,
                           Uint32 max_width)
             const
@@ -549,8 +534,9 @@ namespace sdl::ttf {
             const;
 
         [[nodiscard]]
+        inline
         surface
-        render_shaded(const detail::concepts::string auto& text,
+        render_shaded(const concepts::string auto& text,
                       color fg,
                       color bg)
             const
@@ -559,8 +545,9 @@ namespace sdl::ttf {
         }
 
         [[nodiscard]]
+        inline
         surface
-        render_shaded_utf8(const detail::concepts::string auto& text,
+        render_shaded_utf8(const concepts::string auto& text,
                            color fg,
                            color bg)
             const
@@ -596,8 +583,9 @@ namespace sdl::ttf {
             const;
 
         [[nodiscard]]
+        inline
         surface
-        render_shaded(const detail::concepts::string auto& text,
+        render_shaded(const concepts::string auto& text,
                       color fg,
                       color bg,
                       Uint32 max_width)
@@ -607,8 +595,9 @@ namespace sdl::ttf {
         }
 
         [[nodiscard]]
+        inline
         surface
-        render_shaded_utf8(const detail::concepts::string auto& text,
+        render_shaded_utf8(const concepts::string auto& text,
                            color fg,
                            color bg,
                            Uint32 max_width)
@@ -647,8 +636,9 @@ namespace sdl::ttf {
             const;
 
         [[nodiscard]]
+        inline
         surface
-        render_blended(const detail::concepts::string auto& text,
+        render_blended(const concepts::string auto& text,
                        color fg)
             const
         {
@@ -656,8 +646,9 @@ namespace sdl::ttf {
         }
 
         [[nodiscard]]
+        inline
         surface
-        render_blended_utf8(const detail::concepts::string auto& text,
+        render_blended_utf8(const concepts::string auto& text,
                             color fg)
             const
         {
@@ -689,8 +680,9 @@ namespace sdl::ttf {
             const;
 
         [[nodiscard]]
+        inline
         surface
-        render_blended(const detail::concepts::string auto& text,
+        render_blended(const concepts::string auto& text,
                        color fg,
                        Uint32 max_width)
             const
@@ -699,8 +691,9 @@ namespace sdl::ttf {
         }
 
         [[nodiscard]]
+        inline
         surface
-        render_blended_utf8(const detail::concepts::string auto& text,
+        render_blended_utf8(const concepts::string auto& text,
                             color fg,
                             Uint32 max_width)
             const
@@ -742,8 +735,9 @@ namespace sdl::ttf {
             const;
 
         [[nodiscard]]
+        inline
         surface
-        render_lcd(const detail::concepts::string auto& text,
+        render_lcd(const concepts::string auto& text,
                    color fg,
                    color bg)
             const
@@ -752,8 +746,9 @@ namespace sdl::ttf {
         }
 
         [[nodiscard]]
+        inline
         surface
-        render_lcd_utf8(const detail::concepts::string auto& text,
+        render_lcd_utf8(const concepts::string auto& text,
                         color fg,
                         color bg)
             const
@@ -789,8 +784,9 @@ namespace sdl::ttf {
             const;
 
         [[nodiscard]]
+        inline
         surface
-        render_lcd(const detail::concepts::string auto& text,
+        render_lcd(const concepts::string auto& text,
                    color fg,
                    color bg,
                    Uint32 max_width)
@@ -800,8 +796,9 @@ namespace sdl::ttf {
         }
 
         [[nodiscard]]
+        inline
         surface
-        render_lcd_utf8(const detail::concepts::string auto& text,
+        render_lcd_utf8(const concepts::string auto& text,
                         color fg,
                         color bg,
                         Uint32 max_width)

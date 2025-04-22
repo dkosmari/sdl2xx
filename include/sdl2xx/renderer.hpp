@@ -15,6 +15,7 @@
 
 #include <SDL_render.h>
 
+#include "angle.hpp"
 #include "color.hpp"
 #include "rect.hpp"
 #include "string.hpp"
@@ -433,7 +434,7 @@ namespace sdl {
         copy_ex(const texture& tex,
                 const rect* src_area,
                 const rect* dst_area,
-                double angle,
+                degrees rot,
                 const vec2* center,
                 SDL_RendererFlip flip);
 
@@ -441,7 +442,7 @@ namespace sdl {
         copy_ex(const texture& tex,
                 const rect* src_area,
                 const rectf* dst_area,
-                double angle,
+                degrees rot,
                 const vec2f* center,
                 SDL_RendererFlip flip);
 

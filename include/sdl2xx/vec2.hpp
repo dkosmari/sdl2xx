@@ -51,6 +51,7 @@ namespace sdl {
             noexcept;
 
 
+        [[nodiscard]]
         constexpr
         bool
         operator ==(const vec2& other)
@@ -63,11 +64,13 @@ namespace sdl {
     using point = vec2;
 
 
+    [[nodiscard]]
     float
     length(vec2 v)
         noexcept;
 
 
+    [[nodiscard]]
     inline
     constexpr
     int
@@ -80,6 +83,29 @@ namespace sdl {
 
     // arithmetic operators
 
+    [[nodiscard]]
+    inline
+    constexpr
+    vec2
+    operator +(vec2 a)
+        noexcept
+    {
+        return a;
+    }
+
+
+    [[nodiscard]]
+    inline
+    constexpr
+    vec2
+    operator -(vec2 a)
+        noexcept
+    {
+        return vec2{-a.x, -a.y};
+    }
+
+
+    [[nodiscard]]
     inline
     constexpr
     vec2
@@ -91,6 +117,7 @@ namespace sdl {
     }
 
 
+    [[nodiscard]]
     inline
     constexpr
     vec2
@@ -103,6 +130,7 @@ namespace sdl {
 
 
     // component-wise multiplication
+    [[nodiscard]]
     constexpr
     vec2
     scaled(vec2 a,
@@ -112,6 +140,7 @@ namespace sdl {
     }
 
 
+    [[nodiscard]]
     inline
     constexpr
     vec2
@@ -123,6 +152,7 @@ namespace sdl {
     }
 
 
+    [[nodiscard]]
     inline
     constexpr
     vec2
@@ -134,6 +164,7 @@ namespace sdl {
     }
 
 
+    [[nodiscard]]
     inline
     constexpr
     vec2
@@ -145,6 +176,7 @@ namespace sdl {
     }
 
 
+    [[nodiscard]]
     inline
     constexpr
     vec2
@@ -156,6 +188,7 @@ namespace sdl {
     }
 
 
+    [[nodiscard]]
     inline
     constexpr
     std::pair<vec2, vec2>
@@ -167,6 +200,7 @@ namespace sdl {
     }
 
 
+    [[nodiscard]]
     inline
     constexpr
     int
@@ -257,6 +291,7 @@ namespace sdl {
 
     // serialization
 
+    [[nodiscard]]
     string
     to_string(vec2 v);
 
@@ -296,6 +331,7 @@ namespace sdl {
             noexcept;
 
 
+        [[nodiscard]]
         constexpr
         bool
         operator ==(const vec2f& other)
@@ -308,11 +344,13 @@ namespace sdl {
     using pointf = vec2f;
 
 
+    [[nodiscard]]
     float
     length(vec2f v)
         noexcept;
 
 
+    [[nodiscard]]
     inline
     constexpr
     float
@@ -323,6 +361,7 @@ namespace sdl {
     }
 
 
+    [[nodiscard]]
     vec2f
     normalized(vec2f v)
         noexcept;
@@ -330,6 +369,29 @@ namespace sdl {
 
     // arithmetic operators
 
+    [[nodiscard]]
+    inline
+    constexpr
+    vec2f
+    operator +(vec2f a)
+        noexcept
+    {
+        return a;
+    }
+
+
+    [[nodiscard]]
+    inline
+    constexpr
+    vec2f
+    operator -(vec2f a)
+        noexcept
+    {
+        return vec2f{-a.x, -a.y};
+    }
+
+
+    [[nodiscard]]
     inline
     constexpr
     vec2f
@@ -341,6 +403,7 @@ namespace sdl {
     }
 
 
+    [[nodiscard]]
     inline
     constexpr
     vec2f
@@ -352,6 +415,7 @@ namespace sdl {
     }
 
 
+    [[nodiscard]]
     inline
     constexpr
     vec2f
@@ -363,6 +427,7 @@ namespace sdl {
     }
 
 
+    [[nodiscard]]
     inline
     constexpr
     vec2f
@@ -374,6 +439,7 @@ namespace sdl {
     }
 
 
+    [[nodiscard]]
     inline
     constexpr
     vec2f
@@ -385,6 +451,7 @@ namespace sdl {
     }
 
 
+    [[nodiscard]]
     inline
     constexpr
     vec2f
@@ -396,6 +463,7 @@ namespace sdl {
     }
 
 
+    [[nodiscard]]
     inline
     constexpr
     vec2f
@@ -406,6 +474,7 @@ namespace sdl {
     }
 
 
+    [[nodiscard]]
     inline
     constexpr
     vec2f
@@ -416,6 +485,7 @@ namespace sdl {
     }
 
 
+    [[nodiscard]]
     inline
     constexpr
     vec2f
@@ -426,6 +496,7 @@ namespace sdl {
     }
 
 
+    [[nodiscard]]
     inline
     //constexpr
     std::pair<vec2f, vec2f>
@@ -443,6 +514,7 @@ namespace sdl {
     }
 
 
+    [[nodiscard]]
     inline
     constexpr
     float
@@ -456,7 +528,7 @@ namespace sdl {
 
     // assignment operators
 
-        inline
+    inline
     constexpr
     vec2f&
     operator +=(vec2f& a,
@@ -519,6 +591,17 @@ namespace sdl {
     }
 
 
+    [[nodiscard]]
+    inline
+    vec2f
+    with_length(vec2f v,
+                float len)
+        noexcept
+    {
+        return len * normalized(v);
+    }
+
+
     // serialization
 
     string
@@ -536,7 +619,8 @@ namespace sdl {
     constexpr
     vec2::vec2(const vec2f& other)
         noexcept :
-        SDL_Point(other.x, other.y)
+        SDL_Point(static_cast<int>(other.x),
+                  static_cast<int>(other.y))
     {}
 
 
@@ -544,7 +628,8 @@ namespace sdl {
     constexpr
     vec2f::vec2f(const vec2& other)
         noexcept :
-        SDL_FPoint(other.x, other.y)
+        SDL_FPoint(static_cast<float>(other.x),
+                   static_cast<float>(other.y))
     {}
 
 } // namespace sdl

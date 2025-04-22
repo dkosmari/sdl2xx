@@ -10,6 +10,7 @@
 #define SDL2XX_STRING_HPP
 
 #include <string>
+#include <type_traits>
 
 #ifdef SDL2XX_CUSTOM_ALLOCATOR
 #includde "allocator.hpp"
@@ -55,6 +56,25 @@ namespace sdl {
     using std::u32string;
 
 #endif
+
+
+    template<typename T>
+    struct is_string :
+        std::false_type {};
+
+    template<typename CharT,
+             typename Traits,
+             typename Allocator>
+    struct is_string<std::basic_string<CharT, Traits, Allocator>> :
+        std::true_type {};
+
+    namespace concepts {
+
+        // any basic_string
+        template<typename T>
+        concept string = is_string<T>::value;
+
+    } // namespace concepts
 
 } // namespace sdl
 

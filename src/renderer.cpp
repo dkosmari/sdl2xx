@@ -854,7 +854,7 @@ namespace sdl {
     renderer::copy_ex(const texture& tex,
                       const rect* src_area,
                       const rect* dst_area,
-                      double angle,
+                      degrees rot,
                       const vec2* center,
                       SDL_RendererFlip flip)
     {
@@ -862,7 +862,7 @@ namespace sdl {
                              const_cast<SDL_Texture*>(tex.data()),
                              src_area,
                              dst_area,
-                             angle,
+                             rot.value(),
                              center,
                              flip) < 0)
             throw error{};
@@ -873,7 +873,7 @@ namespace sdl {
     renderer::copy_ex(const texture& tex,
                       const rect* src_area,
                       const rectf* dst_area,
-                      double angle,
+                      degrees rot,
                       const vec2f* center,
                       SDL_RendererFlip flip)
     {
@@ -881,7 +881,7 @@ namespace sdl {
                               const_cast<SDL_Texture*>(tex.data()),
                               src_area,
                               dst_area,
-                              angle,
+                              rot.value(),
                               center,
                               flip) < 0)
             throw error{};
