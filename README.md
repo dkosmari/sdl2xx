@@ -1,6 +1,8 @@
 # SDL2XX - A modern C++ wrapper for SDL2
 
-This library is a modern C++ wrapper for SDL2. Currently the target is C++23.
+SDL2XX is a modern C++ wrapper for SDL2. Currently the target is C++23.
+
+It's licensed under the Zlib license (same as SDL2).
 
 > Note: this is still a work in progress.
 
