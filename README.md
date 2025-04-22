@@ -86,10 +86,10 @@ See the [examples directory](examples) for more examples of the API usage.
 - Entities that are opaque pointers are handled through movable RAII classes. For
   instance:
   
-  - `SDL_Window*` -> `sdl::window`
-  - `SDL_Renderer*` -> `sdl::renderer`
-  - `SDL_Surface*` -> `sdl::surface`
-  - `SDL_Texture*` -> `sdl::texture`
+  - `SDL_Window*` → `sdl::window`
+  - `SDL_Renderer*` → `sdl::renderer`
+  - `SDL_Surface*` → `sdl::surface`
+  - `SDL_Texture*` → `sdl::texture`
   
   Objects can be in an "invalid" state, where they just store a null pointer. In such a
   state, you can only construct, destroy or check for validity:
@@ -119,11 +119,11 @@ See the [examples directory](examples) for more examples of the API usage.
 
 - Various utility types are extended, with extra methods and operators:
 
-  - `SDL_Point` -> `sdl::vec2` (or `sdl::point`)
-  - `SDL_FPoint` -> `sdl::vec2f` (or `sdl::pointf`)
-  - `SDL_Rect` -> `sdl::rect`
-  - `SDL_FRect` -> `sdl::rectf`
-  - `SDL_Color` -> `sdl::color`
+  - `SDL_Point` → `sdl::vec2` (or `sdl::point`)
+  - `SDL_FPoint` → `sdl::vec2f` (or `sdl::pointf`)
+  - `SDL_Rect` → `sdl::rect`
+  - `SDL_FRect` → `sdl::rectf`
+  - `SDL_Color` → `sdl::color`
 
 - Additional types:
 
@@ -134,11 +134,11 @@ See the [examples directory](examples) for more examples of the API usage.
 
 - Literals, found in `sdl::literals`:
 
-  - `_deg` -> `sdl::degrees`
-  - `_degf` -> `sdl::degreesf`
-  - `_rad` -> `sdl::radians`
-  - `_radf` -> `sdl::radiansf`
-  - `_rgb` -> `sdl::color` (with `.a = 0xff`)
-  - `_rgba` -> `sdl::color`
+  - `_deg` → `sdl::degrees`
+  - `_degf` → `sdl::degreesf`
+  - `_rad` → `sdl::radians`
+  - `_radf` → `sdl::radiansf`
+  - `_rgb` → `sdl::color` (with `.a = 0xff`)
+  - `_rgba` → `sdl::color`
   
 - Functions either throw `sdl::error` or return `std::expected<..., sdl::error>`.
