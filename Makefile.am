@@ -24,6 +24,7 @@ sdl2xx_HEADERS = \
 	include/sdl2xx/angle.hpp \
 	include/sdl2xx/blob.hpp \
 	include/sdl2xx/color.hpp \
+	include/sdl2xx/display.hpp \
 	include/sdl2xx/error.hpp \
 	include/sdl2xx/events.hpp \
 	include/sdl2xx/gl.hpp \
@@ -58,6 +59,7 @@ libsdl2xx_a_SOURCES = \
 	src/angle.cpp \
 	src/blob.cpp \
 	src/color.cpp \
+	src/display.cpp \
 	src/error.cpp \
 	src/events.cpp \
 	src/gl.cpp \

@@ -10,7 +10,6 @@
 #define SDL2XX_ERROR_HPP
 
 #include <stdexcept>
-#include <string>
 
 namespace sdl {
 

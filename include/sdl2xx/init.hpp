@@ -16,6 +16,19 @@ namespace sdl {
 
     struct init {
 
+        enum flag : Uint32 {
+            timer           = SDL_INIT_TIMER,
+            audio           = SDL_INIT_AUDIO,
+            video           = SDL_INIT_VIDEO,
+            joystick        = SDL_INIT_JOYSTICK,
+            haptic          = SDL_INIT_HAPTIC,
+            game_controller = SDL_INIT_GAMECONTROLLER,
+            events          = SDL_INIT_EVENTS,
+            sensor          = SDL_INIT_SENSOR,
+            everything      = SDL_INIT_EVERYTHING,
+        };
+
+
         init(Uint32 flags = 0);
 
         // Disallow copies.
@@ -23,17 +36,6 @@ namespace sdl {
 
         ~init()
             noexcept;
-
-
-        static constexpr Uint32 timer           = SDL_INIT_TIMER;
-        static constexpr Uint32 audio           = SDL_INIT_AUDIO;
-        static constexpr Uint32 video           = SDL_INIT_VIDEO;
-        static constexpr Uint32 joystick        = SDL_INIT_JOYSTICK;
-        static constexpr Uint32 haptic          = SDL_INIT_HAPTIC;
-        static constexpr Uint32 game_controller = SDL_INIT_GAMECONTROLLER;
-        static constexpr Uint32 events          = SDL_INIT_EVENTS;
-        static constexpr Uint32 sensor          = SDL_INIT_SENSOR;
-        static constexpr Uint32 everything      = SDL_INIT_EVERYTHING;
 
     };
 

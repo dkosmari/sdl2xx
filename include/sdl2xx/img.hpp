@@ -33,34 +33,36 @@ namespace sdl::img {
 
     struct init {
 
+        enum flag : Uint32 {
 #if SDL_IMAGE_VERSION_ATLEAST(2, 6, 0)
-        static inline constexpr Uint32 avif = IMG_INIT_AVIF;
+            avif = IMG_INIT_AVIF,
 #endif
-        static inline constexpr Uint32 jpg  = IMG_INIT_JPG;
+            jpg  = IMG_INIT_JPG,
 #if SDL_IMAGE_VERSION_ATLEAST(2, 6, 0)
-        static inline constexpr Uint32 jxl  = IMG_INIT_JXL;
+            jxl  = IMG_INIT_JXL,
 #endif
-        static inline constexpr Uint32 png  = IMG_INIT_PNG;
-        static inline constexpr Uint32 tif  = IMG_INIT_TIF;
-        static inline constexpr Uint32 webp = IMG_INIT_WEBP;
+            png  = IMG_INIT_PNG,
+            tif  = IMG_INIT_TIF,
+            webp = IMG_INIT_WEBP,
 
-        static inline constexpr Uint32 all =
+            all =
 #if SDL_IMAGE_VERSION_ATLEAST(2, 6, 0)
-            avif |
+                avif |
 #endif
-            jpg  |
+                jpg  |
 #if SDL_IMAGE_VERSION_ATLEAST(2, 6, 0)
-            jxl  |
+                jxl  |
 #endif
-            png  |
-            tif  |
-            webp;
+                png  |
+                tif  |
+                webp
+        };
 
 
         // Disallow copies.
         init(const init&) = delete;
 
-        init(Uint32 flags = all)
+        init(Uint32 flags = flag::all)
             noexcept;
 
         ~init()

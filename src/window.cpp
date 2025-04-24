@@ -37,7 +37,7 @@ namespace sdl {
     {}
 
 
-    window::window(const string& title,
+    window::window(const char* title,
                    int x, int y,
                    int w, int h,
                    Uint32 flags)
@@ -46,10 +46,12 @@ namespace sdl {
     }
 
 
-    window::~window()
-        noexcept
+    window::window(const char* title,
+                   vec2 pos,
+                   vec2 size,
+                   Uint32 flags)
     {
-        destroy();
+        create(title, pos, size, flags);
     }
 
 
@@ -60,6 +62,13 @@ namespace sdl {
     {
         other.ptr = nullptr;
         link_this();
+    }
+
+
+    window::~window()
+        noexcept
+    {
+        destroy();
     }
 
 
@@ -79,16 +88,26 @@ namespace sdl {
 
 
     void
-    window::create(const string& title,
+    window::create(const char* title,
                    int x, int y,
                    int w, int h,
                    Uint32 flags)
     {
         destroy();
-        ptr = SDL_CreateWindow(title.data(), x, y, w, h, flags);
+        ptr = SDL_CreateWindow(title, x, y, w, h, flags);
         if (!ptr)
             throw error{};
         link_this();
+    }
+
+
+    void
+    window::create(const char* title,
+                   vec2 pos,
+                   vec2 size,
+                   Uint32 flags)
+    {
+        create(title, pos.x, pos.y, size.x, size.y, flags);
     }
 
 
@@ -142,11 +161,33 @@ namespace sdl {
     }
 
 
-    int
+    unsigned
     window::get_display_index()
         const
     {
-        return SDL_GetWindowDisplayIndex(ptr);
+        int result = SDL_GetWindowDisplayIndex(ptr);
+        if (result < 0)
+            throw error{};
+        return result;
+    }
+
+
+    void
+    window::set_display_mode(const display::mode& mode)
+    {
+        if (SDL_SetWindowDisplayMode(ptr, &mode) < 0)
+            throw error{};
+    }
+
+
+    display::mode
+    window::get_display_mode()
+        const
+    {
+        display::mode result;
+        if (SDL_GetWindowDisplayMode(ptr, &result) < 0)
+            throw error{};
+        return result;
     }
 
 
@@ -202,14 +243,14 @@ namespace sdl {
 
 
     void
-    window::set_title(const string& title)
+    window::set_title(const char* title)
         noexcept
     {
-        SDL_SetWindowTitle(ptr, title.data());
+        SDL_SetWindowTitle(ptr, title);
     }
 
 
-    string
+    const char*
     window::get_title()
         const
     {
@@ -217,20 +258,28 @@ namespace sdl {
     }
 
 
-    void*
-    window::set_user_data(const string& key,
-                          void* value)
+    void
+    window::set_icon(const surface& icon)
         noexcept
     {
-        return SDL_SetWindowData(ptr, key.data(), value);
+        SDL_SetWindowIcon(ptr, const_cast<SDL_Surface*>(icon.data()));
     }
 
 
     void*
-    window::get_user_data(const string& key)
+    window::set_user_data(const char* key,
+                          void* value)
+        noexcept
+    {
+        return SDL_SetWindowData(ptr, key, value);
+    }
+
+
+    void*
+    window::get_user_data(const char* key)
         const noexcept
     {
-        return SDL_GetWindowData(ptr, key.data());
+        return SDL_GetWindowData(ptr, key);
     }
 
 
@@ -287,18 +336,22 @@ namespace sdl {
 
 
     int
-    window::width()
+    window::get_width()
         const noexcept
     {
-        return get_size().x;
+        int width;
+        SDL_GetWindowSize(ptr, &width, nullptr);
+        return width;
     }
 
 
     int
-    window::height()
+    window::get_height()
         const noexcept
     {
-        return get_size().y;
+        int height;
+        SDL_GetWindowSize(ptr, nullptr, &height);
+        return height;
     }
 
 

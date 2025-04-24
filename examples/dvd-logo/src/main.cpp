@@ -164,11 +164,11 @@ struct Logo {
 
 struct App {
 
-    sdl::init init{sdl::init::video | sdl::init::game_controller};
+    sdl::init init{sdl::init::flag::video | sdl::init::flag::game_controller};
     sdl::window window{
         "DVD Logo",
-        sdl::window::pos::centered, sdl::window::pos::centered,
-        1280, 720,
+        sdl::window::pos_centered,
+        {1280, 720},
         0
     };
     sdl::renderer renderer{

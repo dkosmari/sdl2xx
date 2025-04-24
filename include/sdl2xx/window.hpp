@@ -16,6 +16,7 @@
 #include <SDL_video.h>
 
 #include "blob.hpp"
+#include "display.hpp"
 #include "string.hpp"
 #include "rect.hpp"
 #include "vec2.hpp"
@@ -46,28 +47,78 @@ namespace sdl {
 
     public:
 
-        enum pos : int {
-            centered  = SDL_WINDOWPOS_CENTERED,
-            undefined = SDL_WINDOWPOS_UNDEFINED
+        enum flag : Uint32 {
+            allow_high_dpi     = SDL_WINDOW_ALLOW_HIGHDPI,
+            always_on_top      = SDL_WINDOW_ALWAYS_ON_TOP,
+            borderless         = SDL_WINDOW_BORDERLESS,
+            foreign            = SDL_WINDOW_FOREIGN,
+            fullscreen         = SDL_WINDOW_FULLSCREEN,
+            fullscreen_desktop = SDL_WINDOW_FULLSCREEN_DESKTOP,
+            hidden             = SDL_WINDOW_HIDDEN,
+            input_focus        = SDL_WINDOW_INPUT_FOCUS,
+            keyboard_grabbed   = SDL_WINDOW_KEYBOARD_GRABBED,
+            maximized          = SDL_WINDOW_MAXIMIZED,
+            metal              = SDL_WINDOW_METAL,
+            minimized          = SDL_WINDOW_MINIMIZED,
+            mouse_capture      = SDL_WINDOW_MOUSE_CAPTURE,
+            mouse_focus        = SDL_WINDOW_MOUSE_FOCUS,
+            mouse_grabbed      = SDL_WINDOW_MOUSE_GRABBED,
+            opengl             = SDL_WINDOW_OPENGL,
+            popup_menu         = SDL_WINDOW_POPUP_MENU,
+            resizable          = SDL_WINDOW_RESIZABLE,
+            shown              = SDL_WINDOW_SHOWN,
+            skip_taskbar       = SDL_WINDOW_SKIP_TASKBAR,
+            tooltip            = SDL_WINDOW_TOOLTIP,
+            utility            = SDL_WINDOW_UTILITY,
+            vulkan             = SDL_WINDOW_VULKAN,
         };
+
+        static constexpr int coord_centered  = SDL_WINDOWPOS_CENTERED;
+        static constexpr int coord_undefined = SDL_WINDOWPOS_UNDEFINED;
+
+        static constexpr vec2 pos_centered  = vec2{coord_centered, coord_centered};
+        static constexpr vec2 pos_undefined = vec2{coord_undefined, coord_undefined};
 
 
         constexpr
         window()
             noexcept = default;
 
-        window(const string& title,
+        window(const char* title,
                int x, int y,
                int w, int h,
                Uint32 flags);
 
-        ~window()
-            noexcept;
+        inline
+        window(const concepts::string auto& title,
+               int x, int y,
+               int w, int h,
+               Uint32 flags) :
+            window{title.data(), x, y, w, h, flags}
+        {}
+
+        window(const char* title,
+               vec2 pos,
+               vec2 size,
+               Uint32 flags);
+
+        inline
+        window(const concepts::string auto& title,
+               vec2 pos,
+               vec2 size,
+               Uint32 flags) :
+            window{title.data(), pos, size, flags}
+        {}
 
 
         /// Move constructor.
         window(window&& other)
             noexcept;
+
+
+        ~window()
+            noexcept;
+
 
         /// Move assignment.
         window&
@@ -76,10 +127,35 @@ namespace sdl {
 
 
         void
-        create(const string& title,
+        create(const char* title,
                int x, int y,
                int w, int h,
                Uint32 flags);
+
+        void
+        create(const concepts::string auto& title,
+               int x, int y,
+               int w, int h,
+               Uint32 flags)
+        {
+            create(title.data(), x, y, w, h, flags);
+        }
+
+        void
+        create(const char* title,
+               vec2 pos,
+               vec2 size,
+               Uint32 flags);
+
+        inline
+        void
+        create(const concepts::string auto& title,
+               vec2 pos,
+               vec2 size,
+               Uint32 flags)
+        {
+            create(title.data(), pos, size, flags);
+        }
 
 
         [[nodiscard]]
@@ -117,13 +193,19 @@ namespace sdl {
 
 
         [[nodiscard]]
-        int
+        unsigned
         get_display_index()
             const;
 
 
-        // TODO: wrap SDL_SetWindowDisplayMode()
-        // TODO: wrap SDL_GetWindowDisplayMode()
+        void
+        set_display_mode(const display::mode& mode);
+
+
+        [[nodiscard]]
+        display::mode
+        get_display_mode()
+            const;
 
 
         [[nodiscard]]
@@ -156,34 +238,75 @@ namespace sdl {
 
 
         void
-        set_title(const string& title)
+        set_title(const char* title)
             noexcept;
 
+        inline
+        void
+        set_title(const concepts::string auto& title)
+            noexcept
+        {
+            set_title(title.data());
+        }
+
+
         [[nodiscard]]
-        string
+        const char*
         get_title()
             const;
 
 
-        // TODO: wrap SDLCALL SDL_SetWindowIcon()
+        void
+        set_icon(const surface& icon)
+            noexcept;
 
 
         void*
-        set_user_data(const string& key, void* value)
+        set_user_data(const char* key,
+                      void* value)
             noexcept;
+
+        inline
+        void*
+        set_user_data(const concepts::string auto& key,
+                      void* value)
+            noexcept
+        {
+            return set_user_data(key.data(), value);
+        }
+
 
         [[nodiscard]]
         void*
-        get_user_data(const string& key)
+        get_user_data(const char* key)
             const noexcept;
+
+        [[nodiscard]]
+        inline
+        void*
+        get_user_data(const concepts::string auto& key)
+            const noexcept
+        {
+            return get_user_data(key.data());
+        }
+
 
         template<typename T>
         [[nodiscard]]
         T
-        get_user_data_as(const string& key)
+        get_user_data_as(const char* key)
             const noexcept
         {
             return reinterpret_cast<T*>(get_user_data(key));
+        }
+
+        template<typename T>
+        [[nodiscard]]
+        T
+        get_user_data_as(const concepts::string auto& key)
+            const noexcept
+        {
+            return get_user_data_as<T>(key.data());
         }
 
 
@@ -217,12 +340,12 @@ namespace sdl {
 
         [[nodiscard]]
         int
-        width()
+        get_width()
             const noexcept;
 
         [[nodiscard]]
         int
-        height()
+        get_height()
             const noexcept;
 
 
@@ -476,7 +599,7 @@ namespace sdl {
         get_wrapper(SDL_Window* win)
             noexcept;
 
-    };
+    }; // class window
 
 } // namespace sdl
 

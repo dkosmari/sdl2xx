@@ -39,7 +39,7 @@ namespace sdl {
     public:
 
         struct dont_destroy_t{};
-        static inline constexpr dont_destroy_t dont_destroy{};
+        static constexpr dont_destroy_t dont_destroy{};
 
 
         constexpr

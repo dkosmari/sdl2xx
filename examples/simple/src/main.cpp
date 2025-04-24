@@ -9,12 +9,11 @@ using namespace sdl::literals;
 int main(int, char* [])
 {
     try {
-        sdl::init guard{sdl::init::video};
+        sdl::init guard{sdl::init::flag::video};
 
         sdl::window win{"Simple App",
-                        sdl::window::pos::centered,
-                        sdl::window::pos::centered,
-                        1280, 720,
+                        sdl::window::pos_centered,
+                        {1280, 720},
                         0};
 
         sdl::renderer rend{win,
