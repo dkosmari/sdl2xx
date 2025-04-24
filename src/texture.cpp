@@ -19,24 +19,16 @@ namespace sdl {
     texture::link_this()
         noexcept
     {
-        if (ptr)
-            SDL_SetTextureUserData(ptr, this);
-    }
-
-
-    void
-    texture::release()
-        noexcept
-    {
-        ptr = nullptr;
-        user_data = nullptr;
+        if (raw)
+            SDL_SetTextureUserData(raw, this);
     }
 
 
     texture::texture(SDL_Texture* tex)
-        noexcept :
-        ptr{tex}
-    {}
+        noexcept
+    {
+        acquire(tex);
+    }
 
 
     texture::texture(renderer& ren,
@@ -57,15 +49,11 @@ namespace sdl {
     }
 
 
-    /// Move constructor.
     texture::texture(texture&& other)
         noexcept :
-        ptr{other.ptr},
-        user_data{other.user_data},
-        locked_surface{std::move(other.locked_surface)}
+        basic_wrapper{}
     {
-        other.release();
-        link_this();
+        acquire(other.release());
     }
 
 
@@ -76,18 +64,13 @@ namespace sdl {
     }
 
 
-    /// Move assignment.
     texture&
     texture::operator =(texture&& other)
         noexcept
     {
         if (this != &other) {
             destroy();
-            ptr = other.ptr;
-            user_data = other.user_data;
-            locked_surface = std::move(other.locked_surface);
-            other.release();
-            link_this();
+            acquire(other.release());
         }
         return *this;
     }
@@ -100,11 +83,11 @@ namespace sdl {
                     int width,
                     int height)
     {
-        destroy();
-        ptr = SDL_CreateTexture(ren.data(), format, access, width, height);
+        auto ptr = SDL_CreateTexture(ren.data(), format, access, width, height);
         if (!ptr)
             throw error{};
-        link_this();
+        destroy();
+        acquire(ptr);
     }
 
 
@@ -112,11 +95,11 @@ namespace sdl {
     texture::create(renderer& ren,
                     surface& surf)
     {
-        destroy();
-        ptr = SDL_CreateTextureFromSurface(ren.data(), surf.data());
+        auto ptr = SDL_CreateTextureFromSurface(ren.data(), surf.data());
         if (!ptr)
             throw error{};
-        link_this();
+        destroy();
+        acquire(ptr);
     }
 
 
@@ -124,42 +107,45 @@ namespace sdl {
     texture::destroy()
         noexcept
     {
-        if (ptr) {
-            locked_surface.reset();
-            SDL_DestroyTexture(ptr);
-            release();
+        if (raw) {
+            auto [old_raw, old_user_data, old_locked_surface] = release();
+            SDL_DestroyTexture(old_raw);
         }
     }
 
 
-    bool
-    texture::is_valid()
-        const noexcept
-    {
-        return ptr;
-    }
-
-
-    texture::operator bool()
-        const noexcept
-    {
-        return ptr;
-    }
-
-
-    SDL_Texture*
-    texture::data()
+    void
+    texture::acquire(std::tuple<SDL_Texture*, void*, unique_ptr<surface>> state)
         noexcept
     {
-        return ptr;
+        basic_wrapper::acquire(get<0>(state));
+        user_data = get<1>(state);
+        locked_surface = std::move(get<2>(state));
+        link_this();
     }
 
 
-    const SDL_Texture*
-    texture::data()
-        const noexcept
+    void
+    texture::acquire(SDL_Texture* ptr)
+        noexcept
     {
-        return ptr;
+        acquire({ptr, nullptr, nullptr});
+    }
+
+
+    std::tuple<SDL_Texture*,
+               void*,
+               unique_ptr<surface>>
+    texture::release()
+        noexcept
+    {
+        auto old_user_data = user_data;
+        user_data = nullptr;
+        return {
+            basic_wrapper::release(),
+            old_user_data,
+            std::move(locked_surface)
+        };
     }
 
 
@@ -171,7 +157,7 @@ namespace sdl {
         int access;
         int width;
         int height;
-        if (SDL_QueryTexture(ptr, &format, &access, &width, &height) < 0)
+        if (SDL_QueryTexture(raw, &format, &access, &width, &height) < 0)
             throw error{};
         return info_t{
             .format = static_cast<SDL_PixelFormatEnum>(format),
@@ -187,7 +173,7 @@ namespace sdl {
         const
     {
         Uint32 format;
-        if (SDL_QueryTexture(ptr, &format, nullptr, nullptr, nullptr) < 0)
+        if (SDL_QueryTexture(raw, &format, nullptr, nullptr, nullptr) < 0)
             throw error{};
         return static_cast<SDL_PixelFormatEnum>(format);
     }
@@ -198,7 +184,7 @@ namespace sdl {
         const
     {
         int access;
-        if (SDL_QueryTexture(ptr, nullptr, &access, nullptr, nullptr) < 0)
+        if (SDL_QueryTexture(raw, nullptr, &access, nullptr, nullptr) < 0)
             throw error{};
         return static_cast<SDL_TextureAccess>(access);
     }
@@ -209,7 +195,7 @@ namespace sdl {
         const
     {
         vec2 size;
-        if (SDL_QueryTexture(ptr, nullptr, nullptr, &size.x, &size.y) < 0)
+        if (SDL_QueryTexture(raw, nullptr, nullptr, &size.x, &size.y) < 0)
             throw error{};
         return size;
     }
@@ -220,7 +206,7 @@ namespace sdl {
         const
     {
         int width;
-        if (SDL_QueryTexture(ptr, nullptr, nullptr, &width, nullptr) < 0)
+        if (SDL_QueryTexture(raw, nullptr, nullptr, &width, nullptr) < 0)
             throw error{};
         return width;
     }
@@ -231,7 +217,7 @@ namespace sdl {
         const
     {
         int height;
-        if (SDL_QueryTexture(ptr, nullptr, nullptr, nullptr, &height) < 0)
+        if (SDL_QueryTexture(raw, nullptr, nullptr, nullptr, &height) < 0)
             throw error{};
         return height;
     }
@@ -242,7 +228,7 @@ namespace sdl {
                            Uint8 g,
                            Uint8 b)
     {
-        if (SDL_SetTextureColorMod(ptr, r, g, b) < 0)
+        if (SDL_SetTextureColorMod(raw, r, g, b) < 0)
             throw error{};
     }
 
@@ -259,7 +245,7 @@ namespace sdl {
         const
     {
         color c;
-        if (SDL_GetTextureColorMod(ptr, &c.r, &c.g, &c.b) < 0)
+        if (SDL_GetTextureColorMod(raw, &c.r, &c.g, &c.b) < 0)
             throw error{};
         return c;
     }
@@ -268,7 +254,7 @@ namespace sdl {
     void
     texture::set_alpha_mod(Uint8 a)
     {
-        if (SDL_SetTextureAlphaMod(ptr, a) < 0)
+        if (SDL_SetTextureAlphaMod(raw, a) < 0)
             throw error{};
     }
 
@@ -278,7 +264,7 @@ namespace sdl {
         const
     {
         Uint8 a;
-        if (SDL_GetTextureAlphaMod(ptr, &a) < 0)
+        if (SDL_GetTextureAlphaMod(raw, &a) < 0)
             throw error{};
         return a;
     }
@@ -287,7 +273,7 @@ namespace sdl {
     void
     texture::set_blend_mode(SDL_BlendMode mode)
     {
-        if (SDL_SetTextureBlendMode(ptr, mode) < 0)
+        if (SDL_SetTextureBlendMode(raw, mode) < 0)
             throw error{};
     }
 
@@ -297,7 +283,7 @@ namespace sdl {
         const
     {
         SDL_BlendMode mode;
-        if (SDL_GetTextureBlendMode(ptr, &mode) < 0)
+        if (SDL_GetTextureBlendMode(raw, &mode) < 0)
             throw error{};
         return mode;
     }
@@ -306,7 +292,7 @@ namespace sdl {
     void
     texture::set_scale_mode(SDL_ScaleMode mode)
     {
-        if (SDL_SetTextureScaleMode(ptr, mode) < 0)
+        if (SDL_SetTextureScaleMode(raw, mode) < 0)
             throw error{};
     }
 
@@ -316,7 +302,7 @@ namespace sdl {
         const
     {
         SDL_ScaleMode mode;
-        if (SDL_GetTextureScaleMode(ptr, &mode) < 0)
+        if (SDL_GetTextureScaleMode(raw, &mode) < 0)
             throw error{};
         return mode;
     }
@@ -343,7 +329,7 @@ namespace sdl {
                     const void* pixels,
                     int pitch)
     {
-        if (SDL_UpdateTexture(ptr, area, pixels, pitch) < 0)
+        if (SDL_UpdateTexture(raw, area, pixels, pitch) < 0)
             throw error{};
     }
 
@@ -354,7 +340,7 @@ namespace sdl {
                         const Uint8* u, int u_pitch,
                         const Uint8* v, int v_pitch)
     {
-        if (SDL_UpdateYUVTexture(ptr, area,
+        if (SDL_UpdateYUVTexture(raw, area,
                                  y, y_pitch,
                                  u, u_pitch,
                                  v, v_pitch) < 0)
@@ -367,7 +353,7 @@ namespace sdl {
                        const Uint8* y, int y_pitch,
                        const Uint8* uv, int uv_pitch)
     {
-        if (SDL_UpdateNVTexture(ptr, area,
+        if (SDL_UpdateNVTexture(raw, area,
                                 y, y_pitch,
                                 uv, uv_pitch) < 0)
             throw error{};
@@ -379,7 +365,7 @@ namespace sdl {
     {
         void* pixels;
         int pitch;
-        if (SDL_LockTexture(ptr, area, &pixels, &pitch) < 0)
+        if (SDL_LockTexture(raw, area, &pixels, &pitch) < 0)
             throw error{};
         return {pixels, pitch};
     }
@@ -389,7 +375,7 @@ namespace sdl {
     texture::lock_surface(const rect* area)
     {
         SDL_Surface* surf;
-        if (SDL_LockTextureToSurface(ptr, area, &surf) < 0)
+        if (SDL_LockTextureToSurface(raw, area, &surf) < 0)
             throw error{};
         locked_surface = make_unique<surface>(surf, surface::dont_destroy);
         return locked_surface.get();
@@ -401,7 +387,7 @@ namespace sdl {
         noexcept
     {
         locked_surface.reset();
-        SDL_UnlockTexture(ptr);
+        SDL_UnlockTexture(raw);
     }
 
 
@@ -410,7 +396,7 @@ namespace sdl {
         const
     {
         vec2f size;
-        if (SDL_GL_BindTexture(ptr, &size.x, &size.y) < 0)
+        if (SDL_GL_BindTexture(raw, &size.x, &size.y) < 0)
             throw error{};
         return size;
     }
@@ -420,7 +406,7 @@ namespace sdl {
     texture::gl_unbind()
         const
     {
-        if (SDL_GL_UnbindTexture(ptr) < 0)
+        if (SDL_GL_UnbindTexture(raw) < 0)
             throw error{};
     }
 

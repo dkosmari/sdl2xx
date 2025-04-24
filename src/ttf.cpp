@@ -69,21 +69,6 @@ namespace sdl::ttf {
     }
 
 
-    // class font
-
-    void
-    font::release()
-        noexcept
-    {
-        ptr = nullptr;
-    }
-
-
-    font::font(TTF_Font* raw)
-        noexcept :
-        ptr{raw}
-    {}
-
 
     font::font(const path& filename,
                int pt_size)
@@ -118,10 +103,10 @@ namespace sdl::ttf {
 
 
     font::font(font&& other)
-        noexcept
+        noexcept :
+        basic_wrapper{}
     {
-        ptr = other.ptr;
-        other.release();
+        acquire(other.release());
     }
 
 
@@ -137,8 +122,7 @@ namespace sdl::ttf {
     {
         if  (this != &other) {
             destroy();
-            ptr = other.ptr;
-            other.release();
+            acquire(other.release());
         }
         return *this;
     }
@@ -148,10 +132,11 @@ namespace sdl::ttf {
     font::create(const path& filename,
                  int pt_size)
     {
-        destroy();
-        ptr = TTF_OpenFont(filename.c_str(), pt_size);
+        auto ptr = TTF_OpenFont(filename.c_str(), pt_size);
         if (!ptr)
             throw error{};
+        destroy();
+        acquire(ptr);
     }
 
 
@@ -160,8 +145,7 @@ namespace sdl::ttf {
                  int pt_size,
                  const options& opt)
     {
-        destroy();
-
+        TTF_Font* ptr = nullptr;
         if (opt.index) {
             if (opt.dpi) {
                 // index, dpi
@@ -192,6 +176,9 @@ namespace sdl::ttf {
 
         if (!ptr)
             throw error{};
+
+        destroy();
+        acquire(ptr);
     }
 
 
@@ -200,10 +187,11 @@ namespace sdl::ttf {
                  bool free_src,
                  int pt_size)
     {
-        destroy();
-        ptr = TTF_OpenFontRW(src, free_src, pt_size);
+        auto ptr = TTF_OpenFontRW(src, free_src, pt_size);
         if (!ptr)
             throw error{};
+        destroy();
+        acquire(ptr);
     }
 
 
@@ -213,8 +201,7 @@ namespace sdl::ttf {
                  int pt_size,
                  const options& opt)
     {
-        destroy();
-
+        TTF_Font* ptr = nullptr;
         if (opt.index) {
             if (opt.dpi) {
                 // index, dpi
@@ -247,6 +234,9 @@ namespace sdl::ttf {
 
         if (!ptr)
             throw error{};
+
+        destroy();
+        acquire(ptr);
     }
 
 
@@ -254,41 +244,8 @@ namespace sdl::ttf {
     font::destroy()
         noexcept
     {
-        if (ptr) {
-            TTF_CloseFont(ptr);
-            ptr = nullptr;
-        }
-    }
-
-
-    bool
-    font::is_valid()
-        const noexcept
-    {
-        return ptr;
-    }
-
-
-    font::operator bool()
-        const noexcept
-    {
-        return ptr;
-    }
-
-
-    TTF_Font*
-    font::data()
-        noexcept
-    {
-        return ptr;
-    }
-
-
-    const TTF_Font*
-    font::data()
-        const noexcept
-    {
-        return ptr;
+        if (raw)
+            TTF_CloseFont(release());
     }
 
 
@@ -296,7 +253,7 @@ namespace sdl::ttf {
     font::get_style()
         const noexcept
     {
-        return TTF_GetFontStyle(ptr);
+        return TTF_GetFontStyle(raw);
     }
 
 
@@ -304,7 +261,7 @@ namespace sdl::ttf {
     font::set_style(unsigned s)
         noexcept
     {
-        TTF_SetFontStyle(ptr, s);
+        TTF_SetFontStyle(raw, s);
     }
 
 
@@ -312,7 +269,7 @@ namespace sdl::ttf {
     font::get_outline()
         const noexcept
     {
-        return TTF_GetFontOutline(ptr);
+        return TTF_GetFontOutline(raw);
     }
 
 
@@ -320,7 +277,7 @@ namespace sdl::ttf {
     font::set_outline(int outline)
         noexcept
     {
-        TTF_SetFontOutline(ptr, outline);
+        TTF_SetFontOutline(raw, outline);
     }
 
 
@@ -328,7 +285,7 @@ namespace sdl::ttf {
     font::get_hinting()
         const noexcept
     {
-        return static_cast<hinting>(TTF_GetFontHinting(ptr));
+        return static_cast<hinting>(TTF_GetFontHinting(raw));
     }
 
 
@@ -336,7 +293,7 @@ namespace sdl::ttf {
     font::set_hinting(hinting h)
         noexcept
     {
-        TTF_SetFontHinting(ptr, static_cast<int>(h));
+        TTF_SetFontHinting(raw, static_cast<int>(h));
     }
 
 
@@ -346,7 +303,7 @@ namespace sdl::ttf {
     font::get_align()
         const noexcept
     {
-        return static_cast<align>(TTF_GetFontWrappedAlign(ptr));
+        return static_cast<align>(TTF_GetFontWrappedAlign(raw));
     }
 
 
@@ -354,7 +311,7 @@ namespace sdl::ttf {
     font::set_align(align a)
         noexcept
     {
-        TTF_SetFontWrappedAlign(ptr, static_cast<int>(a));
+        TTF_SetFontWrappedAlign(raw, static_cast<int>(a));
     }
 
 #endif // SDL_TTF_VERSION_ATLEAST(2, 20, 0)
@@ -364,7 +321,7 @@ namespace sdl::ttf {
     font::get_height()
         const noexcept
     {
-        return TTF_FontHeight(ptr);
+        return TTF_FontHeight(raw);
     }
 
 
@@ -372,7 +329,7 @@ namespace sdl::ttf {
     font::get_ascent()
         const noexcept
     {
-        return TTF_FontAscent(ptr);
+        return TTF_FontAscent(raw);
     }
 
 
@@ -380,7 +337,7 @@ namespace sdl::ttf {
     font::get_descent()
         const noexcept
     {
-        return TTF_FontDescent(ptr);
+        return TTF_FontDescent(raw);
     }
 
 
@@ -388,7 +345,7 @@ namespace sdl::ttf {
     font::get_line_skip()
         const noexcept
     {
-        return TTF_FontLineSkip(ptr);
+        return TTF_FontLineSkip(raw);
     }
 
 
@@ -396,7 +353,7 @@ namespace sdl::ttf {
     font::get_kerning()
         const noexcept
     {
-        return TTF_GetFontKerning(ptr);
+        return TTF_GetFontKerning(raw);
     }
 
 
@@ -404,7 +361,7 @@ namespace sdl::ttf {
     font::set_kerning(bool allowed)
         noexcept
     {
-        TTF_SetFontKerning(ptr, allowed);
+        TTF_SetFontKerning(raw, allowed);
     }
 
 
@@ -412,7 +369,7 @@ namespace sdl::ttf {
     font::get_num_faces()
         const noexcept
     {
-        return TTF_FontFaces(ptr);
+        return TTF_FontFaces(raw);
     }
 
 
@@ -420,7 +377,7 @@ namespace sdl::ttf {
     font::is_fixed_width()
         const noexcept
     {
-        return TTF_FontFaceIsFixedWidth(ptr);
+        return TTF_FontFaceIsFixedWidth(raw);
     }
 
 
@@ -428,7 +385,7 @@ namespace sdl::ttf {
     font::get_family_name()
         const
     {
-        return TTF_FontFaceFamilyName(ptr);
+        return TTF_FontFaceFamilyName(raw);
     }
 
 
@@ -436,7 +393,7 @@ namespace sdl::ttf {
     font::get_style_name()
         const
     {
-        return TTF_FontFaceStyleName(ptr);
+        return TTF_FontFaceStyleName(raw);
     }
 
 
@@ -444,7 +401,7 @@ namespace sdl::ttf {
     font::has_glyph(char32_t codepoint)
         const noexcept
     {
-        return TTF_GlyphIsProvided32(ptr, codepoint);
+        return TTF_GlyphIsProvided32(raw, codepoint);
     }
 
 
@@ -454,7 +411,7 @@ namespace sdl::ttf {
     {
         metrics result;
         // TODO: check if it can actually return -1
-        if (TTF_GlyphMetrics32(ptr,
+        if (TTF_GlyphMetrics32(raw,
                                codepoint,
                                &result.min.x,
                                &result.max.x,
@@ -471,7 +428,7 @@ namespace sdl::ttf {
         const
     {
         vec2 size;
-        if (TTF_SizeText(ptr,
+        if (TTF_SizeText(raw,
                          text,
                          &size.x,
                          &size.y) < 0)
@@ -484,7 +441,7 @@ namespace sdl::ttf {
         const
     {
         vec2 size;
-        if (TTF_SizeUTF8(ptr,
+        if (TTF_SizeUTF8(raw,
                          reinterpret_cast<const char*>(text),
                          &size.x,
                          &size.y) < 0)
@@ -507,7 +464,7 @@ namespace sdl::ttf {
         const
     {
         measure result;
-        if (TTF_MeasureText(ptr,
+        if (TTF_MeasureText(raw,
                             text,
                             max_width,
                             &result.width,
@@ -523,7 +480,7 @@ namespace sdl::ttf {
         const
     {
         measure result;
-        if (TTF_MeasureUTF8(ptr,
+        if (TTF_MeasureUTF8(raw,
                             reinterpret_cast<const char*>(text),
                             max_width,
                             &result.width,
@@ -547,7 +504,7 @@ namespace sdl::ttf {
                        color fg)
         const
     {
-        auto surf = TTF_RenderText_Solid(ptr, text, fg);
+        auto surf = TTF_RenderText_Solid(raw, text, fg);
         if (!surf)
             throw error{};
         return surface{surf};
@@ -559,7 +516,7 @@ namespace sdl::ttf {
                        color fg)
         const
     {
-        auto surf = TTF_RenderUTF8_Solid(ptr,
+        auto surf = TTF_RenderUTF8_Solid(raw,
                                          reinterpret_cast<const char*>(text),
                                          fg);
         if (!surf)
@@ -583,7 +540,7 @@ namespace sdl::ttf {
                                Uint32 max_width)
         const
     {
-        auto surf = TTF_RenderText_Solid_Wrapped(ptr, text, fg, max_width);
+        auto surf = TTF_RenderText_Solid_Wrapped(raw, text, fg, max_width);
         if (!surf)
             throw error{};
         return surface{surf};
@@ -596,7 +553,7 @@ namespace sdl::ttf {
                                Uint32 max_width)
         const
     {
-        auto surf = TTF_RenderUTF8_Solid_Wrapped(ptr,
+        auto surf = TTF_RenderUTF8_Solid_Wrapped(raw,
                                                  reinterpret_cast<const char*>(text),
                                                  fg,
                                                  max_width);
@@ -623,7 +580,7 @@ namespace sdl::ttf {
                              color fg)
         const
     {
-        auto surf = TTF_RenderGlyph32_Solid(ptr, codepoint, fg);
+        auto surf = TTF_RenderGlyph32_Solid(raw, codepoint, fg);
         if (!surf)
             throw error{};
         return surface{surf};
@@ -636,7 +593,7 @@ namespace sdl::ttf {
                         color bg)
         const
     {
-        auto surf = TTF_RenderText_Shaded(ptr, text, fg, bg);
+        auto surf = TTF_RenderText_Shaded(raw, text, fg, bg);
         if (!surf)
             throw error{};
         return surface{surf};
@@ -649,7 +606,7 @@ namespace sdl::ttf {
                         color bg)
         const
     {
-        auto surf = TTF_RenderUTF8_Shaded(ptr,
+        auto surf = TTF_RenderUTF8_Shaded(raw,
                                           reinterpret_cast<const char*>(text),
                                           fg,
                                           bg);
@@ -678,7 +635,7 @@ namespace sdl::ttf {
                         Uint32 max_width)
         const
     {
-        auto surf = TTF_RenderText_Shaded_Wrapped(ptr,
+        auto surf = TTF_RenderText_Shaded_Wrapped(raw,
                                                   text,
                                                   fg,
                                                   bg,
@@ -696,7 +653,7 @@ namespace sdl::ttf {
                         Uint32 max_width)
         const
     {
-        auto surf = TTF_RenderUTF8_Shaded_Wrapped(ptr,
+        auto surf = TTF_RenderUTF8_Shaded_Wrapped(raw,
                                                   reinterpret_cast<const char*>(text),
                                                   fg,
                                                   bg,
@@ -727,7 +684,7 @@ namespace sdl::ttf {
                               color bg)
         const
     {
-        auto surf = TTF_RenderGlyph32_Shaded(ptr, codepoint, fg, bg);
+        auto surf = TTF_RenderGlyph32_Shaded(raw, codepoint, fg, bg);
         if (!surf)
             throw error{};
         return surface{surf};
@@ -739,7 +696,7 @@ namespace sdl::ttf {
                          color fg)
         const
     {
-        auto surf = TTF_RenderText_Blended(ptr, text, fg);
+        auto surf = TTF_RenderText_Blended(raw, text, fg);
         if (!surf)
             throw error{};
         return surface{surf};
@@ -751,7 +708,7 @@ namespace sdl::ttf {
                          color fg)
         const
     {
-        auto surf = TTF_RenderUTF8_Blended(ptr,
+        auto surf = TTF_RenderUTF8_Blended(raw,
                                            reinterpret_cast<const char*>(text),
                                            fg);
         if (!surf)
@@ -776,7 +733,7 @@ namespace sdl::ttf {
                          Uint32 max_width)
         const
     {
-        auto surf = TTF_RenderText_Blended_Wrapped(ptr, text, fg, max_width);
+        auto surf = TTF_RenderText_Blended_Wrapped(raw, text, fg, max_width);
         if (!surf)
             throw error{};
         return surface{surf};
@@ -789,7 +746,7 @@ namespace sdl::ttf {
                          Uint32 max_width)
         const
     {
-        auto surf = TTF_RenderUTF8_Blended_Wrapped(ptr,
+        auto surf = TTF_RenderUTF8_Blended_Wrapped(raw,
                                                    reinterpret_cast<const char*>(text),
                                                    fg,
                                                    max_width);
@@ -816,7 +773,7 @@ namespace sdl::ttf {
                                color fg)
         const
     {
-        auto surf = TTF_RenderGlyph32_Blended(ptr, codepoint, fg);
+        auto surf = TTF_RenderGlyph32_Blended(raw, codepoint, fg);
         if (!surf)
             throw error{};
         return surface{surf};
@@ -831,7 +788,7 @@ namespace sdl::ttf {
                      color bg)
         const
     {
-        auto surf = TTF_RenderText_LCD(ptr, text, fg, bg);
+        auto surf = TTF_RenderText_LCD(raw, text, fg, bg);
         if (!surf)
             throw error{};
         return surface{surf};
@@ -844,7 +801,7 @@ namespace sdl::ttf {
                      color bg)
         const
     {
-        auto surf = TTF_RenderUTF8_LCD(ptr,
+        auto surf = TTF_RenderUTF8_LCD(raw,
                                        reinterpret_cast<const char*>(text),
                                        fg,
                                        bg);
@@ -873,7 +830,7 @@ namespace sdl::ttf {
                      Uint32 max_width)
         const
     {
-        auto surf = TTF_RenderText_LCD_Wrapped(ptr, text, fg, bg, max_width);
+        auto surf = TTF_RenderText_LCD_Wrapped(raw, text, fg, bg, max_width);
         if (!surf)
             throw error{};
         return surface{surf};
@@ -887,7 +844,7 @@ namespace sdl::ttf {
                      Uint32 max_width)
         const
     {
-        auto surf = TTF_RenderUTF8_LCD_Wrapped(ptr,
+        auto surf = TTF_RenderUTF8_LCD_Wrapped(raw,
                                                reinterpret_cast<const char*>(text),
                                                fg,
                                                bg,
@@ -918,7 +875,7 @@ namespace sdl::ttf {
                            color bg)
         const
     {
-        auto surf = TTF_RenderGlyph32_LCD(ptr, codepoint, fg, bg);
+        auto surf = TTF_RenderGlyph32_LCD(raw, codepoint, fg, bg);
         if (!surf)
             throw error{};
         return surface{surf};
@@ -932,7 +889,7 @@ namespace sdl::ttf {
                            char32_t codepoint)
         const
     {
-        int result = TTF_GetFontKerningSizeGlyphs32(ptr, prev_codepoint, codepoint);
+        int result = TTF_GetFontKerningSizeGlyphs32(raw, prev_codepoint, codepoint);
         if (result < 0)
             throw error{};
         return result;
@@ -942,7 +899,7 @@ namespace sdl::ttf {
     void
     font::set_sdf(bool enable)
     {
-        if (TTF_SetFontSDF(ptr, enable ? SDL_TRUE : SDL_FALSE) < 0)
+        if (TTF_SetFontSDF(raw, enable ? SDL_TRUE : SDL_FALSE) < 0)
             throw error{};
     }
 
@@ -951,7 +908,7 @@ namespace sdl::ttf {
     font::get_sdf()
         const noexcept
     {
-        return TTF_GetFontSDF(ptr);
+        return TTF_GetFontSDF(raw);
     }
 
 
@@ -960,7 +917,7 @@ namespace sdl::ttf {
     void
     font::set_direction(direction dir)
     {
-        if (TTF_SetFontDirection(ptr, static_cast<TTF_Direction>(dir)) < 0)
+        if (TTF_SetFontDirection(raw, static_cast<TTF_Direction>(dir)) < 0)
             throw error{};
     }
 
@@ -968,7 +925,7 @@ namespace sdl::ttf {
     void
     font::set_script(const char* script)
     {
-        if (TTF_SetFontScriptName(ptr, script) < 0)
+        if (TTF_SetFontScriptName(raw, script) < 0)
             throw error{};
     }
 

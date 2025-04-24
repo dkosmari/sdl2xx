@@ -36,6 +36,7 @@ namespace sdl {
 
 
         constexpr
+        explicit
         basic_wrapper(T src)
             noexcept :
             raw{src}

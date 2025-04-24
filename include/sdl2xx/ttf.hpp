@@ -16,6 +16,7 @@
 
 #include <SDL_ttf.h>
 
+#include "basic_wrapper.hpp"
 #include "color.hpp"
 #include "string.hpp"
 #include "surface.hpp"
@@ -83,16 +84,7 @@ namespace sdl::ttf {
     }; // struct init
 
 
-    class font {
-
-        TTF_Font* ptr = nullptr;
-
-
-        void
-        release()
-            noexcept;
-
-    public:
+    struct font : basic_wrapper<TTF_Font*> {
 
         struct dpi_opt {
             unsigned h;
@@ -106,13 +98,8 @@ namespace sdl::ttf {
         };
 
 
-        constexpr
-        font()
-            noexcept = default;
-
-        explicit
-        font(TTF_Font* raw)
-            noexcept;
+        // Inherit constructors.
+        using basic_wrapper::basic_wrapper;
 
         font(const path& filename,
              int pt_size);
@@ -170,28 +157,6 @@ namespace sdl::ttf {
         void
         destroy()
             noexcept;
-
-
-        [[nodiscard]]
-        bool
-        is_valid()
-            const noexcept;
-
-        [[nodiscard]]
-        explicit
-        operator bool()
-            const noexcept;
-
-
-        [[nodiscard]]
-        TTF_Font*
-        data()
-            noexcept;
-
-        [[nodiscard]]
-        const TTF_Font*
-        data()
-            const noexcept;
 
 
         enum style : unsigned {

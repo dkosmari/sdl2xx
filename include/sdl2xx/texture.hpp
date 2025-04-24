@@ -9,10 +9,12 @@
 #ifndef SDL2XX_TEXTURE_HPP
 #define SDL2XX_TEXTURE_HPP
 
+#include <tuple>
 #include <utility>
 
 #include <SDL_render.h>
 
+#include "basic_wrapper.hpp"
 #include "color.hpp"
 #include "unique_ptr.hpp"
 #include "vec2.hpp"
@@ -25,9 +27,8 @@ namespace sdl {
     class surface;
 
 
-    class texture {
+    class texture : public basic_wrapper<SDL_Texture*> {
 
-        SDL_Texture* ptr = nullptr;
         void* user_data = nullptr;
         unique_ptr<surface> locked_surface;
 
@@ -36,17 +37,11 @@ namespace sdl {
         link_this()
             noexcept;
 
-
-        void
-        release()
-            noexcept;
-
-
     public:
 
-        constexpr
-        texture()
-            noexcept = default;
+        // Inherit constructors.
+        using basic_wrapper::basic_wrapper;
+
 
         texture(SDL_Texture* tex)
             noexcept;
@@ -92,26 +87,22 @@ namespace sdl {
             noexcept;
 
 
-        [[nodiscard]]
-        bool
-        is_valid()
-            const noexcept;
-
-        [[nodiscard]]
-        explicit
-        operator bool()
-            const noexcept;
-
-
-        [[nodiscard]]
-        SDL_Texture*
-        data()
+        void
+        acquire(std::tuple<SDL_Texture*,
+                void*,
+                unique_ptr<surface>> state)
             noexcept;
 
-        [[nodiscard]]
-        const SDL_Texture*
-        data()
-            const noexcept;
+        void
+        acquire(SDL_Texture* ptr)
+            noexcept;
+
+
+        std::tuple<SDL_Texture*,
+                   void*,
+                   unique_ptr<surface>>
+        release()
+            noexcept;
 
 
         struct info_t {

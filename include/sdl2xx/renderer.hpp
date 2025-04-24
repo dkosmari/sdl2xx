@@ -10,12 +10,14 @@
 #define SDL2XX_RENDERER_HPP
 
 #include <optional>
-#include <utility>
 #include <span>
+#include <tuple>
+#include <utility>
 
 #include <SDL_render.h>
 
 #include "angle.hpp"
+#include "basic_wrapper.hpp"
 #include "color.hpp"
 #include "rect.hpp"
 #include "string.hpp"
@@ -33,19 +35,13 @@ namespace sdl {
     using vertex = SDL_Vertex;
 
 
-    class renderer {
+    class renderer : public basic_wrapper<SDL_Renderer*> {
 
-        SDL_Renderer* ptr = nullptr;
         void* user_data = nullptr;
 
 
         void
         link_this()
-            noexcept;
-
-
-        explicit
-        renderer(SDL_Renderer* ren)
             noexcept;
 
 
@@ -78,14 +74,18 @@ namespace sdl {
         get_driver_info(int index);
 
 
-        constexpr
-        renderer()
-            noexcept = default;
+        // Inherit constructors.
+        using basic_wrapper::basic_wrapper;
+
+        explicit
+        renderer(SDL_Renderer* ren)
+            noexcept;
 
         renderer(window& win,
                  int index,
                  Uint32 flags);
 
+        explicit
         renderer(surface& surf);
 
 
@@ -118,26 +118,17 @@ namespace sdl {
             noexcept;
 
 
-        [[nodiscard]]
-        bool
-        is_valid()
-            const noexcept;
-
-        [[nodiscard]]
-        explicit
-        operator bool()
-            const noexcept;
-
-
-        [[nodiscard]]
-        SDL_Renderer*
-        data()
+        void
+        acquire(std::tuple<SDL_Renderer*, void*> state)
             noexcept;
 
-        [[nodiscard]]
-        const SDL_Renderer*
-        data()
-            const noexcept;
+        void
+        acquire(SDL_Renderer* ren)
+            noexcept;
+
+        std::tuple<SDL_Renderer*, void*>
+        release()
+            noexcept;
 
 
         [[nodiscard]]
@@ -319,8 +310,18 @@ namespace sdl {
         void
         draw_point(vec2f pt);
 
+
+        void
+        draw_points(const vec2* pts,
+                    std::size_t count);
+
         void
         draw_points(std::span<const vec2> pts);
+
+
+        void
+        draw_points(const vec2f* pts,
+                    std::size_t count);
 
         void
         draw_points(std::span<const vec2f> pts);

@@ -77,10 +77,6 @@ namespace sdl {
         if (this != &other) {
             destroy();
             acquire(other.release());
-            // ptr = other.ptr;
-            // other.ptr = nullptr;
-            // surf = std::move(other.surf);
-            // link_this();
         }
         return *this;
     }
@@ -123,7 +119,6 @@ namespace sdl {
     {
         if (raw) {
             auto [w, s] = release();
-            s.reset();
             SDL_DestroyWindow(w);
         }
     }

@@ -25,6 +25,7 @@ namespace sdl {
 
             vector<element_t> renderer_map;
 
+
             void
             update(const SDL_Renderer* raw,
                    const renderer* wrap)
@@ -85,7 +86,6 @@ namespace sdl {
                 };
             }
 
-
         } // namespace detail
 
     } // namespace
@@ -95,16 +95,8 @@ namespace sdl {
     renderer::link_this()
         noexcept
     {
-        if (ptr)
-            detail::update(ptr, this);
-    }
-
-
-    renderer::renderer(SDL_Renderer* ren)
-        noexcept :
-        ptr{ren}
-    {
-        link_this();
+        if (raw)
+            detail::update(raw, this);
     }
 
 
@@ -128,6 +120,13 @@ namespace sdl {
     }
 
 
+    renderer::renderer(SDL_Renderer* ren)
+        noexcept
+    {
+        acquire(ren);
+    }
+
+
     renderer::renderer(window& win,
                        int index,
                        Uint32 flags)
@@ -144,10 +143,9 @@ namespace sdl {
 
     renderer::renderer(renderer&& other)
         noexcept :
-        ptr{other.ptr}
+        basic_wrapper{}
     {
-        other.ptr = nullptr;
-        link_this();
+        acquire(other.release());
     }
 
 
@@ -164,13 +162,10 @@ namespace sdl {
     {
         if (this != &other) {
             destroy();
-            ptr = other.ptr;
-            other.ptr = nullptr;
-            link_this();
+            acquire(other.release());
         }
         return *this;
     }
-
 
 
     void
@@ -178,22 +173,22 @@ namespace sdl {
                      int index,
                      Uint32 flags)
     {
-        destroy();
-        ptr = SDL_CreateRenderer(win.data(), index, flags);
+        auto ptr = SDL_CreateRenderer(win.data(), index, flags);
         if (!ptr)
             throw error{};
-        link_this();
+        destroy();
+        acquire(ptr);
     }
 
 
     void
     renderer::create(surface& surf)
     {
-        destroy();
-        ptr = SDL_CreateSoftwareRenderer(surf.data());
+        auto ptr = SDL_CreateSoftwareRenderer(surf.data());
         if (!ptr)
             throw error{};
-        link_this();
+        destroy();
+        acquire(ptr);
     }
 
 
@@ -201,49 +196,47 @@ namespace sdl {
     renderer::destroy()
         noexcept
     {
-        if (ptr) {
-            detail::remove(ptr);
-            SDL_DestroyRenderer(ptr);
-            ptr = 0;
+        if (raw) {
+            auto [old_raw, old_user_data] = release();
+            SDL_DestroyRenderer(old_raw);
         }
     }
 
 
-    bool
-    renderer::is_valid()
-        const noexcept
-    {
-        return ptr;
-    }
-
-
-    renderer::operator bool()
-        const noexcept
-    {
-        return ptr;
-    }
-
-
-    SDL_Renderer*
-    renderer::data()
+    void
+    renderer::acquire(std::tuple<SDL_Renderer*, void*> state)
         noexcept
     {
-        return ptr;
+        basic_wrapper::acquire(get<0>(state));
+        user_data = get<1>(state);
+        link_this();
     }
 
 
-    const SDL_Renderer*
-    renderer::data()
-        const noexcept
+    void
+    renderer::acquire(SDL_Renderer* ren)
+        noexcept
     {
-        return ptr;
+        acquire({ren, nullptr});
+    }
+
+
+    std::tuple<SDL_Renderer*, void*>
+    renderer::release()
+        noexcept
+    {
+        void* old_user_data = user_data;
+        user_data = nullptr;
+        auto old_raw = basic_wrapper::release();
+        detail::remove(old_raw);
+        return {old_raw, old_user_data};
     }
 
 
     window*
     renderer::get_window()
     {
-        SDL_Window* win = SDL_RenderGetWindow(ptr);
+        SDL_Window* win = SDL_RenderGetWindow(raw);
         if (!win)
             throw error{};
         return window::get_wrapper(win);
@@ -255,7 +248,7 @@ namespace sdl {
         const
     {
         SDL_RendererInfo info;
-        if (SDL_GetRendererInfo(ptr, &info) < 0)
+        if (SDL_GetRendererInfo(raw, &info) < 0)
             throw error{};
         return detail::convert(info);
     }
@@ -266,7 +259,7 @@ namespace sdl {
         const
     {
         vec2 result;
-        if (SDL_GetRendererOutputSize(ptr, &result.x, &result.y) < 0)
+        if (SDL_GetRendererOutputSize(raw, &result.x, &result.y) < 0)
             throw error{};
         return result;
     }
@@ -276,14 +269,14 @@ namespace sdl {
     renderer::renter_target_supported()
         const noexcept
     {
-        return SDL_RenderTargetSupported(ptr);
+        return SDL_RenderTargetSupported(raw);
     }
 
 
     void
     renderer::set_render_target()
     {
-        if (SDL_SetRenderTarget(ptr, nullptr) < 0)
+        if (SDL_SetRenderTarget(raw, nullptr) < 0)
             throw error{};
     }
 
@@ -291,7 +284,7 @@ namespace sdl {
     void
     renderer::set_render_target(texture& tex)
     {
-        if (SDL_SetRenderTarget(ptr, tex.data()) < 0)
+        if (SDL_SetRenderTarget(raw, tex.data()) < 0)
             throw error{};
     }
 
@@ -300,7 +293,7 @@ namespace sdl {
     renderer::get_render_target()
         const noexcept
     {
-        return texture::get_wrapper(SDL_GetRenderTarget(ptr));
+        return texture::get_wrapper(SDL_GetRenderTarget(raw));
     }
 
 
@@ -308,7 +301,7 @@ namespace sdl {
     renderer::set_logical_size(int width,
                                int height)
     {
-        if (SDL_RenderSetLogicalSize(ptr, width, height) < 0)
+        if (SDL_RenderSetLogicalSize(raw, width, height) < 0)
             throw error{};
     }
 
@@ -325,7 +318,7 @@ namespace sdl {
         const noexcept
     {
         vec2 size;
-        SDL_RenderGetLogicalSize(ptr, &size.x, &size.y);
+        SDL_RenderGetLogicalSize(raw, &size.x, &size.y);
         return size;
     }
 
@@ -335,7 +328,7 @@ namespace sdl {
         const noexcept
     {
         int width;
-        SDL_RenderGetLogicalSize(ptr, &width, nullptr);
+        SDL_RenderGetLogicalSize(raw, &width, nullptr);
         return width;
     }
 
@@ -345,7 +338,7 @@ namespace sdl {
         const noexcept
     {
         int height;
-        SDL_RenderGetLogicalSize(ptr, nullptr, &height);
+        SDL_RenderGetLogicalSize(raw, nullptr, &height);
         return height;
     }
 
@@ -353,7 +346,7 @@ namespace sdl {
     void
     renderer::set_integer_scale(bool enable)
     {
-        if (SDL_RenderSetIntegerScale(ptr, enable ? SDL_TRUE : SDL_FALSE) < 0)
+        if (SDL_RenderSetIntegerScale(raw, enable ? SDL_TRUE : SDL_FALSE) < 0)
             throw error{};
     }
 
@@ -362,7 +355,7 @@ namespace sdl {
     renderer::get_integer_scale()
         const noexcept
     {
-        return SDL_RenderGetIntegerScale(ptr);
+        return SDL_RenderGetIntegerScale(raw);
     }
 
 
@@ -376,7 +369,7 @@ namespace sdl {
     void
     renderer::set_viewport(const rect* vp)
     {
-        if (SDL_RenderSetViewport(ptr, vp) < 0)
+        if (SDL_RenderSetViewport(raw, vp) < 0)
             throw error{};
     }
 
@@ -393,7 +386,7 @@ namespace sdl {
         const noexcept
     {
         rect vp;
-        SDL_RenderGetViewport(ptr, &vp);
+        SDL_RenderGetViewport(raw, &vp);
         return vp;
     }
 
@@ -408,7 +401,7 @@ namespace sdl {
     void
     renderer::set_clip(const rect* clip)
     {
-        if (SDL_RenderSetClipRect(ptr, clip) < 0)
+        if (SDL_RenderSetClipRect(raw, clip) < 0)
             throw error{};
     }
 
@@ -425,7 +418,7 @@ namespace sdl {
         const noexcept
     {
         rect clip;
-        SDL_RenderGetClipRect(ptr, &clip);
+        SDL_RenderGetClipRect(raw, &clip);
         return clip;
     }
 
@@ -434,7 +427,7 @@ namespace sdl {
     renderer::is_clip_enabled()
         const noexcept
     {
-        return SDL_RenderIsClipEnabled(ptr);
+        return SDL_RenderIsClipEnabled(raw);
     }
 
 
@@ -442,7 +435,7 @@ namespace sdl {
     renderer::set_scale(float scale_x,
                         float scale_y)
     {
-        if (SDL_RenderSetScale(ptr, scale_x, scale_y) < 0)
+        if (SDL_RenderSetScale(raw, scale_x, scale_y) < 0)
             throw error{};
     }
 
@@ -459,7 +452,7 @@ namespace sdl {
         const noexcept
     {
         vec2f scale;
-        SDL_RenderGetScale(ptr, &scale.x, &scale.y);
+        SDL_RenderGetScale(raw, &scale.x, &scale.y);
         return scale;
     }
 
@@ -470,7 +463,7 @@ namespace sdl {
         const noexcept
     {
         vec2f result;
-        SDL_RenderWindowToLogical(ptr, win_x, win_y, &result.x, &result.y);
+        SDL_RenderWindowToLogical(raw, win_x, win_y, &result.x, &result.y);
         return result;
     }
 
@@ -489,7 +482,7 @@ namespace sdl {
         const noexcept
     {
         vec2 result;
-        SDL_RenderLogicalToWindow(ptr, log_x, log_y, &result.x, &result.y);
+        SDL_RenderLogicalToWindow(raw, log_x, log_y, &result.x, &result.y);
         return result;
     }
 
@@ -508,7 +501,7 @@ namespace sdl {
                         Uint8 b,
                         Uint8 a)
     {
-        if (SDL_SetRenderDrawColor(ptr, r, g, b, a) < 0)
+        if (SDL_SetRenderDrawColor(raw, r, g, b, a) < 0)
             throw error{};
     }
 
@@ -525,7 +518,7 @@ namespace sdl {
         const
     {
         color c;
-        if (SDL_GetRenderDrawColor(ptr, &c.r, &c.g, &c.b, &c.a) < 0)
+        if (SDL_GetRenderDrawColor(raw, &c.r, &c.g, &c.b, &c.a) < 0)
             throw error{};
         return c;
     }
@@ -534,7 +527,7 @@ namespace sdl {
     void
     renderer::set_blend_mode(SDL_BlendMode mode)
     {
-        if (SDL_SetRenderDrawBlendMode(ptr, mode) < 0)
+        if (SDL_SetRenderDrawBlendMode(raw, mode) < 0)
             throw error{};
     }
 
@@ -544,7 +537,7 @@ namespace sdl {
         const
     {
         SDL_BlendMode mode;
-        if (SDL_GetRenderDrawBlendMode(ptr, &mode) < 0)
+        if (SDL_GetRenderDrawBlendMode(raw, &mode) < 0)
             throw error{};
         return mode;
     }
@@ -553,7 +546,7 @@ namespace sdl {
     void
     renderer::clear()
     {
-        if (SDL_RenderClear(ptr) < 0)
+        if (SDL_RenderClear(raw) < 0)
             throw error{};
 
     }
@@ -563,7 +556,7 @@ namespace sdl {
     renderer::draw_point(int x,
                          int y)
     {
-        if (SDL_RenderDrawPoint(ptr, x, y) < 0)
+        if (SDL_RenderDrawPoint(raw, x, y) < 0)
             throw error{};
     }
 
@@ -572,7 +565,7 @@ namespace sdl {
     renderer::draw_point(float x,
                          float y)
     {
-        if (SDL_RenderDrawPointF(ptr, x, y) < 0)
+        if (SDL_RenderDrawPointF(raw, x, y) < 0)
             throw error{};
     }
 
@@ -592,9 +585,26 @@ namespace sdl {
 
 
     void
+    renderer::draw_points(const vec2* pts,
+                          std::size_t count)
+    {
+        if (SDL_RenderDrawPoints(raw, pts, count) < 0)
+            throw error{};
+    }
+
+
+    void
     renderer::draw_points(std::span<const vec2> pts)
     {
-        if (SDL_RenderDrawPoints(ptr, pts.data(), pts.size()) < 0)
+        draw_points(pts.data(), pts.size());
+    }
+
+
+    void
+    renderer::draw_points(const vec2f* pts,
+                          std::size_t count)
+    {
+        if (SDL_RenderDrawPointsF(raw, pts, count) < 0)
             throw error{};
     }
 
@@ -602,8 +612,7 @@ namespace sdl {
     void
     renderer::draw_points(std::span<const vec2f> pts)
     {
-        if (SDL_RenderDrawPointsF(ptr, pts.data(), pts.size()) < 0)
-            throw error{};
+        draw_points(pts.data(), pts.size());
     }
 
 
@@ -613,7 +622,7 @@ namespace sdl {
                         int b_x,
                         int b_y)
     {
-        if (SDL_RenderDrawLine(ptr,
+        if (SDL_RenderDrawLine(raw,
                                a_x, a_y,
                                b_x, b_y) < 0)
             throw error{};
@@ -626,7 +635,7 @@ namespace sdl {
                         float b_x,
                         float b_y)
     {
-        if (SDL_RenderDrawLineF(ptr,
+        if (SDL_RenderDrawLineF(raw,
                                 a_x, a_y,
                                 b_x, b_y) < 0)
             throw error{};
@@ -652,7 +661,7 @@ namespace sdl {
     void
     renderer::draw_lines(std::span<const vec2> pts)
     {
-        if (SDL_RenderDrawLines(ptr, pts.data(), pts.size()) < 0)
+        if (SDL_RenderDrawLines(raw, pts.data(), pts.size()) < 0)
             throw error{};
     }
 
@@ -660,7 +669,7 @@ namespace sdl {
     void
     renderer::draw_lines(std::span<const vec2f> pts)
     {
-        if (SDL_RenderDrawLinesF(ptr, pts.data(), pts.size()) < 0)
+        if (SDL_RenderDrawLinesF(raw, pts.data(), pts.size()) < 0)
             throw error{};
     }
 
@@ -668,7 +677,7 @@ namespace sdl {
     void
     renderer::draw_box(const rect* box)
     {
-        if (SDL_RenderDrawRect(ptr, box) < 0)
+        if (SDL_RenderDrawRect(raw, box) < 0)
             throw error{};
     }
 
@@ -676,7 +685,7 @@ namespace sdl {
     void
     renderer::draw_box(const rectf* box)
     {
-        if (SDL_RenderDrawRectF(ptr, box) < 0)
+        if (SDL_RenderDrawRectF(raw, box) < 0)
             throw error{};
     }
 
@@ -684,7 +693,7 @@ namespace sdl {
     void
     renderer::draw_box()
     {
-        if (SDL_RenderDrawRect(ptr, nullptr) < 0)
+        if (SDL_RenderDrawRect(raw, nullptr) < 0)
             throw error{};
     }
 
@@ -706,7 +715,7 @@ namespace sdl {
     void
     renderer::draw_boxes(std::span<const rect> boxes)
     {
-        if (SDL_RenderDrawRects(ptr, boxes.data(), boxes.size()) < 0)
+        if (SDL_RenderDrawRects(raw, boxes.data(), boxes.size()) < 0)
             throw error{};
     }
 
@@ -714,7 +723,7 @@ namespace sdl {
     void
     renderer::draw_boxes(std::span<const rectf> boxes)
     {
-        if (SDL_RenderDrawRectsF(ptr, boxes.data(), boxes.size()) < 0)
+        if (SDL_RenderDrawRectsF(raw, boxes.data(), boxes.size()) < 0)
             throw error{};
     }
 
@@ -722,7 +731,7 @@ namespace sdl {
     void
     renderer::fill_box(const rect* box)
     {
-        if (SDL_RenderFillRect(ptr, box) < 0)
+        if (SDL_RenderFillRect(raw, box) < 0)
             throw error{};
     }
 
@@ -730,7 +739,7 @@ namespace sdl {
     void
     renderer::fill_box(const rectf* box)
     {
-        if (SDL_RenderFillRectF(ptr, box) < 0)
+        if (SDL_RenderFillRectF(raw, box) < 0)
             throw error{};
     }
 
@@ -738,7 +747,7 @@ namespace sdl {
     void
     renderer::fill_box()
     {
-        if (SDL_RenderFillRect(ptr, nullptr) < 0)
+        if (SDL_RenderFillRect(raw, nullptr) < 0)
             throw error{};
     }
 
@@ -760,7 +769,7 @@ namespace sdl {
     void
     renderer::fill_boxes(std::span<const rect> boxes)
     {
-        if (SDL_RenderFillRects(ptr, boxes.data(), boxes.size()) < 0)
+        if (SDL_RenderFillRects(raw, boxes.data(), boxes.size()) < 0)
             throw error{};
     }
 
@@ -768,7 +777,7 @@ namespace sdl {
     void
     renderer::fill_boxes(std::span<const rectf> boxes)
     {
-        if (SDL_RenderFillRectsF(ptr, boxes.data(), boxes.size()) < 0)
+        if (SDL_RenderFillRectsF(raw, boxes.data(), boxes.size()) < 0)
             throw error{};
     }
 
@@ -776,7 +785,7 @@ namespace sdl {
     void
     renderer::copy(const texture& tex)
     {
-        if (SDL_RenderCopy(ptr,
+        if (SDL_RenderCopy(raw,
                            const_cast<SDL_Texture*>(tex.data()),
                            nullptr,
                            nullptr) < 0)
@@ -788,7 +797,7 @@ namespace sdl {
     renderer::copy(const texture& tex,
                    const rect* src_area)
     {
-        if (SDL_RenderCopy(ptr,
+        if (SDL_RenderCopy(raw,
                            const_cast<SDL_Texture*>(tex.data()),
                            src_area,
                            nullptr) < 0)
@@ -801,7 +810,7 @@ namespace sdl {
                    const rect* src_area,
                    const rect* dst_area)
     {
-        if (SDL_RenderCopy(ptr,
+        if (SDL_RenderCopy(raw,
                            const_cast<SDL_Texture*>(tex.data()),
                            src_area,
                            dst_area) < 0)
@@ -814,7 +823,7 @@ namespace sdl {
                    const rect* src_area,
                    const rectf* dst_area)
     {
-        if (SDL_RenderCopyF(ptr,
+        if (SDL_RenderCopyF(raw,
                             const_cast<SDL_Texture*>(tex.data()),
                             src_area,
                             dst_area) < 0)
@@ -858,7 +867,7 @@ namespace sdl {
                       const vec2* center,
                       SDL_RendererFlip flip)
     {
-        if (SDL_RenderCopyEx(ptr,
+        if (SDL_RenderCopyEx(raw,
                              const_cast<SDL_Texture*>(tex.data()),
                              src_area,
                              dst_area,
@@ -877,7 +886,7 @@ namespace sdl {
                       const vec2f* center,
                       SDL_RendererFlip flip)
     {
-        if (SDL_RenderCopyExF(ptr,
+        if (SDL_RenderCopyExF(raw,
                               const_cast<SDL_Texture*>(tex.data()),
                               src_area,
                               dst_area,
@@ -893,7 +902,7 @@ namespace sdl {
                        std::span<const vertex> vertices)
     {
         const SDL_Texture* tex_ptr = tex ? tex->data() : nullptr;
-        if (SDL_RenderGeometry(ptr,
+        if (SDL_RenderGeometry(raw,
                                const_cast<SDL_Texture*>(tex_ptr),
                                vertices.data(),
                                vertices.size(),
@@ -909,7 +918,7 @@ namespace sdl {
                        std::span<const int> indices)
     {
         const SDL_Texture* tex_ptr = tex ? tex->data() : nullptr;
-        if (SDL_RenderGeometry(ptr,
+        if (SDL_RenderGeometry(raw,
                                const_cast<SDL_Texture*>(tex_ptr),
                                vertices.data(),
                                vertices.size(),
@@ -930,7 +939,7 @@ namespace sdl {
                            int index_size)
     {
         const SDL_Texture* tex_ptr = tex ? tex->data() : nullptr;
-        if (SDL_RenderGeometryRaw(ptr,
+        if (SDL_RenderGeometryRaw(raw,
                                   const_cast<SDL_Texture*>(tex_ptr),
                                   xy, xy_stride,
                                   col, col_stride,
@@ -949,7 +958,7 @@ namespace sdl {
                           int pitch)
     {
         const rect* area_ptr = area ? &area.value() : nullptr;
-        if (SDL_RenderReadPixels(ptr, area_ptr, format, pixels, pitch) < 0)
+        if (SDL_RenderReadPixels(raw, area_ptr, format, pixels, pitch) < 0)
             throw error{};
     }
 
@@ -958,14 +967,14 @@ namespace sdl {
     renderer::present()
         noexcept
     {
-        SDL_RenderPresent(ptr);
+        SDL_RenderPresent(raw);
     }
 
 
     void
     renderer::flush()
     {
-        if (SDL_RenderFlush(ptr) < 0)
+        if (SDL_RenderFlush(raw) < 0)
             throw error{};
     }
 
@@ -974,7 +983,7 @@ namespace sdl {
     renderer::get_metal_layer()
         noexcept
     {
-        return SDL_RenderGetMetalLayer(ptr);
+        return SDL_RenderGetMetalLayer(raw);
     }
 
 
@@ -982,14 +991,14 @@ namespace sdl {
     renderer::get_metal_command_encoder()
         noexcept
     {
-        return SDL_RenderGetMetalCommandEncoder(ptr);
+        return SDL_RenderGetMetalCommandEncoder(raw);
     }
 
 
     void
     renderer::set_vsync(bool enabled)
     {
-        if (SDL_RenderSetVSync(ptr, enabled ? 1 : 0) < 0)
+        if (SDL_RenderSetVSync(raw, enabled ? 1 : 0) < 0)
             throw error{};
     }
 
