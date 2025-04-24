@@ -28,20 +28,36 @@ namespace sdl::video {
     const char*
     get_driver(unsigned index)
     {
-        const char* result = SDL_GetVideoDriver(index);
-        if (!result)
+        const char* driver = SDL_GetVideoDriver(index);
+        if (!driver)
             throw error{};
-        return result;
+        return driver;
+    }
+
+
+    void
+    init(const char* driver)
+    {
+        if (SDL_VideoInit(driver) < 0)
+            throw error{};
+    }
+
+
+    void
+    quit()
+        noexcept
+    {
+        SDL_VideoQuit();
     }
 
 
     const char*
     get_current_driver()
     {
-        const char* result = SDL_GetCurrentVideoDriver();
-        if (!result)
+        const char* driver = SDL_GetCurrentVideoDriver();
+        if (!driver)
             throw error{};
-        return result;
+        return driver;
     }
 
 

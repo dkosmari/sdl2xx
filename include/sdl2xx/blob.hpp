@@ -23,6 +23,15 @@ namespace sdl {
         unique_ptr<Uint8[]> ptr;
 
 
+        constexpr
+        blob()
+            noexcept = default;
+
+        blob(Uint8* raw_data,
+             std::size_t size)
+            noexcept;
+
+
         bool
         empty()
             const noexcept;

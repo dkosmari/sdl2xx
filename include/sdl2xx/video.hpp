@@ -11,6 +11,8 @@
 
 #include <SDL_video.h>
 
+#include "string.hpp"
+
 
 namespace sdl::video {
 
@@ -22,6 +24,22 @@ namespace sdl::video {
     [[nodiscard]]
     const char*
     get_driver(unsigned index);
+
+
+    void
+    init(const char* driver);
+
+    inline
+    void
+    init(const concepts::string auto& driver)
+    {
+        init(driver.data());
+    }
+
+
+    void
+    quit()
+        noexcept;
 
 
     [[nodiscard]]

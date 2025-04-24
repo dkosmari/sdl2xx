@@ -10,6 +10,13 @@
 
 namespace sdl {
 
+    blob::blob(Uint8* raw_data,
+               std::size_t size)
+        noexcept :
+        ptr{raw_data, size}
+    {}
+
+
     bool
     blob::empty()
         const noexcept

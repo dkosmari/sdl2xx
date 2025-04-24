@@ -21,6 +21,7 @@ AM_LDFLAGS = $(SDL2_LIBS)
 
 sdl2xx_HEADERS = \
 	include/sdl2xx/allocator.hpp \
+	include/sdl2xx/audio.hpp \
 	include/sdl2xx/angle.hpp \
 	include/sdl2xx/blob.hpp \
 	include/sdl2xx/color.hpp \
@@ -56,6 +57,7 @@ lib_LIBRARIES = libsdl2xx.a
 
 libsdl2xx_a_SOURCES = \
 	src/allocator.cpp \
+	src/audio.cpp \
 	src/angle.cpp \
 	src/blob.cpp \
 	src/color.cpp \

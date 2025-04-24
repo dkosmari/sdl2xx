@@ -10,9 +10,11 @@
 #define SDL2XX_SDL_HPP
 
 #include "allocator.hpp"
+#include "audio.hpp"
 #include "angle.hpp"
 #include "blob.hpp"
 #include "color.hpp"
+#include "display.hpp"
 #include "error.hpp"
 #include "events.hpp"
 #include "gl.hpp"

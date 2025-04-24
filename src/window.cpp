@@ -201,7 +201,7 @@ namespace sdl {
         if (!icc_data)
             throw error{};
 
-        return blob{ unique_ptr<Uint8[]>{icc_data, icc_size} };
+        return blob{icc_data, icc_size};
     }
 
 
