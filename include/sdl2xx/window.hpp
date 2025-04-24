@@ -12,9 +12,11 @@
 #include <functional>
 #include <optional>
 #include <span>
+#include <tuple>
 
 #include <SDL_video.h>
 
+#include "basic_wrapper.hpp"
 #include "blob.hpp"
 #include "display.hpp"
 #include "string.hpp"
@@ -26,24 +28,18 @@
 namespace sdl {
 
     class renderer;
+
     class surface;
 
 
-    class window {
+    class window : public basic_wrapper<SDL_Window*> {
 
-        SDL_Window* ptr = nullptr;
         unique_ptr<surface> surf;
 
 
         void
         link_this()
             noexcept;
-
-
-        explicit
-        window(SDL_Window* win)
-            noexcept;
-
 
     public:
 
@@ -80,9 +76,13 @@ namespace sdl {
         static constexpr vec2 pos_undefined = vec2{coord_undefined, coord_undefined};
 
 
-        constexpr
-        window()
-            noexcept = default;
+        // Inherit constructors.
+        using basic_wrapper::basic_wrapper;
+
+
+        explicit
+        window(SDL_Window* win)
+            noexcept;
 
         window(const char* title,
                int x, int y,
@@ -169,27 +169,20 @@ namespace sdl {
             noexcept;
 
 
-        [[nodiscard]]
-        bool
-        is_valid()
-            const noexcept;
+        void
+        acquire(std::tuple<SDL_Window*,
+                unique_ptr<surface>> state)
+            noexcept;
 
-        [[nodiscard]]
-        explicit
-        operator bool()
-            const noexcept;
-
-
-        [[nodiscard]]
-        SDL_Window*
-        data()
+        void
+        acquire(SDL_Window* w)
             noexcept;
 
 
-        [[nodiscard]]
-        const SDL_Window*
-        data()
-            const noexcept;
+        std::tuple<SDL_Window*,
+                   unique_ptr<surface>>
+        release()
+            noexcept;
 
 
         [[nodiscard]]

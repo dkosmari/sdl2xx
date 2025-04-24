@@ -11,9 +11,11 @@
 
 #include <filesystem>
 #include <span>
+#include <tuple>
 
 #include <SDL_surface.h>
 
+#include "basic_wrapper.hpp"
 #include "color.hpp"
 #include "rect.hpp"
 
@@ -23,32 +25,26 @@ namespace sdl {
     using std::filesystem::path;
 
 
-    class surface {
-
-        SDL_Surface* ptr = nullptr;
+    class surface : public basic_wrapper<SDL_Surface*> {
 
         void* user_data = nullptr;
-
         bool owner = true;
 
 
-        void link_this()
+        void
+        link_this()
             noexcept;
 
-
     public:
+
 
         struct dont_destroy_t{};
         static constexpr dont_destroy_t dont_destroy{};
 
 
-        constexpr
-        surface()
-            noexcept = default;
+        // Inherit constructors.
+        using basic_wrapper::basic_wrapper;
 
-        explicit
-        surface(SDL_Surface* src)
-            noexcept;
 
         surface(Uint32 flags,
                 int width,
@@ -93,14 +89,13 @@ namespace sdl {
         surface(SDL_Surface* surf, dont_destroy_t)
             noexcept;
 
+        /// Move constructor.
+        surface(surface&& other)
+            noexcept;
 
         /// Copy constructor.
         explicit
         surface(const surface& other);
-
-        /// Move constructor.
-        surface(surface&& other)
-            noexcept;
 
 
         ~surface()
@@ -173,28 +168,17 @@ namespace sdl {
 
 
         void
+        acquire(const std::tuple<SDL_Surface*, void*, bool>& state)
+            noexcept;
+
+        void
+        acquire(SDL_Surface* new_raw)
+            noexcept;
+
+
+        std::tuple<SDL_Surface*, void*, bool>
         release()
             noexcept;
-
-
-        [[nodiscard]]
-        bool
-        is_valid()
-            const noexcept;
-
-        [[nodiscard]]
-        explicit
-        operator bool()
-            const noexcept;
-
-
-        SDL_Surface*
-        data()
-            noexcept;
-
-        const SDL_Surface*
-        data()
-            const noexcept;
 
 
         // accessors to the public SDL_Surface fields
@@ -279,7 +263,7 @@ namespace sdl {
         must_lock()
             const noexcept
         {
-            return SDL_MUSTLOCK(ptr);
+            return SDL_MUSTLOCK(raw);
         }
 
 
@@ -302,7 +286,7 @@ namespace sdl {
         public:
 
             struct adopt_lock_t {};
-            static inline constexpr adopt_lock_t adopt_lock{};
+            static constexpr adopt_lock_t adopt_lock{};
 
 
             lock_guard(surface& s);

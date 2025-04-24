@@ -16,6 +16,7 @@
 
 #include <SDL_audio.h>
 
+#include "basic_wrapper.hpp"
 #include "blob.hpp"
 #include "string.hpp"
 
@@ -89,19 +90,11 @@ namespace sdl::audio {
     get_default_info(bool is_capture);
 
 
-    class device {
+    struct device : basic_wrapper<SDL_AudioDeviceID> {
 
-        SDL_AudioDeviceID id = 0;
+        // Inherit constructors.
+        using basic_wrapper::basic_wrapper;
 
-    public:
-
-        constexpr
-        device()
-            noexcept = default;
-
-        explicit
-        device(SDL_AudioDeviceID id_)
-            noexcept;
 
         device(const char* name,
                bool is_capture,
@@ -149,22 +142,6 @@ namespace sdl::audio {
         void
         destroy()
             noexcept;
-
-
-        [[nodiscard]]
-        bool
-        is_valid()
-            const noexcept;
-
-
-        [[nodiscard]]
-        operator bool()
-            const noexcept;
-
-
-        SDL_AudioDeviceID
-        data()
-            const noexcept;
 
 
         [[nodiscard]]
@@ -235,7 +212,33 @@ namespace sdl::audio {
         unlock()
             noexcept;
 
-    };
+
+        class lock_guard {
+
+            device& dev;
+
+        public:
+
+            struct adopt_lock_t {};
+            static constexpr adopt_lock_t adopt_lock{};
+
+
+            lock_guard(device& d);
+
+            lock_guard(device& d,
+                       adopt_lock_t adopt)
+                noexcept;
+
+            ~lock_guard()
+                noexcept;
+
+            // Disallow copying.
+            lock_guard(const lock_guard& other) = delete;
+
+        }; // class lock_guard
+
+
+    }; // struct device
 
 
     [[nodiscard]]
@@ -272,19 +275,13 @@ namespace sdl::audio {
     }; // struct converter
 
 
-    class stream {
-
-        SDL_AudioStream* ptr = nullptr;
+    class stream : public basic_wrapper<SDL_AudioStream*> {
 
     public:
 
-        constexpr
-        stream()
-            noexcept = default;
+        // Inherit constructors.
+        using basic_wrapper::basic_wrapper;
 
-        explicit
-        stream(SDL_AudioStream* src)
-            noexcept;
 
         stream(format_t src_format,
                Uint8 src_channels,
@@ -308,6 +305,7 @@ namespace sdl::audio {
             noexcept;
 
 
+
         void
         create(format_t src_format,
                Uint8 src_channels,
@@ -320,27 +318,6 @@ namespace sdl::audio {
         void
         destroy()
             noexcept;
-
-
-        [[nodiscard]]
-        bool
-        is_valid()
-            const noexcept;
-
-        [[nodiscard]]
-        operator bool()
-            const noexcept;
-
-
-        [[nodiscard]]
-        SDL_AudioStream*
-        data()
-            noexcept;
-
-        [[nodiscard]]
-        const SDL_AudioStream*
-        data()
-            const noexcept;
 
 
         void
@@ -377,7 +354,7 @@ namespace sdl::audio {
         clear()
             noexcept;
 
-    }; // class stream
+    }; // struct stream
 
 
     void

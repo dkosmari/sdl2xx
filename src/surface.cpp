@@ -17,16 +17,8 @@ namespace sdl {
     surface::link_this()
         noexcept
     {
-        if (ptr)
-            ptr->userdata = this;
-    }
-
-
-    surface::surface(SDL_Surface* surf)
-        noexcept :
-        ptr{surf}
-    {
-        link_this();
+        if (raw)
+            raw->userdata = this;
     }
 
 
@@ -118,28 +110,25 @@ namespace sdl {
     }
 
 
-    surface::surface(SDL_Surface* surf, dont_destroy_t)
-        noexcept :
-        ptr{surf},
-        owner{false}
+    surface::surface(SDL_Surface* surf,
+                     dont_destroy_t)
+        noexcept
     {
-        link_this();
-    }
-
-
-    surface::surface(const surface& other)
-    {
-        create(other);
+        acquire({surf, nullptr, false});
     }
 
 
     surface::surface(surface&& other)
-        noexcept :
-        ptr{other.ptr},
-        user_data{other.user_data}
+        noexcept
     {
-        other.release();
-        link_this();
+        acquire(other.release());
+    }
+
+
+    surface::surface(const surface& other) :
+        basic_wrapper{}
+    {
+        create(other);
     }
 
 
@@ -147,6 +136,18 @@ namespace sdl {
         noexcept
     {
         destroy();
+    }
+
+
+    surface&
+    surface::operator =(surface&& other)
+        noexcept
+    {
+        if (this != &other) {
+            destroy();
+            acquire(other.release());
+        }
+        return *this;
     }
 
 
@@ -159,24 +160,6 @@ namespace sdl {
     }
 
 
-    surface&
-    surface::operator =(surface&& other)
-        noexcept
-    {
-        if (this != &other) {
-            destroy();
-
-            ptr = other.ptr;
-            user_data = other.user_data;
-            owner = other.owner;
-
-            other.release();
-            link_this();
-        }
-        return *this;
-    }
-
-
     void
     surface::create(Uint32 flags,
                     int width,
@@ -187,18 +170,18 @@ namespace sdl {
                     Uint32 b_mask,
                     Uint32 a_mask)
     {
-        destroy();
-        ptr = SDL_CreateRGBSurface(flags,
-                                   width,
-                                   height,
-                                   depth,
-                                   r_mask,
-                                   g_mask,
-                                   b_mask,
-                                   a_mask);
+        auto ptr = SDL_CreateRGBSurface(flags,
+                                        width,
+                                        height,
+                                        depth,
+                                        r_mask,
+                                        g_mask,
+                                        b_mask,
+                                        a_mask);
         if (!ptr)
             throw error{};
-        link_this();
+        destroy();
+        acquire(ptr);
     }
 
 
@@ -209,15 +192,15 @@ namespace sdl {
                     int depth,
                     SDL_PixelFormatEnum format)
     {
-        destroy();
-        ptr = SDL_CreateRGBSurfaceWithFormat(flags,
-                                             width,
-                                             height,
-                                             depth,
-                                             format);
+        auto ptr = SDL_CreateRGBSurfaceWithFormat(flags,
+                                                  width,
+                                                  height,
+                                                  depth,
+                                                  format);
         if (!ptr)
             throw error{};
-        link_this();
+        destroy();
+        acquire(ptr);
     }
 
 
@@ -232,19 +215,19 @@ namespace sdl {
                     Uint32 b_mask,
                     Uint32 a_mask)
     {
-        destroy();
-        ptr = SDL_CreateRGBSurfaceFrom(pixels,
-                                       width,
-                                       height,
-                                       depth,
-                                       pitch,
-                                       r_mask,
-                                       g_mask,
-                                       b_mask,
-                                       a_mask);
+        auto ptr = SDL_CreateRGBSurfaceFrom(pixels,
+                                            width,
+                                            height,
+                                            depth,
+                                            pitch,
+                                            r_mask,
+                                            g_mask,
+                                            b_mask,
+                                            a_mask);
         if (!ptr)
             throw error{};
-        link_this();
+        destroy();
+        acquire(ptr);
     }
 
 
@@ -256,28 +239,27 @@ namespace sdl {
                     int pitch,
                     SDL_PixelFormatEnum format)
     {
-        destroy();
-        ptr = SDL_CreateRGBSurfaceWithFormatFrom(pixels,
-                                                 width,
-                                                 height,
-                                                 depth,
-                                                 pitch,
-                                                 format);
+        auto ptr = SDL_CreateRGBSurfaceWithFormatFrom(pixels,
+                                                      width,
+                                                      height,
+                                                      depth,
+                                                      pitch,
+                                                      format);
         if (!ptr)
             throw error{};
-        link_this();
+        destroy();
+        acquire(ptr);
     }
 
 
     void
     surface::create(const surface& other)
     {
-        destroy();
-        ptr = SDL_DuplicateSurface(other.ptr);
+        auto ptr = SDL_DuplicateSurface(other.raw);
         if (!ptr)
             throw error{};
-        link_this();
-        user_data = other.user_data;
+        destroy();
+        acquire(ptr);
     }
 
 
@@ -286,11 +268,11 @@ namespace sdl {
                     const SDL_PixelFormat* format,
                     Uint32 flags)
     {
-        destroy();
-        ptr = SDL_ConvertSurface(other.ptr, format, flags);
+        auto ptr = SDL_ConvertSurface(other.raw, format, flags);
         if (!ptr)
             throw error{};
-        link_this();
+        destroy();
+        acquire(ptr);
     }
 
 
@@ -299,11 +281,11 @@ namespace sdl {
                     SDL_PixelFormatEnum format,
                     Uint32 flags)
     {
-        destroy();
-        ptr = SDL_ConvertSurfaceFormat(other.ptr, format, flags);
+        auto ptr = SDL_ConvertSurfaceFormat(other.raw, format, flags);
         if (!ptr)
             throw error{};
-        link_this();
+        destroy();
+        acquire(ptr);
     }
 
 
@@ -311,52 +293,49 @@ namespace sdl {
     surface::destroy()
         noexcept
     {
-        if (ptr) {
-            if (owner)
-                SDL_FreeSurface(ptr);
-            release();
+        if (raw) {
+            auto [old_surf, old_user_data, old_owner] = release();
+            if (old_owner)
+                SDL_FreeSurface(old_surf);
         }
+
     }
 
 
     void
+    surface::acquire(const std::tuple<SDL_Surface*, void*, bool>& state)
+        noexcept
+    {
+        basic_wrapper::acquire(get<0>(state));
+        user_data = get<1>(state);
+        owner = get<2>(state);
+        link_this();
+    }
+
+
+    void
+    surface::acquire(SDL_Surface* new_raw)
+        noexcept
+    {
+        basic_wrapper::acquire(new_raw);
+        user_data = nullptr;
+        owner = true;
+        link_this();
+    }
+
+
+    std::tuple<SDL_Surface*, void*, bool>
     surface::release()
         noexcept
     {
-        ptr = nullptr;
+        auto old_owner = owner;
         user_data = nullptr;
         owner = true;
-    }
-
-
-    bool
-    surface::is_valid()
-        const noexcept
-    {
-        return ptr;
-    }
-
-
-    surface::operator bool()
-        const noexcept
-    {
-        return ptr;
-    }
-
-
-    SDL_Surface*
-    surface::data()
-        noexcept
-    {
-        return ptr;
-    }
-
-
-    const SDL_Surface*
-    surface::data()
-        const noexcept
-    {
-        return ptr;
+        return {
+            basic_wrapper::release(),
+            set_user_data(nullptr),
+            old_owner
+        };
     }
 
 
@@ -364,7 +343,7 @@ namespace sdl {
     surface::get_flags()
         const noexcept
     {
-        return ptr->flags;
+        return raw->flags;
     }
 
 
@@ -372,7 +351,7 @@ namespace sdl {
     surface::get_format()
         const noexcept
     {
-        return ptr->format;
+        return raw->format;
     }
 
 
@@ -380,7 +359,7 @@ namespace sdl {
     surface::get_width()
         const noexcept
     {
-        return ptr->w;
+        return raw->w;
     }
 
 
@@ -388,7 +367,7 @@ namespace sdl {
     surface::get_height()
         const noexcept
     {
-        return ptr->h;
+        return raw->h;
     }
 
 
@@ -396,7 +375,7 @@ namespace sdl {
     surface::get_size()
         const noexcept
     {
-        return { ptr->w, ptr->h };
+        return { raw->w, raw->h };
     }
 
 
@@ -404,7 +383,7 @@ namespace sdl {
     surface::get_pixels()
         noexcept
     {
-        return ptr->pixels;
+        return raw->pixels;
     }
 
 
@@ -412,7 +391,7 @@ namespace sdl {
     surface::get_pixels()
         const noexcept
     {
-        return ptr->pixels;
+        return raw->pixels;
     }
 
 
@@ -438,14 +417,14 @@ namespace sdl {
     surface::get_ref_count()
         const noexcept
     {
-        return ptr->refcount;
+        return raw->refcount;
     }
 
 
     void
     surface::set_palette(SDL_Palette* palette)
     {
-        if (SDL_SetSurfacePalette(ptr, palette) < 0)
+        if (SDL_SetSurfacePalette(raw, palette) < 0)
             throw error{};
     }
 
@@ -462,7 +441,7 @@ namespace sdl {
     surface::try_lock()
         noexcept
     {
-        return SDL_LockSurface(ptr) >= 0;
+        return SDL_LockSurface(raw) >= 0;
     }
 
 
@@ -470,14 +449,14 @@ namespace sdl {
     surface::unlock()
         noexcept
     {
-        SDL_UnlockSurface(ptr);
+        SDL_UnlockSurface(raw);
     }
 
 
     surface::lock_guard::lock_guard(surface& s) :
         surf(s)
     {
-        s.lock();
+        surf.lock();
     }
 
 
@@ -520,7 +499,7 @@ namespace sdl {
     surface::save_bmp(SDL_RWops* dst,
                       bool close)
     {
-        if (SDL_SaveBMP_RW(ptr, dst, close) < 0)
+        if (SDL_SaveBMP_RW(raw, dst, close) < 0)
             throw error{};
     }
 
@@ -528,7 +507,7 @@ namespace sdl {
     void
     surface::save_bmp(const path& filename)
     {
-        if (SDL_SaveBMP(ptr, filename.c_str()) < 0)
+        if (SDL_SaveBMP(raw, filename.c_str()) < 0)
             throw error{};
     }
 
@@ -536,7 +515,7 @@ namespace sdl {
     void
     surface::set_rle(bool rle)
     {
-        if (SDL_SetSurfaceRLE(ptr, rle) < 0)
+        if (SDL_SetSurfaceRLE(raw, rle) < 0)
             throw error{};
     }
 
@@ -545,14 +524,14 @@ namespace sdl {
     surface::has_rle()
         const noexcept
     {
-        return SDL_HasSurfaceRLE(ptr);
+        return SDL_HasSurfaceRLE(raw);
     }
 
 
     void
     surface::set_color_key(Uint32 key)
     {
-        if (SDL_SetColorKey(ptr, SDL_TRUE, key) < 0)
+        if (SDL_SetColorKey(raw, SDL_TRUE, key) < 0)
             throw error{};
     }
 
@@ -560,7 +539,7 @@ namespace sdl {
     void
     surface::unset_color_key()
     {
-        if (SDL_SetColorKey(ptr, SDL_FALSE, 0) < 0)
+        if (SDL_SetColorKey(raw, SDL_FALSE, 0) < 0)
             throw error{};
     }
 
@@ -569,7 +548,7 @@ namespace sdl {
     surface::has_color_key()
         const noexcept
     {
-        return SDL_HasColorKey(ptr);
+        return SDL_HasColorKey(raw);
     }
 
 
@@ -578,7 +557,7 @@ namespace sdl {
         const
     {
         Uint32 result;
-        if (SDL_GetColorKey(ptr, &result) < 0)
+        if (SDL_GetColorKey(raw, &result) < 0)
             throw error{};
         return result;
     }
@@ -589,7 +568,7 @@ namespace sdl {
                            Uint8 g,
                            Uint8 b)
     {
-        if (SDL_SetSurfaceColorMod(ptr, r, g, b) < 0)
+        if (SDL_SetSurfaceColorMod(raw, r, g, b) < 0)
             throw error{};
     }
 
@@ -606,7 +585,7 @@ namespace sdl {
         const
     {
         color result;
-        if (SDL_GetSurfaceColorMod(ptr, &result.r, &result.g, &result.b) < 0)
+        if (SDL_GetSurfaceColorMod(raw, &result.r, &result.g, &result.b) < 0)
             throw error{};
         return result;
     }
@@ -616,7 +595,7 @@ namespace sdl {
     void
     surface::set_alpha_mod(Uint8 alpha)
     {
-        if (SDL_SetSurfaceAlphaMod(ptr, alpha) < 0)
+        if (SDL_SetSurfaceAlphaMod(raw, alpha) < 0)
             throw error{};
     }
 
@@ -626,7 +605,7 @@ namespace sdl {
         const
     {
         Uint8 result;
-        if (SDL_GetSurfaceAlphaMod(ptr, &result) < 0)
+        if (SDL_GetSurfaceAlphaMod(raw, &result) < 0)
             throw error{};
         return result;
     }
@@ -635,7 +614,7 @@ namespace sdl {
     void
     surface::set_blend_mode(SDL_BlendMode mode)
     {
-        if (SDL_SetSurfaceBlendMode(ptr, mode) < 0)
+        if (SDL_SetSurfaceBlendMode(raw, mode) < 0)
             throw error{};
     }
 
@@ -645,7 +624,7 @@ namespace sdl {
         const
     {
         SDL_BlendMode result;
-        if (SDL_GetSurfaceBlendMode(ptr, &result) < 0)
+        if (SDL_GetSurfaceBlendMode(raw, &result) < 0)
             throw error{};
         return result;
     }
@@ -655,7 +634,7 @@ namespace sdl {
     surface::set_clip(const rect& clip)
         noexcept
     {
-        return SDL_SetClipRect(ptr, &clip);
+        return SDL_SetClipRect(raw, &clip);
     }
 
 
@@ -663,7 +642,7 @@ namespace sdl {
     surface::unset_clip()
         noexcept
     {
-        return SDL_SetClipRect(ptr, nullptr);
+        return SDL_SetClipRect(raw, nullptr);
     }
 
 
@@ -671,7 +650,7 @@ namespace sdl {
     surface::get_clip()
         const noexcept
     {
-        return ptr->clip_rect;
+        return raw->clip_rect;
     }
 
 
@@ -679,7 +658,7 @@ namespace sdl {
     surface::fill(const rect& r,
                   Uint32 c)
     {
-        if (SDL_FillRect(ptr, &r, c) < 0)
+        if (SDL_FillRect(raw, &r, c) < 0)
             throw error{};
     }
 
@@ -688,7 +667,7 @@ namespace sdl {
     surface::fill(std::span<const rect> rs,
                   Uint32 c)
     {
-        if (SDL_FillRects(ptr, rs.data(), rs.size(), c) < 0)
+        if (SDL_FillRects(raw, rs.data(), rs.size(), c) < 0)
             throw error{};
     }
 

@@ -110,13 +110,6 @@ namespace sdl::audio {
     }
 
 
-
-    device::device(SDL_AudioDeviceID id_)
-        noexcept :
-        id{id_}
-    {}
-
-
     device::device(const char* name,
                    bool is_capture,
                    const spec_t& desired,
@@ -127,10 +120,9 @@ namespace sdl::audio {
 
 
     device::device(device&& other)
-        noexcept :
-        id{other.id}
+        noexcept
     {
-        other.id = 0;
+        acquire(other.release());
     }
 
 
@@ -147,12 +139,10 @@ namespace sdl::audio {
     {
         if (this != &other) {
             destroy();
-            id = other.id;
-            other.id = 0;
+            acquire(other.release());
         }
         return *this;
     }
-
 
 
     void
@@ -161,10 +151,15 @@ namespace sdl::audio {
                    const spec_t& desired,
                    bool allowed_changes)
     {
-        destroy();
-        id = SDL_OpenAudioDevice(name, is_capture, &desired, nullptr, allowed_changes);
+        auto id = SDL_OpenAudioDevice(name,
+                                      is_capture,
+                                      &desired,
+                                      nullptr,
+                                      allowed_changes);
         if (!id)
             throw error{};
+        destroy();
+        acquire(id);
     }
 
 
@@ -175,10 +170,15 @@ namespace sdl::audio {
                    spec_t& obtained,
                    bool allowed_changes)
     {
-        destroy();
-        id = SDL_OpenAudioDevice(name, is_capture, &desired, &obtained, allowed_changes);
+        auto id = SDL_OpenAudioDevice(name,
+                                      is_capture,
+                                      &desired,
+                                      &obtained,
+                                      allowed_changes);
         if (!id)
             throw error{};
+        destroy();
+        acquire(id);
     }
 
 
@@ -186,42 +186,16 @@ namespace sdl::audio {
     device::destroy()
         noexcept
     {
-        if (id) {
-            SDL_CloseAudioDevice(id);
-            id = 0;
-        }
+        if (raw)
+            SDL_CloseAudioDevice(release());
     }
-
-
-    bool
-    device::is_valid()
-        const noexcept
-    {
-        return id;
-    }
-
-
-    device::operator bool()
-        const noexcept
-    {
-        return id;
-    }
-
-
-    SDL_AudioDeviceID
-    device::data()
-            const noexcept
-    {
-        return id;
-    }
-
 
 
     status
     device::get_status()
         const
     {
-        return static_cast<status>(SDL_GetAudioDeviceStatus(id));
+        return static_cast<status>(SDL_GetAudioDeviceStatus(raw));
     }
 
 
@@ -229,7 +203,7 @@ namespace sdl::audio {
     device::set_pause(bool paused)
         noexcept
     {
-        SDL_PauseAudioDevice(id, paused);
+        SDL_PauseAudioDevice(raw, paused);
     }
 
 
@@ -253,7 +227,7 @@ namespace sdl::audio {
     device::play(const void* samples,
                 std::size_t size)
     {
-        if (SDL_QueueAudio(id, samples, size) < 0)
+        if (SDL_QueueAudio(raw, samples, size) < 0)
             throw error{};
     }
 
@@ -263,7 +237,7 @@ namespace sdl::audio {
                     std::size_t size)
         noexcept
     {
-        return SDL_DequeueAudio(id, buf, size);
+        return SDL_DequeueAudio(raw, buf, size);
     }
 
 
@@ -271,7 +245,7 @@ namespace sdl::audio {
     device::get_size()
         const noexcept
     {
-        return SDL_GetQueuedAudioSize(id);
+        return SDL_GetQueuedAudioSize(raw);
     }
 
 
@@ -279,7 +253,7 @@ namespace sdl::audio {
     device::clear()
         noexcept
     {
-        SDL_ClearQueuedAudio(id);
+        SDL_ClearQueuedAudio(raw);
     }
 
 
@@ -287,7 +261,7 @@ namespace sdl::audio {
     device::lock()
         noexcept
     {
-        SDL_LockAudioDevice(id);
+        SDL_LockAudioDevice(raw);
     }
 
 
@@ -295,7 +269,28 @@ namespace sdl::audio {
     device::unlock()
         noexcept
     {
-        SDL_UnlockAudioDevice(id);
+        SDL_UnlockAudioDevice(raw);
+    }
+
+
+    device::lock_guard::lock_guard(device& d) :
+        dev(d)
+    {
+        dev.lock();
+    }
+
+
+    device::lock_guard::lock_guard(device& d,
+                                   device::lock_guard::adopt_lock_t)
+        noexcept :
+        dev(d)
+    {}
+
+
+    device::lock_guard::~lock_guard()
+        noexcept
+    {
+        dev.unlock();
     }
 
 
@@ -351,12 +346,6 @@ namespace sdl::audio {
     }
 
 
-    stream::stream(SDL_AudioStream* src)
-        noexcept :
-        ptr{src}
-    {}
-
-
     stream::stream(format_t src_format,
                    Uint8 src_channels,
                    int src_rate,
@@ -370,10 +359,9 @@ namespace sdl::audio {
 
 
     stream::stream(stream&& other)
-        noexcept :
-        ptr{other.ptr}
+        noexcept
     {
-        other.ptr = nullptr;
+        acquire(other.release());
     }
 
 
@@ -390,8 +378,7 @@ namespace sdl::audio {
     {
         if (this != &other) {
             destroy();
-            ptr = other.ptr;
-            other.ptr = nullptr;
+            acquire(other.release());
         }
         return *this;
     }
@@ -405,11 +392,12 @@ namespace sdl::audio {
                    Uint8 dst_channels,
                    int dst_rate)
     {
-        destroy();
-        ptr = SDL_NewAudioStream(src_format, src_channels, src_rate,
-                                 dst_format, dst_channels, dst_rate);
-        if (!ptr)
+        auto str = SDL_NewAudioStream(src_format, src_channels, src_rate,
+                                      dst_format, dst_channels, dst_rate);
+        if (!str)
             throw error{};
+        destroy();
+        acquire(str);
     }
 
 
@@ -417,41 +405,8 @@ namespace sdl::audio {
     stream::destroy()
         noexcept
     {
-        if (ptr) {
-            SDL_FreeAudioStream(ptr);
-            ptr = nullptr;
-        }
-    }
-
-
-    bool
-    stream::is_valid()
-        const noexcept
-    {
-        return ptr;
-    }
-
-
-    stream::operator bool()
-        const noexcept
-    {
-        return ptr;
-    }
-
-
-    SDL_AudioStream*
-    stream::data()
-        noexcept
-    {
-        return ptr;
-    }
-
-
-    const SDL_AudioStream*
-    stream::data()
-        const noexcept
-    {
-        return ptr;
+        if (raw)
+            SDL_FreeAudioStream(release());
     }
 
 
@@ -459,7 +414,7 @@ namespace sdl::audio {
     stream::put(const void* buf,
                 std::size_t size)
     {
-        if (SDL_AudioStreamPut(ptr, buf, size) < 0)
+        if (SDL_AudioStreamPut(raw, buf, size) < 0)
             throw error{};
     }
 
@@ -489,7 +444,7 @@ namespace sdl::audio {
     stream::get(void* buf,
                 std::size_t size)
     {
-        int result = SDL_AudioStreamGet(ptr, buf, size);
+        int result = SDL_AudioStreamGet(raw, buf, size);
         if (result < 0)
             throw error{};
         return result;
@@ -500,14 +455,14 @@ namespace sdl::audio {
     stream::get_available()
         const noexcept
     {
-        return SDL_AudioStreamAvailable(ptr);
+        return SDL_AudioStreamAvailable(raw);
     }
 
 
     void
     stream::flush()
     {
-        if (SDL_AudioStreamFlush(ptr) < 0)
+        if (SDL_AudioStreamFlush(raw) < 0)
             throw error{};
     }
 
@@ -516,7 +471,7 @@ namespace sdl::audio {
     stream::clear()
         noexcept
     {
-        SDL_AudioStreamClear(ptr);
+        SDL_AudioStreamClear(raw);
     }
 
 

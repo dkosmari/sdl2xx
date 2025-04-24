@@ -23,6 +23,7 @@ sdl2xx_HEADERS = \
 	include/sdl2xx/allocator.hpp \
 	include/sdl2xx/audio.hpp \
 	include/sdl2xx/angle.hpp \
+	include/sdl2xx/basic_wrapper.hpp \
 	include/sdl2xx/blob.hpp \
 	include/sdl2xx/color.hpp \
 	include/sdl2xx/display.hpp \
@@ -42,13 +43,19 @@ sdl2xx_HEADERS = \
 	include/sdl2xx/video.hpp \
 	include/sdl2xx/window.hpp
 
-if ENABLE_TTF
-sdl2xx_HEADERS += include/sdl2xx/ttf.hpp 
-endif ENABLE_TTF
 
 if ENABLE_IMAGE
 sdl2xx_HEADERS += include/sdl2xx/img.hpp
 endif ENABLE_IMAGE
+
+if ENABLE_MIXER
+sdl2xx_HEADERS += include/sdl2xx/mix.hpp
+endif ENABLE_MIXER
+
+if ENABLE_TTF
+sdl2xx_HEADERS += include/sdl2xx/ttf.hpp 
+endif ENABLE_TTF
+
 
 sdl2xxdir = $(includedir)/sdl2xx
 
@@ -77,16 +84,18 @@ libsdl2xx_a_SOURCES = \
 
 if ENABLE_IMAGE
 lib_LIBRARIES += libsdl2xx_image.a
-
 libsdl2xx_image_a_SOURCES = src/img.cpp
 endif ENABLE_IMAGE
 
+if ENABLE_MIXER
+lib_LIBRARIES += libsdl2xx_mixer.a
+libsdl2xx_mixer_a_SOURCES = src/mix.cpp
+endif ENABLE_MIXER
 
 if ENABLE_TTF
 lib_LIBRARIES += libsdl2xx_ttf.a
 libsdl2xx_ttf_a_SOURCES = src/ttf.cpp
 endif ENABLE_TTF
-
 
 
 .PHONY: company
