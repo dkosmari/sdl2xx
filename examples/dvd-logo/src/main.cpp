@@ -7,14 +7,17 @@
  */
 
 #include <exception>
+#include <filesystem>
 #include <iostream>
 #include <random>
 #include <sstream>
 #include <utility>
 #include <vector>
+#include <type_traits>
 
 #include <sdl2xx/sdl.hpp>
 #include <sdl2xx/img.hpp>
+#include <sdl2xx/mix.hpp>
 #include <sdl2xx/ttf.hpp>
 
 
@@ -27,6 +30,9 @@ using sdl::radiansf;
 using sdl::rectf;
 using sdl::vec2;
 using sdl::vec2f;
+
+
+const std::filesystem::path assets_path = "assets/";
 
 
 std::mt19937_64 rand_eng;
@@ -86,6 +92,19 @@ rotated(vec2f v,
          c * v.x - s * v.y,
          s * v.x + c * v.y
     };
+}
+
+
+template<typename T,
+         typename... Ts>
+std::vector<std::remove_cvref_t<T>>
+make_vector(T&& first, Ts&&... tail)
+{
+    std::vector<std::remove_cvref_t<T>> result;
+    result.reserve(1 + sizeof...(Ts));
+    result.push_back(std::forward<T>(first));
+    (result.push_back(std::forward<Ts>(tail)), ...);
+    return result;
 }
 
 
@@ -164,7 +183,16 @@ struct Logo {
 
 struct App {
 
-    sdl::init init{sdl::init::flag::video | sdl::init::flag::game_controller};
+    sdl::init sdl_init{
+        sdl::init::flag::video |
+        sdl::init::flag::game_controller |
+        sdl::init::flag::audio
+    };
+    sdl::img::init img_init;
+    sdl::mix::init mix_init{sdl::mix::init::flag::ogg};
+    sdl::ttf::init ttf_init;
+
+
     sdl::window window{
         "DVD Logo",
         sdl::window::pos_centered,
@@ -177,17 +205,23 @@ struct App {
         sdl::renderer::flag::accelerated | sdl::renderer::flag::present_vsync
     };
 
-    sdl::ttf::init ttf_init;
-    sdl::ttf::font font{"assets/LiberationSans-Regular.ttf", 24};
+
+    sdl::mix::device mix_dev;
+    sdl::mix::chunk bounce_sound{assets_path / "wood.ogg"};
+    sdl::mix::chunk corner_sound{assets_path / "bell.ogg"};
+
+    sdl::ttf::font font{assets_path / "LiberationSans-Regular.ttf", 24};
 
     sdl::color bg_color = sdl::color::black;
 
     rectf boundary;
     Logo logo;
 
-    float logo_speed = 50;
+    float logo_speed = 15;
 
-    std::vector<sdl::texture> logo_textures;
+    std::vector<sdl::texture> logo_textures =
+        make_vector(sdl::img::load_texture(renderer, assets_path / "dvd-logo.svg"),
+                    sdl::img::load_texture(renderer, assets_path / "blu-ray-logo.svg"));
     std::size_t current_texture = 0;
 
     sdl::texture status_texture;
@@ -202,11 +236,6 @@ struct App {
         auto size = window.get_size();
         renderer.set_logical_size(size);
 
-        if (auto tex = sdl::img::try_load_texture(renderer, "assets/dvd-logo.svg"))
-            logo_textures.push_back(std::move(*tex));
-        if (auto tex = sdl::img::try_load_texture(renderer, "assets/blu-ray-logo.svg"))
-            logo_textures.push_back(std::move(*tex));
-
         set_logo(0);
         logo.set_color(sdl::color::yellow);
         update_boundary(logo.get_size());
@@ -214,7 +243,15 @@ struct App {
         logo.set_position(rand_position(boundary));
         logo.velocity = rand_direction(logo_speed);
 
-        update_status();
+        update_status_text();
+
+        sdl::mix::allocate_channels(4);
+    }
+
+
+    ~App()
+    {
+        sdl::mix::halt();
     }
 
 
@@ -241,7 +278,7 @@ struct App {
 
 
     void
-    update_status()
+    update_status_text()
     {
         std::ostringstream out;
         out << "Bounces: " << total_bounces << "\n"
@@ -267,7 +304,7 @@ struct App {
     void
     animate()
     {
-        logo.step(0.1);
+        logo.step(1.0);
 
         unsigned bounced = 0;
 
@@ -298,11 +335,14 @@ struct App {
             logo.velocity = with_length(rotated(logo.velocity, da), logo_speed);
 
             ++total_bounces;
-            if (bounced == 2)
+            if (bounced == 2) {
+                corner_sound.play();
                 ++total_corner_bounces;
-            update_status();
+            } else {
+                bounce_sound.play();
+            }
 
-            // TODO: play sound
+            update_status_text();
         }
 
     }

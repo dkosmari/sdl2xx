@@ -19,6 +19,7 @@ dvd_logo_SOURCES = \
 
 dvd_logo_LDADD = \
 	$(top_builddir)/libsdl2xx_image.a \
+	$(top_builddir)/libsdl2xx_mixer.a \
 	$(top_builddir)/libsdl2xx_ttf.a \
 	$(top_builddir)/libsdl2xx.a \
 	$(SDL2_LIBS)

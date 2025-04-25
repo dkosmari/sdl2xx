@@ -91,18 +91,20 @@ namespace sdl::mix {
 
 
     void
+    open();
+
+    void
     open(int frequency,
          format_t format,
          unsigned channels,
          int chunk_size);
-
 
     void
     open(int frequency,
          format_t format,
          unsigned channels,
          int chunk_size,
-         const char* device,
+         const char* name,
          bool allowed_changes);
 
     inline
@@ -111,10 +113,10 @@ namespace sdl::mix {
          format_t format,
          unsigned channels,
          int chunk_size,
-         const concepts::string auto& device,
+         const concepts::string auto& name,
          bool allowed_changes)
     {
-        open(frequency, format, channels, chunk_size, device.data(), allowed_changes);
+        open(frequency, format, channels, chunk_size, name.data(), allowed_changes);
     }
 
 
@@ -128,6 +130,75 @@ namespace sdl::mix {
         format_t format;
         unsigned channels;
     };
+
+
+    // Call open/close on constructor and destructor.
+    struct device {
+
+        // Forbid copying.
+        device(const device&) = delete;
+
+
+        device();
+
+        device(int frequency,
+               format_t format,
+               unsigned channels,
+               int chunk_size);
+
+        device(int frequency,
+               format_t format,
+               unsigned channels,
+               int chunk_size,
+               const char* name,
+               bool allowed_changes);
+
+        inline
+        device(int frequency,
+               format_t format,
+               unsigned channels,
+               int chunk_size,
+               const concepts::string auto& name,
+               bool allowed_changes) :
+            device{frequency, format, channels, chunk_size, name.data(), allowed_changes}
+        {}
+
+
+        ~device()
+            noexcept;
+
+
+        void
+        reopen();
+
+        void
+        reopen(int frequency,
+               format_t format,
+               unsigned channels,
+               int chunk_size);
+
+        void
+        reopen(int frequency,
+               format_t format,
+               unsigned channels,
+               int chunk_size,
+               const char* name,
+               bool allowed_changes);
+
+        inline
+        void
+        reopen(int frequency,
+               format_t format,
+               unsigned channels,
+               int chunk_size,
+               const concepts::string auto& name,
+               bool allowed_changes)
+        {
+            reopen(frequency, format, channels, chunk_size, name.data(), allowed_changes);
+        }
+
+    }; // struct device
+
 
 
     [[nodiscard]]

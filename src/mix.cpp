@@ -76,6 +76,14 @@ namespace sdl::mix {
 
 
     void
+    open()
+    {
+        auto [name, spec] = audio::get_default_info(false);
+        open(spec.freq, spec.format, spec.channels, 2048, name, true);
+    }
+
+
+    void
     open(int frequency,
          format_t format,
          unsigned channels,
@@ -91,11 +99,11 @@ namespace sdl::mix {
          format_t format,
          unsigned channels,
          int chunk_size,
-         const char* device,
+         const char* name,
          bool allowed_changes)
     {
         if (Mix_OpenAudioDevice(frequency, format, channels,
-                                chunk_size, device, allowed_changes) < 0)
+                                chunk_size, name, allowed_changes) < 0)
             throw error{};
     }
 
@@ -105,6 +113,71 @@ namespace sdl::mix {
         noexcept
     {
         Mix_CloseAudio();
+    }
+
+
+    device::device()
+    {
+        open();
+    }
+
+
+    device::device(int frequency,
+                   format_t format,
+                   unsigned channels,
+                   int chunk_size)
+    {
+        open(frequency, format, channels, chunk_size);
+    }
+
+
+    device::device(int frequency,
+                   format_t format,
+                   unsigned channels,
+                   int chunk_size,
+                   const char* name,
+                   bool allowed_changes)
+    {
+        open(frequency, format, channels, chunk_size, name, allowed_changes);
+    }
+
+
+    device::~device()
+        noexcept
+    {
+        close();
+    }
+
+
+    void
+    device::reopen()
+    {
+        close();
+        open();
+    }
+
+
+    void
+    device::reopen(int frequency,
+                   format_t format,
+                   unsigned channels,
+                   int chunk_size)
+    {
+        close();
+        open(frequency, format, channels, chunk_size);
+    }
+
+
+    void
+    device::reopen(int frequency,
+                   format_t format,
+                   unsigned channels,
+                   int chunk_size,
+                   const char* name,
+                   bool allowed_changes)
+    {
+        close();
+        open(frequency, format, channels, chunk_size, name, allowed_changes);
     }
 
 
