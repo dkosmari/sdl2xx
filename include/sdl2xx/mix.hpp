@@ -9,22 +9,37 @@
 #ifndef SDL2XX_MIX_HPP
 #define SDL2XX_MIX_HPP
 
+#include <chrono>
 #include <filesystem>
 #include <optional>
 #include <span>
 
 #include <SDL_mixer.h>
 
+#include "angle.hpp"
 #include "audio.hpp"
 #include "basic_wrapper.hpp"
 #include "string.hpp"
+#include "vector.hpp"
 
 
 namespace sdl::mix {
 
+    using std::chrono::milliseconds;
+
     using std::filesystem::path;
 
     using audio::format_t;
+
+
+    using dbl_seconds = std::chrono::duration<double>;
+
+
+    enum class fading_status {
+        in   = MIX_FADING_IN,
+        none = MIX_NO_FADING,
+        out  = MIX_FADING_OUT,
+    };
 
 
     [[nodiscard]]
@@ -78,14 +93,14 @@ namespace sdl::mix {
     void
     open(int frequency,
          format_t format,
-         int channels,
+         unsigned channels,
          int chunk_size);
 
 
     void
     open(int frequency,
          format_t format,
-         int channels,
+         unsigned channels,
          int chunk_size,
          const char* device,
          bool allowed_changes);
@@ -94,7 +109,7 @@ namespace sdl::mix {
     void
     open(int frequency,
          format_t format,
-         int channels,
+         unsigned channels,
          int chunk_size,
          const concepts::string auto& device,
          bool allowed_changes)
@@ -103,10 +118,15 @@ namespace sdl::mix {
     }
 
 
+    void
+    close()
+        noexcept;
+
+
     struct spec_t {
         int frequency;
         format_t format;
-        int channels;
+        unsigned channels;
     };
 
 
@@ -211,6 +231,64 @@ namespace sdl::mix {
         {
             return has_decoder(name.data());
         }
+
+
+        unsigned
+        play_on(unsigned channel,
+                int loops = 0)
+            noexcept;
+
+        std::optional<unsigned>
+        play(int loops = 0)
+            noexcept;
+
+
+        unsigned
+        play_on(unsigned channel,
+                milliseconds max_duration,
+                int loops = 0)
+            noexcept;
+
+        std::optional<unsigned>
+        play(milliseconds max_duration,
+             int loops = 0)
+            noexcept;
+
+
+        unsigned
+        fade_in_on(unsigned channel,
+                   milliseconds fade_duration,
+                   int loops = 0)
+            noexcept;
+
+        std::optional<unsigned>
+        fade_in(milliseconds fade_duration,
+                int loops = 0)
+            noexcept;
+
+
+        unsigned
+        fade_in_on(unsigned channel,
+                   milliseconds fade_duration,
+                   milliseconds max_duration,
+                   int loops = 0)
+            noexcept;
+
+        std::optional<unsigned>
+        fade_in(milliseconds fade_duration,
+                milliseconds max_duration,
+                int loops = 0)
+            noexcept;
+
+
+        [[nodiscard]]
+        float
+        get_volume()
+            const noexcept;
+
+        float
+        set_volume(float new_volume)
+            const noexcept;
 
     }; // struct chunk
 
@@ -371,6 +449,164 @@ namespace sdl::mix {
         get_current_copyright_tag()
             noexcept;
 
+
+        void
+        play(int loops = 0);
+
+
+        void
+        fade_in(milliseconds duration,
+                int loops = 0);
+
+
+        void
+        fade_in(milliseconds duration,
+                dbl_seconds position,
+                int loops = 0);
+
+
+        [[nodiscard]]
+        float
+        get_volume()
+            const noexcept;
+
+        static
+        float
+        set_volume(float new_volume)
+            noexcept;
+
+
+        static
+        void
+        halt()
+            noexcept;
+
+
+        bool
+        fade_out(milliseconds fade_duration)
+            noexcept;
+
+
+        [[nodiscard]]
+        static
+        fading_status
+        get_fading_status()
+            noexcept;
+
+
+        static
+        void
+        pause()
+            noexcept;
+
+
+        static
+        void
+        resume()
+            noexcept;
+
+
+        [[nodiscard]]
+        static
+        bool
+        is_paused()
+            noexcept;
+
+
+        static
+        void
+        rewind()
+            noexcept;
+
+
+        static
+        bool
+        mod_jump_to(int order)
+            noexcept;
+
+
+        static
+        bool
+        set_position(dbl_seconds position)
+            noexcept;
+
+
+        [[nodiscard]]
+        std::optional<dbl_seconds>
+        get_position()
+            const noexcept;
+
+
+        [[nodiscard]]
+        std::optional<dbl_seconds>
+        get_duration()
+            const noexcept;
+
+        [[nodiscard]]
+        static
+        std::optional<dbl_seconds>
+        get_current_duration()
+            noexcept;
+
+
+        [[nodiscard]]
+        std::optional<dbl_seconds>
+        get_loop_start()
+            const noexcept;
+
+        [[nodiscard]]
+        static
+        std::optional<dbl_seconds>
+        get_current_loop_start()
+            noexcept;
+
+
+        [[nodiscard]]
+        std::optional<dbl_seconds>
+        get_loop_end()
+            const noexcept;
+
+        [[nodiscard]]
+        static
+        std::optional<dbl_seconds>
+        get_current_loop_end()
+            noexcept;
+
+
+        [[nodiscard]]
+        std::optional<dbl_seconds>
+        get_loop_length()
+            const noexcept;
+
+        [[nodiscard]]
+        static
+        std::optional<dbl_seconds>
+        get_current_loop_length()
+            noexcept;
+
+
+        [[nodiscard]]
+        static
+        bool
+        is_playing()
+            noexcept;
+
+
+        static
+        bool
+        set_cmd(const char* cmd)
+            noexcept;
+
+        static
+        inline
+        bool
+        set_cmd(const concepts::string auto& cmd)
+            noexcept
+        {
+            return set_cmd(cmd.data());
+        }
+
+
     }; // struct music
 
 
@@ -413,7 +649,250 @@ namespace sdl::mix {
         noexcept;
 
 
+    using effect_function = Mix_EffectFunc_t;
 
+    using effect_done_function = Mix_EffectDone_t;
+
+
+    void
+    register_effect(unsigned channel,
+                    effect_function effect_func,
+                    effect_done_function effect_done_func,
+                    void* ctx);
+
+
+    void
+    unregister_effect(unsigned channel,
+                      effect_function func);
+
+
+    void
+    unregister_all_effects(unsigned channel);
+
+
+    void
+    set_panning(unsigned channel,
+                Uint8 left,
+                Uint8 right);
+
+    void
+    reset_panning(unsigned channel);
+
+
+    void
+    set_position(unsigned channel,
+                 degreesf angle,
+                 float distance);
+
+    void
+    reset_position(unsigned channel);
+
+
+    void
+    set_distance(unsigned channel,
+                 float distance);
+
+    void
+    reset_distance(unsigned channel);
+
+
+    void
+    set_reverse_stereo(unsigned channel,
+                       bool reverse);
+
+
+    [[nodiscard]]
+    unsigned
+    reserve_channels(unsigned n)
+        noexcept;
+
+
+    void
+    set_group(unsigned channel,
+              int tag);
+
+    void
+    set_group(unsigned first,
+              unsigned last,
+              int tag);
+
+
+    [[nodiscard]]
+    std::optional<unsigned>
+    get_first_available(int tag)
+        noexcept;
+
+
+    [[nodiscard]]
+    unsigned
+    group_size(int tag)
+        noexcept;
+
+    [[nodiscard]]
+    unsigned
+    size()
+        noexcept;
+
+
+    [[nodiscard]]
+    std::optional<unsigned>
+    get_newest(int tag)
+        noexcept;
+
+
+    [[nodiscard]]
+    std::optional<unsigned>
+    get_oldest(int tag)
+        noexcept;
+
+
+    [[nodiscard]]
+    float
+    get_volume(unsigned channel)
+        noexcept;
+
+    [[nodiscard]]
+    float
+    get_volume()
+        noexcept;
+
+
+    float
+    set_volume(unsigned channel,
+               float new_volume)
+        noexcept;
+
+    float
+    set_volume(float new_volume)
+        noexcept;
+
+
+    [[nodiscard]]
+    float
+    get_master_volume()
+        noexcept;
+
+
+    float
+    set_master_volume(float new_volume)
+        noexcept;
+
+
+    void
+    halt(unsigned channel);
+
+    void
+    halt();
+
+
+    void
+    halt_group(int tag)
+        noexcept;
+
+
+    unsigned
+    expire(unsigned channel,
+           milliseconds duration)
+        noexcept;
+
+    unsigned
+    expire(milliseconds duration)
+        noexcept;
+
+
+    unsigned
+    no_expire(unsigned channel)
+        noexcept;
+
+    unsigned
+    no_expire()
+        noexcept;
+
+
+    void
+    fade_out(unsigned channel,
+             milliseconds fade_duration);
+
+
+    unsigned
+    fade_out_group(int tag,
+                   milliseconds fade_duration)
+        noexcept;
+
+
+    fading_status
+    get_fading_status(unsigned channel)
+        noexcept;
+
+
+    void
+    pause(unsigned channel)
+        noexcept;
+
+    void
+    pause()
+        noexcept;
+
+
+    void
+    resume(unsigned channel)
+        noexcept;
+
+    void
+    resume()
+        noexcept;
+
+
+    [[nodiscard]]
+    bool
+    is_paused(unsigned channel)
+        noexcept;
+
+    [[nodiscard]]
+    bool
+    is_paused()
+        noexcept;
+
+
+    [[nodiscard]]
+    bool
+    is_playing(unsigned channel)
+        noexcept;
+
+    [[nodiscard]]
+    unsigned
+    is_playing()
+        noexcept;
+
+
+    bool
+    set_sound_fonts(const char* paths)
+        noexcept;
+
+
+    [[nodiscard]]
+    const char*
+    get_sound_fonts();
+
+
+    using sound_font_function = int (SDLCALL *)(const char*, void*);
+
+    bool
+    for_eac_sound_font(sound_font_function func,
+                       void* ctx)
+        noexcept;
+
+
+    void
+    set_timidity_cfg(const path& cfg_filename);
+
+
+    const char*
+    get_timidity_cfg()
+        noexcept;
+
+
+    // TODO: wrap Mix_GetChunk()
 
 
 } // namespace sdl::mix

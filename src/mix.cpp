@@ -6,12 +6,30 @@
  * SPDX-License-Identifier: Zlib
  */
 
+#include <algorithm>
+#include <cmath>
+
 #include "mix.hpp"
 
 #include "error.hpp"
 
 
 namespace sdl::mix {
+
+    namespace {
+
+        constexpr
+        int
+        float_to_int(float f,
+                      int max_value)
+            noexcept
+        {
+            float sf = std::floor(f * (max_value + 1.0f));
+            return std::clamp(int(sf), 0, max_value);
+        }
+
+    } // namespace
+
 
     SDL_version
     linked_version()
@@ -58,10 +76,10 @@ namespace sdl::mix {
 
 
     void
-    open_audio(int frequency,
-               format_t format,
-               int channels,
-               int chunk_size)
+    open(int frequency,
+         format_t format,
+         unsigned channels,
+         int chunk_size)
     {
         if (Mix_OpenAudio(frequency, format, channels, chunk_size) < 0)
             throw error{};
@@ -71,7 +89,7 @@ namespace sdl::mix {
     void
     open(int frequency,
          format_t format,
-         int channels,
+         unsigned channels,
          int chunk_size,
          const char* device,
          bool allowed_changes)
@@ -82,12 +100,22 @@ namespace sdl::mix {
     }
 
 
+    void
+    close()
+        noexcept
+    {
+        Mix_CloseAudio();
+    }
+
+
     std::optional<spec_t>
     query()
     {
+        int channels;
         spec_t spec;
-        if (!Mix_QuerySpec(&spec.frequency, &spec.format, &spec.channels))
+        if (!Mix_QuerySpec(&spec.frequency, &spec.format, &channels))
             return {};
+        spec.channels = channels;
         return spec;
     }
 
@@ -231,6 +259,120 @@ namespace sdl::mix {
         return Mix_HasChunkDecoder(name);
     }
 
+
+    unsigned
+    chunk::play_on(unsigned channel,
+                int loops)
+        noexcept
+    {
+        return Mix_PlayChannel(channel, raw, loops);
+    }
+
+
+    std::optional<unsigned>
+    chunk::play(int loops)
+        noexcept
+    {
+        int result = Mix_PlayChannel(-1, raw, loops);
+        if (result == -1)
+            return {};
+        return result;
+    }
+
+
+    unsigned
+    chunk::play_on(unsigned channel,
+                   milliseconds max_duration,
+                   int loops)
+        noexcept
+    {
+        return Mix_PlayChannelTimed(channel, raw, loops, max_duration.count());
+    }
+
+
+    std::optional<unsigned>
+    chunk::play(milliseconds max_duration,
+                int loops)
+        noexcept
+    {
+        int result = Mix_PlayChannelTimed(-1, raw, loops, max_duration.count());
+        if (result == -1)
+            return {};
+        return result;
+    }
+
+
+    unsigned
+    chunk::fade_in_on(unsigned channel,
+               milliseconds max_duration,
+               int loops)
+        noexcept
+    {
+        return Mix_FadeInChannel(channel, raw, loops, max_duration.count());
+    }
+
+
+    std::optional<unsigned>
+    chunk::fade_in(milliseconds max_duration,
+            int loops)
+        noexcept
+    {
+        int result = Mix_FadeInChannel(-1, raw, loops, max_duration.count());
+        if (result == -1)
+            return {};
+        return result;
+    }
+
+
+    unsigned
+    chunk::fade_in_on(unsigned channel,
+                      milliseconds fade_duration,
+                      milliseconds max_duration,
+                      int loops)
+        noexcept
+    {
+        return Mix_FadeInChannelTimed(channel,
+                                      raw,
+                                      loops,
+                                      fade_duration.count(),
+                                      max_duration.count());
+    }
+
+
+    std::optional<unsigned>
+    chunk::fade_in(milliseconds fade_duration,
+                   milliseconds max_duration,
+                   int loops)
+        noexcept
+    {
+        int result = Mix_FadeInChannelTimed(-1,
+                                            raw,
+                                            loops,
+                                            fade_duration.count(),
+                                            max_duration.count());
+        if (result == -1)
+            return {};
+        return result;
+    }
+
+
+    float
+    chunk::get_volume()
+        const noexcept
+    {
+        int result = Mix_VolumeChunk(raw, -1);
+        return result / float(MIX_MAX_VOLUME);
+    }
+
+
+    float
+    chunk::set_volume(float new_volume)
+        const noexcept
+    {
+        int inew_volume = float_to_int(new_volume, MIX_MAX_VOLUME);
+        int result = Mix_VolumeChunk(raw, inew_volume);
+        return result / float(MIX_MAX_VOLUME);
+    }
 
 
     music::music(const path& filename)
@@ -442,6 +584,239 @@ namespace sdl::mix {
 
 
     void
+    music::play(int loops)
+    {
+        if (Mix_PlayMusic(raw, loops) < 0)
+            throw error{};
+    }
+
+
+    void
+    music::fade_in(milliseconds duration,
+                   int loops)
+    {
+        if (Mix_FadeInMusic(raw, loops, duration.count()) < 0)
+            throw error{};
+    }
+
+
+    void
+    music::fade_in(milliseconds duration,
+                   dbl_seconds position,
+                   int loops)
+    {
+        if (Mix_FadeInMusicPos(raw, loops, duration.count(), position.count()) < 0)
+            throw error{};
+    }
+
+
+    float
+    music::get_volume()
+        const noexcept
+    {
+        int result = Mix_GetMusicVolume(raw);
+        return result / float(MIX_MAX_VOLUME);
+    }
+
+
+    float
+    music::set_volume(float new_volume)
+        noexcept
+    {
+        int inew_volume = float_to_int(new_volume, MIX_MAX_VOLUME);
+        int result = Mix_VolumeMusic(inew_volume);
+        return result / float(MIX_MAX_VOLUME);
+    }
+
+
+    void
+    music::halt()
+        noexcept
+    {
+        Mix_HaltMusic();
+    }
+
+
+    bool
+    music::fade_out(milliseconds fade_duration)
+        noexcept
+    {
+        return Mix_FadeOutMusic(fade_duration.count());
+    }
+
+
+    fading_status
+    music::get_fading_status()
+        noexcept
+    {
+        return static_cast<fading_status>(Mix_FadingMusic());
+    }
+
+
+    void
+    music::pause()
+        noexcept
+    {
+        Mix_PauseMusic();
+    }
+
+
+    void
+    music::resume()
+        noexcept
+    {
+        Mix_ResumeMusic();
+    }
+
+
+    bool
+    music::is_paused()
+        noexcept
+    {
+        return Mix_PausedMusic();
+    }
+
+
+    void
+    music::rewind()
+        noexcept
+    {
+        Mix_RewindMusic();
+    }
+
+
+    bool
+    music::mod_jump_to(int order)
+        noexcept
+    {
+        return !Mix_ModMusicJumpToOrder(order);
+    }
+
+
+    bool
+    music::set_position(dbl_seconds position)
+        noexcept
+    {
+        return !Mix_SetMusicPosition(position.count());
+    }
+
+
+    std::optional<dbl_seconds>
+    music::get_position()
+        const noexcept
+    {
+        double result = Mix_GetMusicPosition(raw);
+        if (result == -1.0)
+            return {};
+        return dbl_seconds{result};
+    }
+
+
+    std::optional<dbl_seconds>
+    music::get_duration()
+        const noexcept
+    {
+        double result = Mix_MusicDuration(raw);
+        if (result == -1.0)
+            return {};
+        return dbl_seconds{result};
+    }
+
+
+    std::optional<dbl_seconds>
+    get_current_duration()
+        noexcept
+    {
+        double result = Mix_MusicDuration(nullptr);
+        if (result == -1.0)
+            return {};
+        return dbl_seconds{result};
+    }
+
+
+    std::optional<dbl_seconds>
+    music::get_loop_start()
+        const noexcept
+    {
+        double result = Mix_GetMusicLoopStartTime(raw);
+        if (result == -1.0)
+            return {};
+        return dbl_seconds{result};
+    }
+
+
+    std::optional<dbl_seconds>
+    music::get_current_loop_start()
+        noexcept
+    {
+        double result = Mix_GetMusicLoopStartTime(nullptr);
+        if (result == -1.0)
+            return {};
+        return dbl_seconds{result};
+    }
+
+
+    std::optional<dbl_seconds>
+    music::get_loop_end()
+        const noexcept
+    {
+        double result = Mix_GetMusicLoopEndTime(raw);
+        if (result == -1.0)
+            return {};
+        return dbl_seconds{result};
+    }
+
+
+    std::optional<dbl_seconds>
+    music::get_current_loop_end()
+        noexcept
+    {
+        double result = Mix_GetMusicLoopEndTime(nullptr);
+        if (result == -1.0)
+            return {};
+        return dbl_seconds{result};
+    }
+
+
+    std::optional<dbl_seconds>
+    music::get_loop_length()
+        const noexcept
+    {
+        double result = Mix_GetMusicLoopLengthTime(raw);
+        if (result == -1.0)
+            return {};
+        return dbl_seconds{result};
+    }
+
+
+    std::optional<dbl_seconds>
+    music::get_current_loop_length()
+        noexcept
+    {
+        double result = Mix_GetMusicLoopLengthTime(nullptr);
+        if (result == -1.0)
+            return {};
+        return dbl_seconds{result};
+    }
+
+
+    bool
+    music::is_playing()
+        noexcept
+    {
+        return Mix_PlayingMusic();
+    }
+
+
+    bool
+    music::set_cmd(const char* cmd)
+        noexcept
+    {
+        return !Mix_SetMusicCMD(cmd);
+    }
+
+
+    void
     set_post_mix(mix_function func,
                  void* ctx)
         noexcept
@@ -481,6 +856,424 @@ namespace sdl::mix {
     {
         Mix_ChannelFinished(func);
     }
+
+
+    void
+    register_effect(unsigned channel,
+                    effect_function effect_func,
+                    effect_done_function effect_done_func,
+                    void* ctx)
+    {
+        if (!Mix_RegisterEffect(channel, effect_func, effect_done_func, ctx))
+            throw error{};
+    }
+
+
+    void
+    unregister_effect(unsigned channel,
+                      effect_function func)
+    {
+        if (!Mix_UnregisterEffect(channel, func))
+            throw error{};
+    }
+
+
+    void
+    unregister_all_effects(unsigned channel)
+    {
+        if (!Mix_UnregisterAllEffects(channel))
+            throw error{};
+    }
+
+
+    void
+    set_panning(unsigned channel,
+                Uint8 left,
+                Uint8 right)
+    {
+        if (!Mix_SetPanning(channel, left, right))
+            throw error{};
+    }
+
+
+    void
+    reset_panning(unsigned channel)
+    {
+        set_panning(channel, 255, 255);
+    }
+
+
+    void
+    set_position(unsigned channel,
+                 degreesf angle,
+                 float distance)
+    {
+        Sint16 iangle = angle.value();
+        Uint8 idistance = float_to_int(distance, 255);
+        if (!Mix_SetPosition(channel, iangle, idistance))
+            throw error{};
+    }
+
+
+    void
+    reset_position(unsigned channel)
+    {
+        if (!Mix_SetPosition(channel, 0, 0))
+            throw error{};
+    }
+
+
+    void
+    set_distance(unsigned channel,
+                 float distance)
+    {
+        Uint8 idistance = float_to_int(distance, 255);
+        if (!Mix_SetDistance(channel, idistance))
+            throw error{};
+    }
+
+
+    void
+    reset_distance(unsigned channel)
+    {
+        if (!Mix_SetDistance(channel, 0))
+            throw error{};
+    }
+
+
+    void
+    set_reverse_stereo(unsigned channel,
+                       bool reverse)
+    {
+        if (!Mix_SetReverseStereo(channel, reverse))
+            throw error{};
+    }
+
+
+    unsigned
+    reserve_channels(unsigned n)
+        noexcept
+    {
+        return Mix_ReserveChannels(n);
+    }
+
+
+    void
+    set_group(unsigned channel,
+              int tag)
+    {
+        if (!Mix_GroupChannel(channel, tag))
+            throw error{};
+    }
+
+
+    void
+    set_group(unsigned first,
+              unsigned last,
+              int tag)
+    {
+        if (!Mix_GroupChannels(first, last, tag))
+            throw error{};
+    }
+
+
+    std::optional<unsigned>
+    get_first_available(int tag)
+        noexcept
+    {
+        int result = Mix_GroupAvailable(tag);
+        if (result == -1)
+            return {};
+        return result;
+    }
+
+
+    unsigned
+    group_size(int tag)
+        noexcept
+    {
+        return Mix_GroupCount(tag);
+    }
+
+
+    unsigned
+    size()
+        noexcept
+    {
+        return group_size(-1);
+    }
+
+
+    std::optional<unsigned>
+    get_newest(int tag)
+        noexcept
+    {
+        int result = Mix_GroupNewer(tag);
+        if (result == -1)
+            return {};
+        return result;
+    }
+
+
+    std::optional<unsigned>
+    get_oldest(int tag)
+        noexcept
+    {
+        int result = Mix_GroupOldest(tag);
+        if (result == -1)
+            return {};
+        return result;
+    }
+
+
+    float
+    get_volume(unsigned channel)
+        noexcept
+    {
+        int result = Mix_Volume(channel, -1);
+        return result / float(MIX_MAX_VOLUME);
+    }
+
+
+    float
+    get_volume()
+        noexcept
+    {
+        int result = Mix_Volume(-1, -1);
+        return result / float(MIX_MAX_VOLUME);
+    }
+
+
+    float
+    set_volume(unsigned channel,
+               float new_volume)
+        noexcept
+    {
+        int inew_volume = float_to_int(new_volume, MIX_MAX_VOLUME);
+        int result = Mix_Volume(channel, inew_volume);
+        return result / float(MIX_MAX_VOLUME);
+    }
+
+
+    float
+    set_volume(float new_volume)
+        noexcept
+    {
+        int inew_volume = float_to_int(new_volume, MIX_MAX_VOLUME);
+        int result = Mix_Volume(-1, inew_volume);
+        return result / float(MIX_MAX_VOLUME);
+    }
+
+
+    float
+    get_master_volume()
+        noexcept
+    {
+        int result = Mix_MasterVolume(-1);
+        return result / float(MIX_MAX_VOLUME);
+    }
+
+
+    float
+    set_master_volume(float new_volume)
+        noexcept
+    {
+        int inew_volume = float_to_int(new_volume, MIX_MAX_VOLUME);
+        int result = Mix_MasterVolume(inew_volume);
+        return result / float(MIX_MAX_VOLUME);
+    }
+
+
+    void
+    halt(unsigned channel)
+    {
+        if (Mix_HaltChannel(channel) < 0)
+            throw error{};
+    }
+
+
+    void
+    halt()
+    {
+        if (Mix_HaltChannel(-1) < 0)
+            throw error{};
+    }
+
+
+    void
+    halt_group(int tag)
+        noexcept
+    {
+        Mix_HaltGroup(tag);
+    }
+
+
+
+    unsigned
+    expire(unsigned channel,
+           milliseconds duration)
+        noexcept
+    {
+        return Mix_ExpireChannel(channel, duration.count());
+    }
+
+
+    unsigned
+    expire(milliseconds duration)
+        noexcept
+    {
+        return Mix_ExpireChannel(-1, duration.count());
+    }
+
+
+    unsigned
+    no_expire(unsigned channel)
+        noexcept
+    {
+        return Mix_ExpireChannel(channel, -1);
+    }
+
+
+    unsigned
+    no_expire()
+        noexcept
+    {
+        return Mix_ExpireChannel(-1, -1);
+    }
+
+
+    void
+    fade_out(unsigned channel,
+             milliseconds fade_duration)
+    {
+        if (!Mix_FadeOutChannel(channel, fade_duration.count()))
+            throw error{};
+    }
+
+
+    unsigned
+    fade_out_group(int tag,
+                   milliseconds fade_duration)
+        noexcept
+    {
+        return Mix_FadeOutGroup(tag, fade_duration.count());
+    }
+
+
+    fading_status
+    get_fading_status(unsigned channel)
+        noexcept
+    {
+        return static_cast<fading_status>(Mix_FadingChannel(channel));
+    }
+
+
+    void
+    pause(unsigned channel)
+        noexcept
+    {
+        Mix_Pause(channel);
+    }
+
+
+    void
+    pause()
+        noexcept
+    {
+        Mix_Pause(-1);
+    }
+
+
+    void
+    resume(unsigned channel)
+        noexcept
+    {
+        Mix_Resume(channel);
+    }
+
+
+    void
+    resume()
+        noexcept
+    {
+        Mix_Resume(-1);
+    }
+
+
+    bool
+    is_paused(unsigned channel)
+        noexcept
+    {
+        return Mix_Paused(channel);
+    }
+
+
+    bool
+    is_paused()
+        noexcept
+    {
+        return Mix_Paused(-1);
+    }
+
+
+    bool
+    is_playing(unsigned channel)
+        noexcept
+    {
+        return Mix_Playing(channel);
+    }
+
+
+    unsigned
+    is_playing()
+        noexcept
+    {
+        return Mix_Playing(-1);
+    }
+
+
+    bool
+    set_sound_fonts(const char* paths)
+        noexcept
+    {
+        return Mix_SetSoundFonts(paths);
+    }
+
+
+    const char*
+    get_sound_fonts()
+    {
+        const char* result = Mix_GetSoundFonts();
+        if (!result)
+            throw error{}; // TODO: check if there's any error to report
+        return result;
+    }
+
+
+    bool
+    for_eac_sound_font(sound_font_function func,
+                       void* ctx)
+        noexcept
+    {
+        return Mix_EachSoundFont(func, ctx);
+    }
+
+
+    void
+    set_timidity_cfg(const path& cfg_filename)
+    {
+        if (!Mix_SetTimidityCfg(cfg_filename.c_str()))
+            throw error{};
+    }
+
+
+    const char*
+    get_timidity_cfg()
+        noexcept
+    {
+        return Mix_GetTimidityCfg();
+    }
+
 
 
 } // namespace sdl::mix
