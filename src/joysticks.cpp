@@ -246,13 +246,11 @@ namespace sdl::joysticks {
 
 #if SDL_VERSION_ATLEAST(2, 0, 9)
 
-    unsigned
+    int
     get_player_index(unsigned index)
+        noexcept
     {
-        int player = SDL_JoystickGetDevicePlayerIndex(index);
-        if (player < 0)
-            throw error{};
-        return player;
+        return SDL_JoystickGetDevicePlayerIndex(index);
     }
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 9)
@@ -347,7 +345,7 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 12)
 
     joystick
-    joystick::from_player_index(unsigned player_index)
+    joystick::from_player_index(int player_index)
     {
         auto j = SDL_JoystickFromPlayerIndex(player_index);
         if (!j)
@@ -446,14 +444,11 @@ namespace sdl::joysticks {
 
 #if SDL_VERSION_ATLEAST(2, 0, 9)
 
-    unsigned
+    int
     joystick::get_player_index()
-        const
+        const noexcept
     {
-        int index = SDL_JoystickGetPlayerIndex(raw);
-        if (index < 0)
-            throw error{};
-        return index;
+        return SDL_JoystickGetPlayerIndex(raw);
     }
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 9)
@@ -462,18 +457,10 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 12)
 
     void
-    joystick::set_player_index(unsigned index)
+    joystick::set_player_index(int index)
         noexcept
     {
         SDL_JoystickSetPlayerIndex(raw, index);
-    }
-
-
-    void
-    joystick::reset_player_index()
-        noexcept
-    {
-        SDL_JoystickSetPlayerIndex(raw, -1);
     }
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 12)

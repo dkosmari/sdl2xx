@@ -170,8 +170,9 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 9)
 
     [[nodiscard]]
-    unsigned
-    get_player_index(unsigned index);
+    int
+    get_player_index(unsigned index)
+        noexcept;
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 9)
 
@@ -249,7 +250,7 @@ namespace sdl::joysticks {
         [[nodiscard]]
         static
         joystick
-        from_player_index(unsigned player_index);
+        from_player_index(int player_index);
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 12)
 
@@ -307,9 +308,9 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 9)
 
         [[nodiscard]]
-        unsigned
+        int
         get_player_index()
-            const;
+            const noexcept;
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 9)
 
@@ -317,12 +318,7 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 12)
 
         void
-        set_player_index(unsigned index)
-            noexcept;
-
-
-        void
-        reset_player_index()
+        set_player_index(int index)
             noexcept;
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 12)
