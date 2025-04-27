@@ -19,6 +19,7 @@
 #include "events.hpp"
 #include "gl.hpp"
 #include "init.hpp"
+#include "joysticks.hpp"
 #include "rect.hpp"
 #include "renderer.hpp"
 #include "string.hpp"

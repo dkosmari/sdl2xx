@@ -30,7 +30,9 @@ sdl2xx_HEADERS = \
 	include/sdl2xx/error.hpp \
 	include/sdl2xx/events.hpp \
 	include/sdl2xx/gl.hpp \
+	include/sdl2xx/guid.hpp \
 	include/sdl2xx/init.hpp \
+	include/sdl2xx/joysticks.hpp \
 	include/sdl2xx/rect.hpp \
 	include/sdl2xx/renderer.hpp \
 	include/sdl2xx/sdl.hpp \
@@ -72,7 +74,9 @@ libsdl2xx_a_SOURCES = \
 	src/error.cpp \
 	src/events.cpp \
 	src/gl.cpp \
+	src/guid.cpp \
 	src/init.cpp \
+	src/joysticks.cpp \
 	src/rect.cpp \
 	src/renderer.cpp \
 	src/surface.cpp \

@@ -42,6 +42,11 @@ AM_CONDITIONAL([ENABLE_TTF], [test x$enable_ttf = xyes])
 PKG_CHECK_MODULES([SDL2], [$sdl_libs])
 
 
+enable_examples=yes
+AC_ARG_ENABLE([examples],
+              [AS_HELP_STRING([--disable-examples], [disable building examples])])
+AM_CONDITIONAL([ENABLE_EXAMPLES], [test x$enable_examples = xyes])
+
 
 AC_CONFIG_FILES([Makefile
                  examples/dvd-logo/Makefile

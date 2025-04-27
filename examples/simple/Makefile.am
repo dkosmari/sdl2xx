@@ -7,6 +7,8 @@ AM_CXXFLAGS = \
 	-Wall -Wextra -Werror
 
 
+if ENABLE_EXAMPLES
+
 noinst_PROGRAMS = simple
 
 
@@ -17,3 +19,5 @@ simple_SOURCES = \
 simple_LDADD = \
 	$(top_builddir)/libsdl2xx.a \
 	$(SDL2_LIBS)
+
+endif ENABLE_EXAMPLES
