@@ -23,6 +23,11 @@ namespace sdl {
     {}
 
 
+    error::error(const char* msg) :
+        runtime_error{msg}
+    {}
+
+
     error::error(const std::exception& e) :
         runtime_error{e.what()}
     {}

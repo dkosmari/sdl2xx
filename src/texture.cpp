@@ -32,12 +32,12 @@ namespace sdl {
 
 
     texture::texture(renderer& ren,
-                     SDL_PixelFormatEnum format,
+                     pixels::format_enum fmt,
                      SDL_TextureAccess access,
                      int width,
                      int height)
     {
-        create(ren, format, access, width, height);
+        create(ren, fmt, access, width, height);
     }
 
 
@@ -78,12 +78,16 @@ namespace sdl {
 
     void
     texture::create(renderer& ren,
-                    SDL_PixelFormatEnum format,
+                    pixels::format_enum fmt,
                     SDL_TextureAccess access,
                     int width,
                     int height)
     {
-        auto ptr = SDL_CreateTexture(ren.data(), format, access, width, height);
+        auto ptr = SDL_CreateTexture(ren.data(),
+                                     static_cast<SDL_PixelFormatEnum>(fmt),
+                                     access,
+                                     width,
+                                     height);
         if (!ptr)
             throw error{};
         destroy();
@@ -160,7 +164,7 @@ namespace sdl {
         if (SDL_QueryTexture(raw, &format, &access, &width, &height) < 0)
             throw error{};
         return info_t{
-            .format = static_cast<SDL_PixelFormatEnum>(format),
+            .format = static_cast<pixels::format_enum>(format),
             .access = static_cast<SDL_TextureAccess>(access),
             .width = width,
             .height = height
@@ -168,14 +172,14 @@ namespace sdl {
     }
 
 
-    SDL_PixelFormatEnum
+    pixels::format_enum
     texture::get_format()
         const
     {
         Uint32 format;
         if (SDL_QueryTexture(raw, &format, nullptr, nullptr, nullptr) < 0)
             throw error{};
-        return static_cast<SDL_PixelFormatEnum>(format);
+        return static_cast<pixels::format_enum>(format);
     }
 
 

@@ -16,6 +16,7 @@
 
 #include "basic_wrapper.hpp"
 #include "color.hpp"
+#include "pixels.hpp"
 #include "unique_ptr.hpp"
 #include "vec2.hpp"
 
@@ -47,7 +48,7 @@ namespace sdl {
             noexcept;
 
         texture(renderer& ren,
-                SDL_PixelFormatEnum format,
+                pixels::format_enum fmt,
                 SDL_TextureAccess access,
                 int width,
                 int height);
@@ -72,7 +73,7 @@ namespace sdl {
 
         void
         create(renderer& ren,
-               SDL_PixelFormatEnum format,
+               pixels::format_enum format,
                SDL_TextureAccess access,
                int width,
                int height);
@@ -106,7 +107,7 @@ namespace sdl {
 
 
         struct info_t {
-            SDL_PixelFormatEnum format;
+            pixels::format_enum format;
             SDL_TextureAccess access;
             int width;
             int height;
@@ -118,7 +119,7 @@ namespace sdl {
             const;
 
         [[nodiscard]]
-        SDL_PixelFormatEnum
+        pixels::format_enum
         get_format()
             const;
 
@@ -239,8 +240,7 @@ namespace sdl {
         get_wrapper(SDL_Texture* tex)
             noexcept;
 
-    };
-
+    }; // class texture
 
 } // namespace sdl
 

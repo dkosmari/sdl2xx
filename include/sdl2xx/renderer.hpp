@@ -19,6 +19,7 @@
 #include "angle.hpp"
 #include "basic_wrapper.hpp"
 #include "color.hpp"
+#include "pixels.hpp"
 #include "rect.hpp"
 #include "string.hpp"
 #include "vec2.hpp"
@@ -63,7 +64,7 @@ namespace sdl {
         struct info_t {
             string name;
             Uint32 flags;
-            vector<SDL_PixelFormatEnum> texture_formats;
+            vector<pixels::format_enum> texture_formats;
             int max_texture_width;
             int max_texture_height;
         };
@@ -470,7 +471,7 @@ namespace sdl {
 
         void
         read_pixels(const std::optional<rect>& area,
-                    SDL_PixelFormatEnum format,
+                    pixels::format_enum format,
                     void* pixels,
                     int pitch);
 

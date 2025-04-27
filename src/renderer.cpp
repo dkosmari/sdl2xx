@@ -74,9 +74,9 @@ namespace sdl {
             renderer::info_t
             convert(const SDL_RendererInfo& src)
             {
-                vector<SDL_PixelFormatEnum> formats(src.num_texture_formats);
+                vector<pixels::format_enum> formats(src.num_texture_formats);
                 for (Uint32 i = 0; i < src.num_texture_formats; ++i)
-                    formats[i] = static_cast<SDL_PixelFormatEnum>(src.texture_formats[i]);
+                    formats[i] = static_cast<pixels::format_enum>(src.texture_formats[i]);
                 return {
                     .name               = src.name,
                     .flags              = src.flags,
@@ -953,12 +953,16 @@ namespace sdl {
 
     void
     renderer::read_pixels(const std::optional<rect>& area,
-                          SDL_PixelFormatEnum format,
+                          pixels::format_enum format,
                           void* pixels,
                           int pitch)
     {
         const rect* area_ptr = area ? &area.value() : nullptr;
-        if (SDL_RenderReadPixels(raw, area_ptr, format, pixels, pitch) < 0)
+        if (SDL_RenderReadPixels(raw,
+                                 area_ptr,
+                                 static_cast<SDL_PixelFormatEnum>(format),
+                                 pixels,
+                                 pitch) < 0)
             throw error{};
     }
 

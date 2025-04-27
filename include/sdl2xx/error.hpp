@@ -17,6 +17,8 @@ namespace sdl {
 
         error();
 
+        error(const char* msg);
+
         explicit
         error(const std::exception& e);
 

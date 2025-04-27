@@ -46,13 +46,13 @@ namespace sdl {
                      int width,
                      int height,
                      int depth,
-                     SDL_PixelFormatEnum format)
+                     pixels::format_enum fmt)
     {
         create(flags,
                width,
                height,
                depth,
-               format);
+               fmt);
     }
 
 
@@ -79,34 +79,34 @@ namespace sdl {
 
 
     surface::surface(void* pixels,
-                int width,
-                int height,
-                int depth,
-                int pitch,
-                     SDL_PixelFormatEnum format)
+                     int width,
+                     int height,
+                     int depth,
+                     int pitch,
+                     pixels::format_enum fmt)
     {
         create(pixels,
                width,
                height,
                depth,
                pitch,
-               format);
+               fmt);
     }
 
 
     surface::surface(const surface& other,
-                     const SDL_PixelFormat* format,
+                     const pixels::format& fmt,
                      Uint32 flags)
     {
-        create(other, format, flags);
+        create(other, fmt, flags);
     }
 
 
     surface::surface(const surface& other,
-                     SDL_PixelFormatEnum format,
+                     pixels::format_enum fmt,
                      Uint32 flags)
     {
-        create(other, format, flags);
+        create(other, fmt, flags);
     }
 
 
@@ -190,13 +190,13 @@ namespace sdl {
                     int width,
                     int height,
                     int depth,
-                    SDL_PixelFormatEnum format)
+                    pixels::format_enum fmt)
     {
         auto ptr = SDL_CreateRGBSurfaceWithFormat(flags,
                                                   width,
                                                   height,
                                                   depth,
-                                                  format);
+                                                  static_cast<SDL_PixelFormatEnum>(fmt));
         if (!ptr)
             throw error{};
         destroy();
@@ -237,14 +237,14 @@ namespace sdl {
                     int height,
                     int depth,
                     int pitch,
-                    SDL_PixelFormatEnum format)
+                    pixels::format_enum fmt)
     {
         auto ptr = SDL_CreateRGBSurfaceWithFormatFrom(pixels,
                                                       width,
                                                       height,
                                                       depth,
                                                       pitch,
-                                                      format);
+                                                      static_cast<SDL_PixelFormatEnum>(fmt));
         if (!ptr)
             throw error{};
         destroy();
@@ -265,10 +265,10 @@ namespace sdl {
 
     void
     surface::create(const surface& other,
-                    const SDL_PixelFormat* format,
+                    const pixels::format& fmt,
                     Uint32 flags)
     {
-        auto ptr = SDL_ConvertSurface(other.raw, format, flags);
+        auto ptr = SDL_ConvertSurface(other.raw, fmt.data(), flags);
         if (!ptr)
             throw error{};
         destroy();
@@ -278,10 +278,12 @@ namespace sdl {
 
     void
     surface::create(const surface& other,
-                    SDL_PixelFormatEnum format,
+                    pixels::format_enum fmt,
                     Uint32 flags)
     {
-        auto ptr = SDL_ConvertSurfaceFormat(other.raw, format, flags);
+        auto ptr = SDL_ConvertSurfaceFormat(other.raw,
+                                            static_cast<SDL_PixelFormatEnum>(fmt),
+                                            flags);
         if (!ptr)
             throw error{};
         destroy();
@@ -347,11 +349,11 @@ namespace sdl {
     }
 
 
-    SDL_PixelFormat*
+    pixels::format
     surface::get_format()
         const noexcept
     {
-        return raw->format;
+        return pixels::format::ref_up(raw->format);
     }
 
 
@@ -422,9 +424,9 @@ namespace sdl {
 
 
     void
-    surface::set_palette(SDL_Palette* palette)
+    surface::set_palette(pixels::palette& pal)
     {
-        if (SDL_SetSurfacePalette(raw, palette) < 0)
+        if (SDL_SetSurfacePalette(raw, pal.data()) < 0)
             throw error{};
     }
 
@@ -656,10 +658,40 @@ namespace sdl {
 
     void
     surface::fill(const rect& r,
-                  Uint32 c)
+                  Uint32 pixel)
     {
-        if (SDL_FillRect(raw, &r, c) < 0)
+        if (SDL_FillRect(raw, &r, pixel) < 0)
             throw error{};
+    }
+
+
+    void
+    surface::fill(const rect& r,
+                  color c)
+    {
+        auto fmt = get_format();
+        Uint32 pixel = fmt.map_rgba(c);
+        fill(r, pixel);
+    }
+
+
+    void
+    surface::fill(vec2 a,
+                  vec2 b,
+                  Uint32 pixel)
+    {
+        fill(rect::from_corners(a, b), pixel);
+    }
+
+
+    void
+    surface::fill(vec2 a,
+                  vec2 b,
+                  color c)
+    {
+        auto fmt = get_format();
+        Uint32 pixel = fmt.map_rgba(c);
+        fill(a, b, pixel);
     }
 
 
@@ -672,20 +704,34 @@ namespace sdl {
     }
 
 
+    void
+    surface::fill(std::span<const rect> rs,
+                  color c)
+    {
+        auto fmt = get_format();
+        Uint32 pixel = fmt.map_rgba(c);
+        fill(rs, pixel);
+    }
+
 
     void
     convert_pixels(int width,
                    int height,
-                   SDL_PixelFormatEnum src_format,
+                   pixels::format_enum src_format,
                    const void* src,
                    int src_pitch,
-                   SDL_PixelFormatEnum dst_format,
+                   pixels::format_enum dst_format,
                    void* dst,
                    int dst_pitch)
     {
-        if (SDL_ConvertPixels(width, height,
-                              src_format, src, src_pitch,
-                              dst_format, dst, dst_pitch) < 0)
+        if (SDL_ConvertPixels(width,
+                              height,
+                              static_cast<SDL_PixelFormatEnum>(src_format),
+                              src,
+                              src_pitch,
+                              static_cast<SDL_PixelFormatEnum>(dst_format),
+                              dst,
+                              dst_pitch) < 0)
             throw error{};
     }
 
@@ -693,16 +739,21 @@ namespace sdl {
     void
     premultiply_alpha(int width,
                       int height,
-                      SDL_PixelFormatEnum src_format,
+                      pixels::format_enum src_format,
                       const void* src,
                       int src_pitch,
-                      SDL_PixelFormatEnum dst_format,
+                      pixels::format_enum dst_format,
                       void* dst,
                       int dst_pitch)
     {
-        if (SDL_PremultiplyAlpha(width, height,
-                                 src_format, src, src_pitch,
-                                 dst_format, dst, dst_pitch) < 0)
+        if (SDL_PremultiplyAlpha(width,
+                                 height,
+                                 static_cast<SDL_PixelFormatEnum>(src_format),
+                                 src,
+                                 src_pitch,
+                                 static_cast<SDL_PixelFormatEnum>(dst_format),
+                                 dst,
+                                 dst_pitch) < 0)
             throw error{};
     }
 

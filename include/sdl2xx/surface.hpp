@@ -17,6 +17,7 @@
 
 #include "basic_wrapper.hpp"
 #include "color.hpp"
+#include "pixels.hpp"
 #include "rect.hpp"
 
 
@@ -59,7 +60,7 @@ namespace sdl {
                 int width,
                 int height,
                 int depth,
-                SDL_PixelFormatEnum format);
+                pixels::format_enum fmt);
 
         surface(void* pixels,
                 int width,
@@ -76,14 +77,14 @@ namespace sdl {
                 int height,
                 int depth,
                 int pitch,
-                SDL_PixelFormatEnum format);
+                pixels::format_enum fmt);
 
         surface(const surface& other,
-                const SDL_PixelFormat* format,
+                const pixels::format& fmt,
                 Uint32 flags);
 
         surface(const surface& other,
-                SDL_PixelFormatEnum format,
+                pixels::format_enum fmt,
                 Uint32 flags);
 
         surface(SDL_Surface* surf, dont_destroy_t)
@@ -127,7 +128,7 @@ namespace sdl {
                int width,
                int height,
                int depth,
-               SDL_PixelFormatEnum format);
+               pixels::format_enum fmt);
 
         void
         create(void* pixels,
@@ -146,19 +147,19 @@ namespace sdl {
                int height,
                int depth,
                int pitch,
-               SDL_PixelFormatEnum format);
+               pixels::format_enum fmt);
 
         void
         create(const surface& other);
 
         void
         create(const surface& other,
-               const SDL_PixelFormat* format,
+               const pixels::format& fmt,
                Uint32 flags);
 
         void
         create(const surface& other,
-               SDL_PixelFormatEnum format,
+               pixels::format_enum fmt,
                Uint32 flags);
 
 
@@ -189,7 +190,7 @@ namespace sdl {
 
 
         [[nodiscard]]
-        SDL_PixelFormat*
+        pixels::format
         get_format()
             const noexcept;
 
@@ -256,7 +257,7 @@ namespace sdl {
 
 
         void
-        set_palette(SDL_Palette* palette);
+        set_palette(pixels::palette& pal);
 
 
         bool
@@ -397,11 +398,29 @@ namespace sdl {
 
         void
         fill(const rect& r,
-             Uint32 c);
+             Uint32 pixel);
+
+        void
+        fill(const rect& r,
+             color c);
+
+        void
+        fill(vec2 a,
+             vec2 b,
+             Uint32 pixel);
+
+        void
+        fill(vec2 a,
+             vec2 b,
+             color c);
 
         void
         fill(std::span<const rect> rs,
-             Uint32 c);
+             Uint32 pixel);
+
+        void
+        fill(std::span<const rect> rs,
+             color c);
 
     };
 
@@ -409,10 +428,10 @@ namespace sdl {
     void
     convert_pixels(int width,
                    int height,
-                   SDL_PixelFormatEnum src_format,
+                   pixels::format_enum src_format,
                    const void* src,
                    int src_pitch,
-                   SDL_PixelFormatEnum dst_format,
+                   pixels::format_enum dst_format,
                    void* dst,
                    int dst_pitch);
 
@@ -420,10 +439,10 @@ namespace sdl {
     void
     premultiply_alpha(int width,
                       int height,
-                      SDL_PixelFormatEnum src_format,
+                      pixels::format_enum src_format,
                       const void* src,
                       int src_pitch,
-                      SDL_PixelFormatEnum dst_format,
+                      pixels::format_enum dst_format,
                       void* dst,
                       int dst_pitch);
 
