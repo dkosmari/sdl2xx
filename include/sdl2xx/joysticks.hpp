@@ -211,7 +211,7 @@ namespace sdl::joysticks {
 
     [[nodiscard]]
     instance_id
-    get_instance_id(unsigned index);
+    get_instance(unsigned index);
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 6)
 

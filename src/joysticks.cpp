@@ -299,7 +299,7 @@ namespace sdl::joysticks {
 
 
     instance_id
-    get_instance_id(unsigned index)
+    get_instance(unsigned index)
     {
         auto id = SDL_JoystickGetDeviceInstanceID(index);
         if (id == -1)
