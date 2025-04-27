@@ -20,21 +20,27 @@ AC_PROG_RANLIB
 
 AS_VAR_SET([sdl_libs], [sdl2])
 
-enable_image=yes
+
 AC_ARG_ENABLE([image],
-              [AS_HELP_STRING([--disable-image], [disable wrapper for SDL2_image])])
+              [AS_HELP_STRING([--disable-image], [disable wrapper for SDL2_image])],
+              [],
+              [enable_image=yes])
 AS_VAR_IF([enable_image], [yes], [AS_VAR_APPEND([sdl_libs], [" SDL2_image"])])
 AM_CONDITIONAL([ENABLE_IMAGE], [test x$enable_image = xyes])
 
-enable_mixer=yes
+
 AC_ARG_ENABLE([mixer],
-              [AS_HELP_STRING([--disable-mixer], [disable wrapper for SDL2_mixer])])
+              [AS_HELP_STRING([--disable-mixer], [disable wrapper for SDL2_mixer])],
+              [],
+              [enable_mixer=yes])
 AS_VAR_IF([enable_mixer], [yes], [AS_VAR_APPEND([sdl_libs], [" SDL2_mixer"])])
 AM_CONDITIONAL([ENABLE_MIXER], [test x$enable_mixer = xyes])
 
-enable_ttf=yes
+
 AC_ARG_ENABLE([ttf],
-              [AS_HELP_STRING([--disable-ttf], [disable wrapper for SDL2_ttf])])
+              [AS_HELP_STRING([--disable-ttf], [disable wrapper for SDL2_ttf])],
+              [],
+              [enable_ttf=yes])
 AS_VAR_IF([enable_ttf], [yes], [AS_VAR_APPEND([sdl_libs], [" SDL2_ttf"])])
 AM_CONDITIONAL([ENABLE_TTF], [test x$enable_ttf = xyes])
 
@@ -42,9 +48,10 @@ AM_CONDITIONAL([ENABLE_TTF], [test x$enable_ttf = xyes])
 PKG_CHECK_MODULES([SDL2], [$sdl_libs])
 
 
-enable_examples=yes
 AC_ARG_ENABLE([examples],
-              [AS_HELP_STRING([--disable-examples], [disable building examples])])
+              [AS_HELP_STRING([--disable-examples], [disable building examples])],
+              [],
+              [enable_examples=yes])
 AM_CONDITIONAL([ENABLE_EXAMPLES], [test x$enable_examples = xyes])
 
 
@@ -52,3 +59,9 @@ AC_CONFIG_FILES([Makefile
                  examples/dvd-logo/Makefile
                  examples/simple/Makefile])
 AC_OUTPUT
+
+
+AC_MSG_NOTICE([SDL2_image support: $enable_image])
+AC_MSG_NOTICE([SDL2_mixer support: $enable_mixer])
+AC_MSG_NOTICE([SDL2_ttf support:   $enable_ttf])
+AC_MSG_NOTICE([Build examples:     $enable_examples])

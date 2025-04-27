@@ -11,6 +11,9 @@ AM_CXXFLAGS = \
 
 
 if ENABLE_EXAMPLES
+if ENABLE_IMAGE
+if ENABLE_TTF
+if ENABLE_MIXER
 
 noinst_PROGRAMS = dvd-logo
 
@@ -26,4 +29,7 @@ dvd_logo_LDADD = \
 	$(top_builddir)/libsdl2xx.a \
 	$(SDL2_LIBS)
 
+endif ENABLE_MIXER
+endif ENABLE_TTF
+endif ENABLE_IMAGE
 endif ENABLE_EXAMPLES
