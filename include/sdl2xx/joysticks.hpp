@@ -226,33 +226,8 @@ namespace sdl::joysticks {
             noexcept;
 
 
-        /// Named constructor: from joystick index.
-        [[nodiscard]]
-        static
-        joystick
-        from_index(unsigned index);
-
-
-#if SDL_VERSION_ATLEAST(2, 0, 4)
-
-        /// Named constructor: from instance ID.
-        [[nodiscard]]
-        static
-        joystick
-        from_instance(instance_id id);
-
-#endif // SDL_VERSION_ATLEAST(2, 0, 4)
-
-
-#if SDL_VERSION_ATLEAST(2, 0, 12)
-
-        /// Named constructor: from player index.
-        [[nodiscard]]
-        static
-        joystick
-        from_player_index(int player_index);
-
-#endif // SDL_VERSION_ATLEAST(2, 0, 12)
+        explicit
+        joystick(unsigned index);
 
 
         ~joystick()
@@ -534,6 +509,9 @@ namespace sdl::joysticks {
 #endif // SDL_VERSION_ATLEAST(2, 0, 4)
 
     };
+
+    // TODO: wrap SDL_JoystickFromInstanceID()
+    // TODO: wrap SDL_JoystickFromPlayerIndex()
 
 
 #if SDL_VERSION_ATLEAST(2, 0, 14)

@@ -318,43 +318,13 @@ namespace sdl::joysticks {
     }
 
 
-    joystick
-    joystick::from_index(unsigned index)
+    joystick::joystick(unsigned index)
     {
         auto j = SDL_JoystickOpen(index);
         if (!j)
             throw error{};
-        return joystick{j};
+        acquire(j);
     }
-
-
-#if SDL_VERSION_ATLEAST(2, 0, 4)
-
-    joystick
-    joystick::from_instance(instance_id id)
-    {
-        auto j = SDL_JoystickFromInstanceID(id);
-        if (!j)
-            throw error{};
-        return joystick{j};
-    }
-
-#endif // SDL_VERSION_ATLEAST(2, 0, 4)
-
-
-#if SDL_VERSION_ATLEAST(2, 0, 12)
-
-    joystick
-    joystick::from_player_index(int player_index)
-    {
-        auto j = SDL_JoystickFromPlayerIndex(player_index);
-        if (!j)
-            throw error{};
-        return joystick{j};
-    }
-
-#endif // SDL_VERSION_ATLEAST(2, 0, 12)
-
 
 
     joystick::~joystick()
