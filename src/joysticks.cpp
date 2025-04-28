@@ -12,8 +12,6 @@
 
 #include "joysticks.hpp"
 
-#include "error.hpp"
-
 
 namespace sdl::joysticks {
 
@@ -223,9 +221,20 @@ namespace sdl::joysticks {
     const char*
     get_name(unsigned index)
     {
+        auto result = try_get_name(index);
+        if (!result)
+            throw result.error();
+        return *result;
+    }
+
+
+    std::expected<const char*, error>
+    try_get_name(unsigned index)
+            noexcept
+    {
         auto name = SDL_JoystickNameForIndex(index);
         if (!name)
-            throw error{};
+            return std::unexpected{error{}};
         return name;
     }
 
@@ -235,11 +244,23 @@ namespace sdl::joysticks {
     const char*
     get_path(unsigned index)
     {
+        auto result = try_get_path(index);
+        if (!result)
+            throw result.error();
+        return *result;
+    }
+
+
+    std::expected<const char*, error>
+    try_get_path(unsigned index)
+        noexcept
+    {
         auto path = SDL_JoystickPathForIndex(index);
         if (!path)
-            throw error{};
+            return std::unexpected{error{}};
         return path;
     }
+
 
 #endif // SDL_VERSION_ATLEAST(2, 24, 0)
 
@@ -390,9 +411,20 @@ namespace sdl::joysticks {
     joystick::get_name()
         const
     {
+        auto result = try_get_name();
+        if (!result)
+            throw result.error();
+        return *result;
+    }
+
+
+    std::expected<const char*, error>
+    joystick::try_get_name()
+        const noexcept
+    {
         auto name = SDL_JoystickName(raw);
         if (!name)
-            throw error{};
+            return std::unexpected{error{}};
         return name;
     }
 
@@ -490,9 +522,20 @@ namespace sdl::joysticks {
     joystick::get_serial()
         const
     {
+        auto result = try_get_serial();
+        if (!result)
+            throw result.error();
+        return *result;
+    }
+
+
+    std::expected<const char*, error>
+    joystick::try_get_serial()
+        const noexcept
+    {
         auto serial = SDL_JoystickGetSerial(raw);
         if (!serial)
-            throw error{};
+            return std::unexpected{error{}};
         return serial;
     }
 

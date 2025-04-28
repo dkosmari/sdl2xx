@@ -10,6 +10,7 @@
 #define SDL2XX_JOYSTICKS_HPP
 
 #include <chrono>
+#include <expected>
 #include <iosfwd>
 #include <optional>
 #include <span>
@@ -19,6 +20,7 @@
 
 #include "basic_wrapper.hpp"
 #include "color.hpp"
+#include "error.hpp"
 #include "guid.hpp"
 #include "string.hpp"
 #include "vec2.hpp"
@@ -158,12 +160,22 @@ namespace sdl::joysticks {
     const char*
     get_name(unsigned index);
 
+    [[nodiscard]]
+    std::expected<const char*, error>
+    try_get_name(unsigned index)
+        noexcept;
+
 
 #if SDL_VERSION_ATLEAST(2, 24, 0)
 
     [[nodiscard]]
     const char*
     get_path(unsigned index);
+
+    [[nodiscard]]
+    std::expected<const char*, error>
+    try_get_path(unsigned index)
+        noexcept;
 
 #endif // SDL_VERSION_ATLEAST(2, 24, 0)
 
@@ -270,6 +282,11 @@ namespace sdl::joysticks {
         get_name()
             const;
 
+        [[nodiscard]]
+        std::expected<const char*, error>
+        try_get_name()
+            const noexcept;
+
 
 #if SDL_VERSION_ATLEAST(2, 24, 0)
 
@@ -344,6 +361,11 @@ namespace sdl::joysticks {
         const char*
         get_serial()
             const;
+
+        [[nodiscard]]
+        std::expected<const char*, error>
+        try_get_serial()
+            const noexcept;
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 14)
 
