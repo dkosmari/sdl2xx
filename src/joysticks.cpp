@@ -435,9 +435,20 @@ namespace sdl::joysticks {
         joystick::get_path()
             const
         {
+            auto result = try_get_path();
+            if (!result)
+                throw result.error();
+            return *result;
+        }
+
+
+        std::expected<const char*, error>
+        joystick::try_get_path()
+            const noexcept
+        {
             auto result = SDL_JoystickPath(raw);
             if (!result)
-                throw error{};
+                return std::unexpected{error{}};
             return result;
         }
 

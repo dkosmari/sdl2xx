@@ -295,6 +295,11 @@ namespace sdl::joysticks {
         get_path()
             const;
 
+        [[nodiscard]]
+        std::expected<const char*, error>
+        try_get_path()
+            const noexcept;
+
 #endif // SDL_VERSION_ATLEAST(2, 24, 0)
 
 
