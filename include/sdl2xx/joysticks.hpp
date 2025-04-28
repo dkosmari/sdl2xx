@@ -590,10 +590,7 @@ namespace sdl::joysticks {
 
 
     static constexpr Sint16 axis_max = SDL_JOYSTICK_AXIS_MAX;
-    static constexpr Sint16 axi_min = SDL_JOYSTICK_AXIS_MIN;
-
-
-
+    static constexpr Sint16 axis_min = SDL_JOYSTICK_AXIS_MIN;
 
 } // namespace sdk::joysticks
 
