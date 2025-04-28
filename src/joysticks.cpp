@@ -605,6 +605,17 @@ namespace sdl::joysticks {
     }
 
 
+    vec2
+    joystick::get_ball(unsigned ball)
+        const
+    {
+        vec2 result;
+        if (SDL_JoystickGetBall(raw, ball, &result.x, &result.y) < 0)
+            throw error{};
+        return result;
+    }
+
+
     bool
     joystick::get_button(unsigned button)
         const noexcept

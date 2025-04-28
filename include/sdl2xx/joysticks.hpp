@@ -21,6 +21,7 @@
 #include "color.hpp"
 #include "guid.hpp"
 #include "string.hpp"
+#include "vec2.hpp"
 
 
 namespace sdl::joysticks {
@@ -413,6 +414,12 @@ namespace sdl::joysticks {
         hat_dir
         get_hat(unsigned hat)
             const noexcept;
+
+
+        [[nodiscard]]
+        vec2
+        get_ball(unsigned ball)
+            const;
 
 
         [[nodiscard]]
