@@ -320,7 +320,7 @@ namespace sdl::joysticks {
 
 
     instance_id
-    get_instance(unsigned index)
+    get_id(unsigned index)
     {
         auto id = SDL_JoystickGetDeviceInstanceID(index);
         if (id == -1)
@@ -574,7 +574,7 @@ namespace sdl::joysticks {
 
 
     instance_id
-    joystick::get_instance()
+    joystick::get_id()
         const
     {
         int result = SDL_JoystickInstanceID(raw);

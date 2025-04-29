@@ -224,7 +224,7 @@ namespace sdl::joysticks {
 
     [[nodiscard]]
     instance_id
-    get_instance(unsigned index);
+    get_id(unsigned index);
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 6)
 
@@ -393,7 +393,7 @@ namespace sdl::joysticks {
 
         [[nodiscard]]
         instance_id
-        get_instance()
+        get_id()
             const;
 
 
