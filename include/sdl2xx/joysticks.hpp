@@ -30,6 +30,7 @@ namespace sdl::joysticks {
 
     using std::chrono::milliseconds;
 
+    using guid = sdl::guid;
 
     using instance_id = SDL_JoystickID;
 
@@ -458,8 +459,8 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 9)
 
         bool
-        rumble(Uint16 low,
-               Uint16 high,
+        rumble(float low,
+               float high,
                milliseconds duration)
             noexcept;
 
@@ -469,8 +470,8 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 14)
 
         bool
-        rumble_triggers(Uint16 left,
-                        Uint16 right,
+        rumble_triggers(float left,
+                        float right,
                         milliseconds duration)
             noexcept;
 

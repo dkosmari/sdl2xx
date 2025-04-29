@@ -12,20 +12,19 @@
 #include "mix.hpp"
 
 #include "error.hpp"
+#include "impl/utils.hpp"
 
 
 namespace sdl::mix {
 
+    using impl::utils::map_to_uint8;
+
     namespace {
 
-        constexpr
-        int
-        float_to_int(float f,
-                      int max_value)
-            noexcept
+        unsigned
+        map_to_volume(float v)
         {
-            float sf = std::floor(f * (max_value + 1.0f));
-            return std::clamp(int(sf), 0, max_value);
+            return impl::utils::map_to_uint(v, max_volume);
         }
 
     } // namespace
@@ -434,7 +433,7 @@ namespace sdl::mix {
         const noexcept
     {
         int result = Mix_VolumeChunk(raw, -1);
-        return result / float(MIX_MAX_VOLUME);
+        return result / float(max_volume);
     }
 
 
@@ -442,9 +441,8 @@ namespace sdl::mix {
     chunk::set_volume(float new_volume)
         const noexcept
     {
-        int inew_volume = float_to_int(new_volume, MIX_MAX_VOLUME);
-        int result = Mix_VolumeChunk(raw, inew_volume);
-        return result / float(MIX_MAX_VOLUME);
+        int result = Mix_VolumeChunk(raw, map_to_volume(new_volume));
+        return result / float(max_volume);
     }
 
 
@@ -688,7 +686,7 @@ namespace sdl::mix {
         const noexcept
     {
         int result = Mix_GetMusicVolume(raw);
-        return result / float(MIX_MAX_VOLUME);
+        return result / float(max_volume);
     }
 
 
@@ -696,9 +694,8 @@ namespace sdl::mix {
     music::set_volume(float new_volume)
         noexcept
     {
-        int inew_volume = float_to_int(new_volume, MIX_MAX_VOLUME);
-        int result = Mix_VolumeMusic(inew_volume);
-        return result / float(MIX_MAX_VOLUME);
+        int result = Mix_VolumeMusic(map_to_volume(new_volume));
+        return result / float(max_volume);
     }
 
 
@@ -961,10 +958,12 @@ namespace sdl::mix {
 
     void
     set_panning(unsigned channel,
-                Uint8 left,
-                Uint8 right)
+                float left,
+                float right)
     {
-        if (!Mix_SetPanning(channel, left, right))
+        if (!Mix_SetPanning(channel,
+                            map_to_uint8(left),
+                            map_to_uint8(right)))
             throw error{};
     }
 
@@ -981,9 +980,9 @@ namespace sdl::mix {
                  degreesf angle,
                  float distance)
     {
-        Sint16 iangle = angle.value();
-        Uint8 idistance = float_to_int(distance, 255);
-        if (!Mix_SetPosition(channel, iangle, idistance))
+        if (!Mix_SetPosition(channel,
+                             static_cast<Sint16>(angle.value()),
+                             map_to_uint8(distance)))
             throw error{};
     }
 
@@ -1000,8 +999,7 @@ namespace sdl::mix {
     set_distance(unsigned channel,
                  float distance)
     {
-        Uint8 idistance = float_to_int(distance, 255);
-        if (!Mix_SetDistance(channel, idistance))
+        if (!Mix_SetDistance(channel, map_to_uint8(distance)))
             throw error{};
     }
 
@@ -1104,7 +1102,7 @@ namespace sdl::mix {
         noexcept
     {
         int result = Mix_Volume(channel, -1);
-        return result / float(MIX_MAX_VOLUME);
+        return result / float(max_volume);
     }
 
 
@@ -1113,7 +1111,7 @@ namespace sdl::mix {
         noexcept
     {
         int result = Mix_Volume(-1, -1);
-        return result / float(MIX_MAX_VOLUME);
+        return result / float(max_volume);
     }
 
 
@@ -1122,9 +1120,8 @@ namespace sdl::mix {
                float new_volume)
         noexcept
     {
-        int inew_volume = float_to_int(new_volume, MIX_MAX_VOLUME);
-        int result = Mix_Volume(channel, inew_volume);
-        return result / float(MIX_MAX_VOLUME);
+        int result = Mix_Volume(channel, map_to_volume(new_volume));
+        return result / float(max_volume);
     }
 
 
@@ -1132,9 +1129,8 @@ namespace sdl::mix {
     set_volume(float new_volume)
         noexcept
     {
-        int inew_volume = float_to_int(new_volume, MIX_MAX_VOLUME);
-        int result = Mix_Volume(-1, inew_volume);
-        return result / float(MIX_MAX_VOLUME);
+        int result = Mix_Volume(-1, map_to_volume(new_volume));
+        return result / float(max_volume);
     }
 
 
@@ -1143,7 +1139,7 @@ namespace sdl::mix {
         noexcept
     {
         int result = Mix_MasterVolume(-1);
-        return result / float(MIX_MAX_VOLUME);
+        return result / float(max_volume);
     }
 
 
@@ -1151,9 +1147,8 @@ namespace sdl::mix {
     set_master_volume(float new_volume)
         noexcept
     {
-        int inew_volume = float_to_int(new_volume, MIX_MAX_VOLUME);
-        int result = Mix_MasterVolume(inew_volume);
-        return result / float(MIX_MAX_VOLUME);
+        int result = Mix_MasterVolume(map_to_volume(new_volume));
+        return result / float(max_volume);
     }
 
 

@@ -14,21 +14,12 @@
 
 #include "color.hpp"
 
+#include "impl/utils.hpp"
+
 
 namespace sdl {
 
-    namespace {
-
-        constexpr
-        Uint8
-        float_to_byte(float f)
-            noexcept
-        {
-            float sf = std::floor(f * 256.0f);
-            return std::clamp(int(sf), 0, 255);
-        }
-
-    } // namespace
+    using impl::utils::map_to_uint8;
 
 
     color
@@ -38,9 +29,9 @@ namespace sdl {
         noexcept
     {
         return {
-            float_to_byte(r),
-            float_to_byte(g),
-            float_to_byte(b),
+            map_to_uint8(r),
+            map_to_uint8(g),
+            map_to_uint8(b),
             0xff
         };
     }
@@ -54,10 +45,10 @@ namespace sdl {
         noexcept
     {
         return {
-            float_to_byte(r),
-            float_to_byte(g),
-            float_to_byte(b),
-            float_to_byte(a)
+            map_to_uint8(r),
+            map_to_uint8(g),
+            map_to_uint8(b),
+            map_to_uint8(a)
         };
     }
 

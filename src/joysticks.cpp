@@ -12,8 +12,13 @@
 
 #include "joysticks.hpp"
 
+#include "impl/utils.hpp"
+
 
 namespace sdl::joysticks {
+
+    using impl::utils::map_to_uint16;
+
 
 #if SDL_VERSION_ATLEAST(2, 0, 6)
 
@@ -681,12 +686,15 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 9)
 
     bool
-    joystick::rumble(Uint16 low,
-                     Uint16 high,
+    joystick::rumble(float low,
+                     float high,
                      milliseconds duration)
         noexcept
     {
-        return !SDL_JoystickRumble(raw, low, high, duration.count());
+        return !SDL_JoystickRumble(raw,
+                                   map_to_uint16(low),
+                                   map_to_uint16(high),
+                                   duration.count());
     }
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 9)
@@ -695,12 +703,15 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 14)
 
     bool
-    joystick::rumble_triggers(Uint16 left,
-                              Uint16 right,
+    joystick::rumble_triggers(float left,
+                              float right,
                               milliseconds duration)
         noexcept
     {
-        return !SDL_JoystickRumbleTriggers(raw, left, right, duration.count());
+        return !SDL_JoystickRumbleTriggers(raw,
+                                           map_to_uint16(left),
+                                           map_to_uint16(right),
+                                           duration.count());
     }
 
 

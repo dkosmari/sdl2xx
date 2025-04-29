@@ -35,6 +35,13 @@ namespace sdl::mix {
     using dbl_seconds = std::chrono::duration<double>;
 
 
+    constexpr auto default_frequency = MIX_DEFAULT_FREQUENCY;
+    constexpr auto default_format    = MIX_DEFAULT_FORMAT;
+    constexpr auto default_channels  = MIX_DEFAULT_CHANNELS;
+
+    constexpr auto max_volume = MIX_MAX_VOLUME;
+
+
     enum class fading_status {
         in   = MIX_FADING_IN,
         none = MIX_NO_FADING,
@@ -743,8 +750,8 @@ namespace sdl::mix {
 
     void
     set_panning(unsigned channel,
-                Uint8 left,
-                Uint8 right);
+                float left,
+                float right);
 
     void
     reset_panning(unsigned channel);

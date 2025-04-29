@@ -77,6 +77,8 @@ libsdl2xx_a_SOURCES = \
 	src/gl.cpp \
 	src/guid.cpp \
 	src/init.cpp \
+	src/impl/utils.cpp \
+	src/impl/utils.hpp \
 	src/joysticks.cpp \
 	src/pixels.cpp \
 	src/rect.cpp \

@@ -6,6 +6,9 @@
  * SPDX-License-Identifier: Zlib
  */
 
+#ifndef SDL2XX_GUID_HPP
+#define SDL2XX_GUID_HPP
+
 #include <compare>
 #include <iosfwd>
 
@@ -80,3 +83,5 @@ namespace sdl {
                 const guid& id);
 
 } // namespace sdl
+
+#endif
