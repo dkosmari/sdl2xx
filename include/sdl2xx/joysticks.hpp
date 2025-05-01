@@ -213,7 +213,7 @@ namespace sdl::joysticks {
 
     [[nodiscard]]
     Uint16
-    get_product_version(unsigned index)
+    get_version(unsigned index)
         noexcept;
 
 
@@ -345,7 +345,7 @@ namespace sdl::joysticks {
 
         [[nodiscard]]
         Uint16
-        get_product_version()
+        get_version()
             const noexcept;
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 6)
