@@ -20,7 +20,9 @@ namespace sdl {
 
     error::error() :
         runtime_error{SDL_GetError()}
-    {}
+    {
+        SDL_ClearError();
+    }
 
 
     error::error(const char* msg) :

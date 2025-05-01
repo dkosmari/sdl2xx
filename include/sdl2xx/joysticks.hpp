@@ -158,24 +158,16 @@ namespace sdl::joysticks {
 
 
     [[nodiscard]]
-    const char*
-    get_name(unsigned index);
-
-    [[nodiscard]]
-    std::expected<const char*, error>
-    try_get_name(unsigned index)
+    std::optional<string>
+    get_name(unsigned index)
         noexcept;
 
 
 #if SDL_VERSION_ATLEAST(2, 24, 0)
 
     [[nodiscard]]
-    const char*
-    get_path(unsigned index);
-
-    [[nodiscard]]
-    std::expected<const char*, error>
-    try_get_path(unsigned index)
+    std::optional<string>
+    get_path(unsigned index)
         noexcept;
 
 #endif // SDL_VERSION_ATLEAST(2, 24, 0)
@@ -185,7 +177,7 @@ namespace sdl::joysticks {
 
     [[nodiscard]]
     int
-    get_player_index(unsigned index)
+    get_player(unsigned index)
         noexcept;
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 9)
@@ -308,7 +300,7 @@ namespace sdl::joysticks {
 
         [[nodiscard]]
         int
-        get_player_index()
+        get_player()
             const noexcept;
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 9)
@@ -317,7 +309,7 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 12)
 
         void
-        set_player_index(int index)
+        set_player(int index)
             noexcept;
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 12)
@@ -355,7 +347,7 @@ namespace sdl::joysticks {
 
         [[nodiscard]]
         Uint16
-        get_firmware_version()
+        get_firmware()
             const noexcept;
 
 #endif // SDL_VERSION_ATLEAST(2, 24, 0)
@@ -481,6 +473,17 @@ namespace sdl::joysticks {
         has_led()
             const noexcept;
 
+
+        bool
+        set_led(Uint8 red,
+                Uint8 green,
+                Uint8 blue)
+            noexcept;
+
+        bool
+        set_led(color c)
+            noexcept;
+
 #endif // SDL_VERSION_ATLEAST(2, 0, 14)
 
 
@@ -498,21 +501,6 @@ namespace sdl::joysticks {
             const noexcept;
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 18)
-
-
-#if SDL_VERSION_ATLEAST(2, 0, 14)
-
-        bool
-        set_led(color c)
-            noexcept;
-
-        bool
-        set_led(Uint8 red,
-                Uint8 green,
-                Uint8 blue)
-            noexcept;
-
-#endif // SDL_VERSION_ATLEAST(2, 0, 14)
 
 
 #if SDL_VERSION_ATLEAST(2, 0, 16)
@@ -543,7 +531,8 @@ namespace sdl::joysticks {
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 4)
 
-    };
+    }; // struct joystick
+
 
     // TODO: wrap SDL_JoystickFromInstanceID()
     // TODO: wrap SDL_JoystickFromPlayerIndex()
@@ -626,6 +615,7 @@ namespace sdl::joysticks {
 
     static constexpr Sint16 axis_max = SDL_JOYSTICK_AXIS_MAX;
     static constexpr Sint16 axis_min = SDL_JOYSTICK_AXIS_MIN;
+    static constexpr Sint16 axis_dead_zone = 8000;
 
 } // namespace sdk::joysticks
 

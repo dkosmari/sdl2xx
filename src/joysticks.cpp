@@ -169,10 +169,8 @@ namespace sdl::joysticks {
     lock_guard::~lock_guard()
         noexcept
     {
-        if (locked) {
-
-            locked = false;
-        }
+        if (locked)
+            unlock();
     }
 
 
@@ -223,49 +221,28 @@ namespace sdl::joysticks {
     }
 
 
-    const char*
+    std::optional<string>
     get_name(unsigned index)
+        noexcept
     {
-        auto result = try_get_name(index);
-        if (!result)
-            throw result.error();
-        return *result;
-    }
-
-
-    std::expected<const char*, error>
-    try_get_name(unsigned index)
-            noexcept
-    {
-        auto name = SDL_JoystickNameForIndex(index);
+        const char* name = SDL_JoystickNameForIndex(index);
         if (!name)
-            return std::unexpected{error{}};
-        return name;
+            return {};
+        return string(name);
     }
 
 
 #if SDL_VERSION_ATLEAST(2, 24, 0)
 
-    const char*
+    std::optional<string>
     get_path(unsigned index)
-    {
-        auto result = try_get_path(index);
-        if (!result)
-            throw result.error();
-        return *result;
-    }
-
-
-    std::expected<const char*, error>
-    try_get_path(unsigned index)
         noexcept
     {
-        auto path = SDL_JoystickPathForIndex(index);
-        if (!path)
-            return std::unexpected{error{}};
-        return path;
+        const char* p = SDL_JoystickPathForIndex(index);
+        if (!p)
+            return {};
+        return string(p);
     }
-
 
 #endif // SDL_VERSION_ATLEAST(2, 24, 0)
 
@@ -273,7 +250,7 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 9)
 
     int
-    get_player_index(unsigned index)
+    get_player(unsigned index)
         noexcept
     {
         return SDL_JoystickGetDevicePlayerIndex(index);
@@ -338,10 +315,8 @@ namespace sdl::joysticks {
 
     joystick::joystick(joystick&& other)
         noexcept :
-        basic_wrapper{}
-    {
-        acquire(other.release());
-    }
+        basic_wrapper{other.release()}
+    {}
 
 
     joystick::joystick(unsigned index)
@@ -463,7 +438,7 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 9)
 
     int
-    joystick::get_player_index()
+    joystick::get_player()
         const noexcept
     {
         return SDL_JoystickGetPlayerIndex(raw);
@@ -475,7 +450,7 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 12)
 
     void
-    joystick::set_player_index(int index)
+    joystick::set_player(int index)
         noexcept
     {
         SDL_JoystickSetPlayerIndex(raw, index);
@@ -523,7 +498,7 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 24, 0)
 
     Uint16
-    joystick::get_firmware_version()
+    joystick::get_firmware()
         const noexcept
     {
         return SDL_JoystickGetFirmwareVersion(raw);
@@ -722,6 +697,24 @@ namespace sdl::joysticks {
         return SDL_JoystickHasLED(raw);
     }
 
+
+    bool
+    joystick::set_led(Uint8 red,
+                      Uint8 green,
+                      Uint8 blue)
+        noexcept
+    {
+        return !SDL_JoystickSetLED(raw, red, green, blue);
+    }
+
+
+    bool
+    joystick::set_led(color c)
+        noexcept
+    {
+        return set_led(c.r, c.g, c.b);
+    }
+
 #endif // SDL_VERSION_ATLEAST(2, 0, 14)
 
 
@@ -743,28 +736,6 @@ namespace sdl::joysticks {
     }
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 18)
-
-
-#if SDL_VERSION_ATLEAST(2, 0, 14)
-
-    bool
-    joystick::set_led(color c)
-        noexcept
-    {
-        return set_led(c.r, c.g, c.b);
-    }
-
-
-    bool
-    joystick::set_led(Uint8 red,
-                      Uint8 green,
-                      Uint8 blue)
-        noexcept
-    {
-        return !SDL_JoystickSetLED(raw, red, green, blue);
-    }
-
-#endif // SDL_VERSION_ATLEAST(2, 0, 14)
 
 
 #if SDL_VERSION_ATLEAST(2, 0, 16)

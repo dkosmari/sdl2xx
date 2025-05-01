@@ -57,8 +57,8 @@ namespace sdl {
                 guid& id)
     {
         string token;
-        in >> token;
-        id = guid{token};
+        if (in >> token)
+            id = guid{token};
         return in;
     }
 
