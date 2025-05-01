@@ -15,6 +15,9 @@
 #include "impl/utils.hpp"
 
 
+using std::expected;
+using std::unexpected;
+
 namespace sdl::joysticks {
 
     using impl::utils::map_to_uint16;
@@ -221,27 +224,47 @@ namespace sdl::joysticks {
     }
 
 
-    std::optional<string>
+    const char*
     get_name(unsigned index)
+    {
+        auto result = try_get_name(index);
+        if (!result)
+            throw result.error();
+        return *result;
+    }
+
+
+    expected<const char*, error>
+    try_get_name(unsigned index)
         noexcept
     {
         const char* name = SDL_JoystickNameForIndex(index);
         if (!name)
-            return {};
-        return string(name);
+            return unexpected{error{}};
+        return name;
     }
 
 
 #if SDL_VERSION_ATLEAST(2, 24, 0)
 
-    std::optional<string>
+    const char*
     get_path(unsigned index)
+    {
+        auto result = try_get_path(index);
+        if (!result)
+            throw result.error();
+        return *result;
+    }
+
+
+    expected<const char*, error>
+    try_get_path(unsigned index)
         noexcept
     {
         const char* p = SDL_JoystickPathForIndex(index);
         if (!p)
-            return {};
-        return string(p);
+            return unexpected{error{}};
+        return p;
     }
 
 #endif // SDL_VERSION_ATLEAST(2, 24, 0)
@@ -398,13 +421,13 @@ namespace sdl::joysticks {
     }
 
 
-    std::expected<const char*, error>
+    expected<const char*, error>
     joystick::try_get_name()
         const noexcept
     {
         auto name = SDL_JoystickName(raw);
         if (!name)
-            return std::unexpected{error{}};
+            return unexpected{error{}};
         return name;
     }
 
@@ -422,13 +445,13 @@ namespace sdl::joysticks {
         }
 
 
-        std::expected<const char*, error>
+        expected<const char*, error>
         joystick::try_get_path()
             const noexcept
         {
             auto result = SDL_JoystickPath(raw);
             if (!result)
-                return std::unexpected{error{}};
+                return unexpected{error{}};
             return result;
         }
 
@@ -520,13 +543,13 @@ namespace sdl::joysticks {
     }
 
 
-    std::expected<const char*, error>
+    expected<const char*, error>
     joystick::try_get_serial()
         const noexcept
     {
         auto serial = SDL_JoystickGetSerial(raw);
         if (!serial)
-            return std::unexpected{error{}};
+            return unexpected{error{}};
         return serial;
     }
 
