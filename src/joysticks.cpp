@@ -348,24 +348,24 @@ namespace sdl::joysticks {
     joystick
     joystick::from_id(instance_id id)
     {
-        auto raw = SDL_JoystickFromInstanceID(id);
-        if (!raw)
+        if (!SDL_JoystickFromInstanceID(id))
             throw error{};
-        joystick result;
-        result.acquire(raw, false);
-        return result;
+        for (unsigned i = 0; i < get_num_joysticks(); ++i)
+            if (id == joysticks::get_id(i))
+                return joystick{i};
+        throw error{"unknown error"};
     }
 
 
     joystick
-    joystick::from_player(int index)
+    joystick::from_player(int player)
     {
-        auto raw = SDL_JoystickFromPlayerIndex(index);
-        if  (!raw)
+        if (!SDL_JoystickFromPlayerIndex(player))
             throw error{};
-        joystick result;
-        result.acquire(raw, false);
-        return result;
+        for (unsigned i = 0; i < get_num_joysticks(); ++i)
+            if (player == joysticks::get_player(i))
+                return joystick{i};
+        throw error{"unknown error"};
     }
 
 
@@ -380,11 +380,8 @@ namespace sdl::joysticks {
     joystick::destroy()
         noexcept
     {
-        if (raw) {
-            auto [old_raw, old_owner] = release();
-            if (old_owner)
-                SDL_JoystickClose(old_raw);
-        }
+        if (raw)
+            SDL_JoystickClose(release());
     }
 
 
@@ -482,10 +479,10 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 12)
 
     void
-    joystick::set_player(int index)
+    joystick::set_player(int player)
         noexcept
     {
-        SDL_JoystickSetPlayerIndex(raw, index);
+        SDL_JoystickSetPlayerIndex(raw, player);
     }
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 12)

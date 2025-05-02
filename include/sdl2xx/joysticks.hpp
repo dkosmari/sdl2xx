@@ -18,10 +18,10 @@
 #include <SDL_joystick.h>
 #include <SDL_version.h>
 
+#include "basic_wrapper.hpp"
 #include "color.hpp"
 #include "error.hpp"
 #include "guid.hpp"
-#include "owner_wrapper.hpp"
 #include "string.hpp"
 #include "vec2.hpp"
 
@@ -230,9 +230,9 @@ namespace sdl::joysticks {
 #endif // SDL_VERSION_ATLEAST(2, 0, 6)
 
 
-    struct joystick : owner_wrapper<SDL_Joystick*> {
+    struct joystick : basic_wrapper<SDL_Joystick*> {
 
-        using parent_t = owner_wrapper<SDL_Joystick*>;
+        using parent_t = basic_wrapper<SDL_Joystick*>;
 
 
         // Inherit constructors.
@@ -247,18 +247,18 @@ namespace sdl::joysticks {
         joystick(unsigned index);
 
 
-        // Named constructor: from instance id, return observer.
+        // Named constructor: from instance id.
         [[nodiscard]]
         static
         joystick
         from_id(instance_id id);
 
 
-        // Named constructor: from player index, return observer.
+        // Named constructor: from player index.
         [[nodiscard]]
         static
         joystick
-        from_player(int index);
+        from_player(int player);
 
 
         ~joystick()
@@ -334,7 +334,7 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 12)
 
         void
-        set_player(int index)
+        set_player(int player)
             noexcept;
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 12)

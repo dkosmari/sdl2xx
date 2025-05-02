@@ -307,12 +307,12 @@ namespace sdl::game_controllers {
     game_controller
     game_controller::from_id(instance_id id)
     {
-        auto raw = SDL_GameControllerFromInstanceID(id);
-        if (!raw)
+        if (!SDL_GameControllerFromInstanceID(id))
             throw error{};
-        game_controller result;
-        result.acquire(raw, false);
-        return result;
+        for (unsigned i = 0; i < joysticks::get_num_joysticks(); ++i)
+            if (id == joysticks::get_id(i))
+                return game_controller{i};
+        throw error{"unknown error"};
     }
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 4)
@@ -321,15 +321,14 @@ namespace sdl::game_controllers {
 #if SDL_VERSION_ATLEAST(2, 0, 12)
 
     game_controller
-    game_controller::from_player(int index)
+    game_controller::from_player(int player)
     {
-        // TODO: wrap SDL_GameControllerFromPlayerIndex()
-        auto raw = SDL_GameControllerFromPlayerIndex(index);
-        if (!raw)
+        if (!SDL_GameControllerFromPlayerIndex(player))
             throw error{};
-        game_controller result;
-        result.acquire(raw, false);
-        return result;
+        for (unsigned i = 0; i < joysticks::get_num_joysticks(); ++i)
+            if (player == joysticks::get_player(i))
+                return game_controller{i};
+        throw error{"unknown error"};
     }
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 12)
@@ -357,11 +356,8 @@ namespace sdl::game_controllers {
     game_controller::destroy()
         noexcept
     {
-        if (raw) {
-            auto [old_raw, old_owner] = release();
-            if (old_owner)
-                SDL_GameControllerClose(old_raw);
-        }
+        if (raw)
+            SDL_GameControllerClose(release());
     }
 
 
@@ -445,10 +441,10 @@ namespace sdl::game_controllers {
 #if SDL_VERSION_ATLEAST(2, 0, 12)
 
     void
-    game_controller::set_player(int index)
+    game_controller::set_player(int player)
         noexcept
     {
-        SDL_GameControllerSetPlayerIndex(raw, index);
+        SDL_GameControllerSetPlayerIndex(raw, player);
     }
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 12)

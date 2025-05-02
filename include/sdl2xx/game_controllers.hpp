@@ -19,9 +19,9 @@
 
 #include <SDL_gamecontroller.h>
 
+#include "basic_wrapper.hpp"
 #include "error.hpp"
 #include "joysticks.hpp"
-#include "owner_wrapper.hpp"
 #include "sensors.hpp"
 #include "string.hpp"
 #include "vector.hpp"
@@ -344,9 +344,9 @@ namespace sdl::game_controllers {
 #endif // SDL_VERSION_ATLEAST(2, 0, 12)
 
 
-    struct game_controller : owner_wrapper<SDL_GameController*> {
+    struct game_controller : basic_wrapper<SDL_GameController*> {
 
-        using parent_t = owner_wrapper<SDL_GameController*>;
+        using parent_t = basic_wrapper<SDL_GameController*>;
 
 
         // Inherit constructors.
@@ -364,7 +364,7 @@ namespace sdl::game_controllers {
 
 #if SDL_VERSION_ATLEAST(2, 0, 4)
 
-        // Named constructor: from id, return observer.
+        // Named constructor: from id.
         [[nodiscard]]
         static
         game_controller
@@ -375,11 +375,11 @@ namespace sdl::game_controllers {
 
 #if SDL_VERSION_ATLEAST(2, 0, 12)
 
-        // Named constructor: from player index, return observer.
+        // Named constructor: from player index.
         [[nodiscard]]
         static
         game_controller
-        from_player(int index);
+        from_player(int player);
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 12)
 
@@ -453,7 +453,7 @@ namespace sdl::game_controllers {
 #if SDL_VERSION_ATLEAST(2, 0, 12)
 
         void
-        set_player(int index)
+        set_player(int player)
             noexcept;
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 12)
