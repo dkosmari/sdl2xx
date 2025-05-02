@@ -18,7 +18,7 @@
 
 #include "angle.hpp"
 #include "audio.hpp"
-#include "observable_wrapper.hpp"
+#include "owner_wrapper.hpp"
 #include "string.hpp"
 #include "vector.hpp"
 
@@ -216,9 +216,9 @@ namespace sdl::mix {
     allocate_channels(int num);
 
 
-    struct chunk : observable_wrapper<Mix_Chunk*> {
+    struct chunk : owner_wrapper<Mix_Chunk*> {
 
-        using parent_t = observable_wrapper<Mix_Chunk*>;
+        using parent_t = owner_wrapper<Mix_Chunk*>;
 
 
         // Inherit constructors.

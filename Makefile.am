@@ -34,7 +34,7 @@ sdl2xx_HEADERS = \
 	include/sdl2xx/guid.hpp \
 	include/sdl2xx/init.hpp \
 	include/sdl2xx/joysticks.hpp \
-	include/sdl2xx/observable_wrapper.hpp \
+	include/sdl2xx/owner_wrapper.hpp \
 	include/sdl2xx/pixels.hpp \
 	include/sdl2xx/rect.hpp \
 	include/sdl2xx/renderer.hpp \

@@ -18,7 +18,7 @@
 
 #if SDL_VERSION_ATLEAST(2, 0, 9)
 
-#include "observable_wrapper.hpp"
+#include "owner_wrapper.hpp"
 #include "error.hpp"
 #include "vector.hpp"
 
@@ -138,9 +138,9 @@ namespace sdl::sensors {
     get_id(unsigned index);
 
 
-    struct sensor : observable_wrapper<SDL_Sensor*> {
+    struct sensor : owner_wrapper<SDL_Sensor*> {
 
-        using parent_t = observable_wrapper<SDL_Sensor*>;
+        using parent_t = owner_wrapper<SDL_Sensor*>;
 
         // Inherit constructors.
         using parent_t::parent_t;

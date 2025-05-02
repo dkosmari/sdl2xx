@@ -21,7 +21,7 @@
 
 #include "error.hpp"
 #include "joysticks.hpp"
-#include "observable_wrapper.hpp"
+#include "owner_wrapper.hpp"
 #include "sensors.hpp"
 #include "string.hpp"
 #include "vector.hpp"
@@ -344,9 +344,9 @@ namespace sdl::game_controllers {
 #endif // SDL_VERSION_ATLEAST(2, 0, 12)
 
 
-    struct game_controller : observable_wrapper<SDL_GameController*> {
+    struct game_controller : owner_wrapper<SDL_GameController*> {
 
-        using parent_t = observable_wrapper<SDL_GameController*>;
+        using parent_t = owner_wrapper<SDL_GameController*>;
 
 
         // Inherit constructors.

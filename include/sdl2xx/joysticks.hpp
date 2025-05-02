@@ -21,7 +21,7 @@
 #include "color.hpp"
 #include "error.hpp"
 #include "guid.hpp"
-#include "observable_wrapper.hpp"
+#include "owner_wrapper.hpp"
 #include "string.hpp"
 #include "vec2.hpp"
 
@@ -230,9 +230,9 @@ namespace sdl::joysticks {
 #endif // SDL_VERSION_ATLEAST(2, 0, 6)
 
 
-    struct joystick : observable_wrapper<SDL_Joystick*> {
+    struct joystick : owner_wrapper<SDL_Joystick*> {
 
-        using parent_t = observable_wrapper<SDL_Joystick*>;
+        using parent_t = owner_wrapper<SDL_Joystick*>;
 
 
         // Inherit constructors.

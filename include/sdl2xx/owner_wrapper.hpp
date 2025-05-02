@@ -6,8 +6,8 @@
  * SPDX-License-Identifier: Zlib
  */
 
-#ifndef SDL2XX_OBSERVABLE_WRAPPER_HPP
-#define SDL2XX_OBSERVABLE_WRAPPER_HPP
+#ifndef SDL2XX_OWNER_WRAPPER_HPP
+#define SDL2XX_OWNER_WRAPPER_HPP
 
 #include <tuple>
 #include <utility>
@@ -20,7 +20,7 @@ namespace sdl {
     // This wrapper allows an instance to be just an observer.
     // Observer instances do not destroy the raw object.
     template<typename T>
-    class observable_wrapper : public basic_wrapper<T> {
+    class owner_wrapper : public basic_wrapper<T> {
 
     protected:
 
@@ -40,7 +40,7 @@ namespace sdl {
 
 
         /// Move constructor.
-        observable_wrapper(observable_wrapper&& other)
+        owner_wrapper(owner_wrapper&& other)
             noexcept
         {
             acquire(other.release());
@@ -48,8 +48,8 @@ namespace sdl {
 
 
         /// Move assignment.
-        observable_wrapper&
-        operator =(observable_wrapper&& other)
+        owner_wrapper&
+        operator =(owner_wrapper&& other)
             noexcept
         {
             if (this != &other) {

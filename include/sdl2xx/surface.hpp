@@ -15,7 +15,7 @@
 
 #include <SDL_surface.h>
 
-#include "observable_wrapper.hpp"
+#include "owner_wrapper.hpp"
 #include "color.hpp"
 #include "pixels.hpp"
 #include "rect.hpp"
@@ -26,7 +26,7 @@ namespace sdl {
     using std::filesystem::path;
 
 
-    class surface : public observable_wrapper<SDL_Surface*> {
+    class surface : public owner_wrapper<SDL_Surface*> {
 
         void* user_data = nullptr;
 
@@ -37,7 +37,7 @@ namespace sdl {
 
     public:
 
-        using parent_t = observable_wrapper<SDL_Surface*>;
+        using parent_t = owner_wrapper<SDL_Surface*>;
 
         using state_t = std::tuple<
             std::tuple_element_t<0, parent_t::state_t>,
