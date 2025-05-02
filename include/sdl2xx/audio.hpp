@@ -92,8 +92,10 @@ namespace sdl::audio {
 
     struct device : basic_wrapper<SDL_AudioDeviceID> {
 
+        using parent_t = basic_wrapper<SDL_AudioDeviceID>;
+
         // Inherit constructors.
-        using basic_wrapper::basic_wrapper;
+        using parent_t::parent_t;
 
 
         device(const char* name,
@@ -110,9 +112,10 @@ namespace sdl::audio {
                    is_capture, desired, allowed_changes}
         {}
 
+
         /// Move constructor.
         device(device&& other)
-            noexcept;
+            noexcept = default;
 
 
         ~device()
@@ -122,7 +125,7 @@ namespace sdl::audio {
         /// Move assignment.
         device&
         operator =(device&& other)
-            noexcept;
+            noexcept = default;
 
 
         void
@@ -275,12 +278,13 @@ namespace sdl::audio {
     }; // struct converter
 
 
-    class stream : public basic_wrapper<SDL_AudioStream*> {
+    struct stream : basic_wrapper<SDL_AudioStream*> {
 
-    public:
+        using parent_t = basic_wrapper<SDL_AudioStream*>;
+
 
         // Inherit constructors.
-        using basic_wrapper::basic_wrapper;
+        using parent_t::parent_t;
 
 
         stream(format_t src_format,
@@ -292,7 +296,7 @@ namespace sdl::audio {
 
         /// Move constructor.
         stream(stream&& other)
-            noexcept;
+            noexcept = default;
 
 
         ~stream()
@@ -302,7 +306,7 @@ namespace sdl::audio {
         /// Move assignment.
         stream&
         operator =(stream&& other)
-            noexcept;
+            noexcept = default;
 
 
 
@@ -378,8 +382,6 @@ namespace sdl::audio {
                   src.size_bytes(),
                   volume);
     }
-
-
 
 } // namespace sdl::audio
 

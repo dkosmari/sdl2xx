@@ -20,14 +20,13 @@ namespace sdl {
         T raw = {};
 
 
-        // Ensure it can only be destructed by derived classes.
-        constexpr
         ~basic_wrapper()
             noexcept = default;
 
     public:
 
         using raw_type = T;
+        using state_t = raw_type;
 
 
         constexpr
@@ -41,6 +40,34 @@ namespace sdl {
             noexcept :
             raw{src}
         {}
+
+
+        /// Move constructor.
+        constexpr
+        basic_wrapper(basic_wrapper&& other)
+            noexcept
+        {
+            acquire(other.release());
+        }
+
+
+        /// Move assignment.
+        basic_wrapper&
+        operator =(basic_wrapper&& other)
+            noexcept
+        {
+            if (this != &other) {
+                destroy();
+                acquire(other.release());
+            }
+            return *this;
+        }
+
+
+        virtual
+        void
+        destroy()
+            noexcept = 0;
 
 
         [[nodiscard]]
@@ -78,14 +105,14 @@ namespace sdl {
 
 
         void
-        acquire(raw_type new_raw)
+        acquire(state_t new_state)
             noexcept
         {
-            raw = new_raw;
+            raw = new_state;
         }
 
 
-        raw_type
+        state_t
         release()
             noexcept
         {

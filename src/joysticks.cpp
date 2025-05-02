@@ -336,12 +336,6 @@ namespace sdl::joysticks {
 #endif // SDL_VERSION_ATLEAST(2, 0, 6)
 
 
-    joystick::joystick(joystick&& other)
-        noexcept :
-        basic_wrapper{other.release()}
-    {}
-
-
     joystick::joystick(unsigned index)
     {
         auto j = SDL_JoystickOpen(index);
@@ -362,20 +356,11 @@ namespace sdl::joysticks {
     joystick::destroy()
         noexcept
     {
-        if (raw)
-            SDL_JoystickClose(release());
-    }
-
-
-    joystick&
-    joystick::operator =(joystick&& other)
-        noexcept
-    {
-        if (this != &other) {
-            destroy();
-            acquire(other.release());
+        if (raw) {
+            auto [old_raw, old_owner] = release();
+            if (old_owner)
+                SDL_JoystickClose(old_raw);
         }
-        return *this;
     }
 
 

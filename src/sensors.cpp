@@ -156,28 +156,23 @@ namespace sdl::sensors {
     }
 
 
-    sensor::sensor(sensor&& other)
-        noexcept :
-        basic_wrapper{other.release()}
-    {}
+    sensor
+    sensor::from_id(instance_id id)
+    {
+        // TODO: wrap SDL_SensorFromInstanceID()
+        auto raw = SDL_SensorFromInstanceID(id);
+        if (!raw)
+            throw error{};
+        sensor result;
+        result.acquire(raw, false);
+        return result;
+    }
 
 
     sensor::~sensor()
         noexcept
     {
         destroy();
-    }
-
-
-    sensor&
-    sensor::operator=(sensor&& other)
-        noexcept
-    {
-        if (this != &other) {
-            destroy();
-            acquire(other.release());
-        }
-        return *this;
     }
 
 
@@ -196,8 +191,11 @@ namespace sdl::sensors {
     sensor::destroy()
         noexcept
     {
-        if (raw)
-            SDL_SensorClose(release());
+        if (raw) {
+            auto [old_raw, old_owner] = release();
+            if (old_owner)
+                SDL_SensorClose(old_raw);
+        }
     }
 
 

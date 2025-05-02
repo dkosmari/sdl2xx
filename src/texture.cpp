@@ -50,8 +50,7 @@ namespace sdl {
 
 
     texture::texture(texture&& other)
-        noexcept :
-        basic_wrapper{}
+        noexcept
     {
         acquire(other.release());
     }
@@ -119,10 +118,10 @@ namespace sdl {
 
 
     void
-    texture::acquire(std::tuple<SDL_Texture*, void*, unique_ptr<surface>> state)
+    texture::acquire(state_t state)
         noexcept
     {
-        basic_wrapper::acquire(get<0>(state));
+        parent_t::acquire(get<0>(state));
         user_data = get<1>(state);
         locked_surface = std::move(get<2>(state));
         link_this();
@@ -130,10 +129,12 @@ namespace sdl {
 
 
     void
-    texture::acquire(SDL_Texture* ptr)
+    texture::acquire(raw_type new_raw,
+                     void* new_user_data,
+                     unique_ptr<surface> new_locked_surface)
         noexcept
     {
-        acquire({ptr, nullptr, nullptr});
+        acquire({ new_raw, new_user_data, std::move(new_locked_surface) });
     }
 
 
@@ -143,11 +144,9 @@ namespace sdl {
     texture::release()
         noexcept
     {
-        auto old_user_data = user_data;
-        user_data = nullptr;
         return {
             basic_wrapper::release(),
-            old_user_data,
+            set_user_data(nullptr),
             std::move(locked_surface)
         };
     }
@@ -312,11 +311,13 @@ namespace sdl {
     }
 
 
-    void
-    texture::set_user_data(void* d)
+    void*
+    texture::set_user_data(void* new_user_data)
         noexcept
     {
-        user_data = d;
+        void* old_user_data = user_data;
+        user_data = new_user_data;
+        return old_user_data;
     }
 
 

@@ -346,14 +346,6 @@ namespace sdl::pixels {
     }
 
 
-    palette::palette(palette&& other)
-        noexcept :
-        basic_wrapper{}
-    {
-        acquire(other.release());
-    }
-
-
     palette
     palette::ref_up(SDL_Palette* p)
         noexcept
@@ -367,18 +359,6 @@ namespace sdl::pixels {
         noexcept
     {
         destroy();
-    }
-
-
-    palette&
-    palette::operator =(palette&& other)
-        noexcept
-    {
-        if (this != &other) {
-            destroy();
-            acquire(other.release());
-        }
-        return *this;
     }
 
 
@@ -426,14 +406,6 @@ namespace sdl::pixels {
     }
 
 
-    format::format(format&& other)
-        noexcept :
-        basic_wrapper{}
-    {
-        acquire(other.release());
-    }
-
-
     format
     format::ref_up(SDL_PixelFormat* src)
         noexcept
@@ -447,18 +419,6 @@ namespace sdl::pixels {
         noexcept
     {
         destroy();
-    }
-
-
-    format&
-    format::operator =(format&& other)
-        noexcept
-    {
-        if (this != &other) {
-            destroy();
-            acquire(other.release());
-        }
-        return *this;
     }
 
 

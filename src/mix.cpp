@@ -225,28 +225,9 @@ namespace sdl::mix {
     }
 
 
-    chunk::chunk(chunk&& other)
-        noexcept
-    {
-        acquire(other.release());
-    }
-
-
     chunk::~chunk()
     {
         destroy();
-    }
-
-
-    chunk&
-    chunk::operator =(chunk&& other)
-        noexcept
-    {
-        if (this != &other) {
-            destroy();
-            acquire(other.release());
-        }
-        return *this;
     }
 
 
@@ -467,29 +448,10 @@ namespace sdl::mix {
     }
 
 
-    music::music(music&& other)
-        noexcept
-    {
-        acquire(other.release());
-    }
-
-
     music::~music()
         noexcept
     {
         destroy();
-    }
-
-
-    music&
-    music::operator =(music&& other)
-        noexcept
-    {
-        if (this != &other) {
-            destroy();
-            acquire(other.release());
-        }
-        return *this;
     }
 
 
@@ -1341,7 +1303,5 @@ namespace sdl::mix {
     {
         return Mix_GetTimidityCfg();
     }
-
-
 
 } // namespace sdl::mix

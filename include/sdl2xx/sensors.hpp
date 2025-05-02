@@ -18,13 +18,12 @@
 
 #if SDL_VERSION_ATLEAST(2, 0, 9)
 
-#include "basic_wrapper.hpp"
+#include "observable_wrapper.hpp"
 #include "error.hpp"
 #include "vector.hpp"
 
 
 namespace sdl::sensors {
-
 
     using instance_id = SDL_SensorID;
 
@@ -139,10 +138,12 @@ namespace sdl::sensors {
     get_id(unsigned index);
 
 
-    struct sensor : basic_wrapper<SDL_Sensor*> {
+    struct sensor : observable_wrapper<SDL_Sensor*> {
+
+        using parent_t = observable_wrapper<SDL_Sensor*>;
 
         // Inherit constructors.
-        using basic_wrapper::basic_wrapper;
+        using parent_t::parent_t;
 
 
         explicit
@@ -151,7 +152,14 @@ namespace sdl::sensors {
 
         /// Move constructor.
         sensor(sensor&& other)
-            noexcept;
+            noexcept = default;
+
+
+        // Named constructor: from instance id, observer.
+        [[nodiscard]]
+        static
+        sensor
+        from_id(instance_id id);
 
 
         ~sensor();
@@ -160,7 +168,7 @@ namespace sdl::sensors {
         /// Move assignment.
         sensor&
         operator =(sensor&& other)
-            noexcept;
+            noexcept = default;
 
 
         void
@@ -235,9 +243,6 @@ namespace sdl::sensors {
 
 
     static constexpr float gravity = SDL_STANDARD_GRAVITY;
-
-
-    // TODO: wrap SDL_SensorFromInstanceID()
 
 
     void

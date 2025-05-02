@@ -43,6 +43,11 @@ namespace sdl {
 
     public:
 
+        using parent_t = basic_wrapper<SDL_Window*>;
+
+        using state_t = std::tuple<raw_type, unique_ptr<surface>>;
+
+
         enum flag : Uint32 {
             allow_high_dpi     = SDL_WINDOW_ALLOW_HIGHDPI,
             always_on_top      = SDL_WINDOW_ALWAYS_ON_TOP,
@@ -77,7 +82,7 @@ namespace sdl {
 
 
         // Inherit constructors.
-        using basic_wrapper::basic_wrapper;
+        using parent_t::parent_t;
 
 
         explicit
@@ -170,17 +175,16 @@ namespace sdl {
 
 
         void
-        acquire(std::tuple<SDL_Window*,
-                unique_ptr<surface>> state)
+        acquire(state_t state)
             noexcept;
 
         void
-        acquire(SDL_Window* w)
+        acquire(SDL_Window* new_raw,
+                unique_ptr<surface> new_surf = {})
             noexcept;
 
 
-        std::tuple<SDL_Window*,
-                   unique_ptr<surface>>
+        state_t
         release()
             noexcept;
 

@@ -15,7 +15,7 @@
 
 #include <SDL_surface.h>
 
-#include "basic_wrapper.hpp"
+#include "observable_wrapper.hpp"
 #include "color.hpp"
 #include "pixels.hpp"
 #include "rect.hpp"
@@ -26,10 +26,9 @@ namespace sdl {
     using std::filesystem::path;
 
 
-    class surface : public basic_wrapper<SDL_Surface*> {
+    class surface : public observable_wrapper<SDL_Surface*> {
 
         void* user_data = nullptr;
-        bool owner = true;
 
 
         void
@@ -38,13 +37,21 @@ namespace sdl {
 
     public:
 
+        using parent_t = observable_wrapper<SDL_Surface*>;
+
+        using state_t = std::tuple<
+            std::tuple_element_t<0, parent_t::state_t>,
+            std::tuple_element_t<1, parent_t::state_t>,
+            void*
+            >;
+
 
         struct dont_destroy_t{};
         static constexpr dont_destroy_t dont_destroy{};
 
 
         // Inherit constructors.
-        using basic_wrapper::basic_wrapper;
+        using parent_t::parent_t;
 
 
         surface(Uint32 flags,
@@ -165,19 +172,21 @@ namespace sdl {
 
         void
         destroy()
-            noexcept;
+            noexcept override;
 
 
         void
-        acquire(const std::tuple<SDL_Surface*, void*, bool>& state)
+        acquire(state_t state)
             noexcept;
 
         void
-        acquire(SDL_Surface* new_raw)
+        acquire(SDL_Surface* new_raw,
+                bool new_owner = true,
+                void* new_user_data = nullptr)
             noexcept;
 
 
-        std::tuple<SDL_Surface*, void*, bool>
+        state_t
         release()
             noexcept;
 
@@ -422,7 +431,7 @@ namespace sdl {
         fill(std::span<const rect> rs,
              color c);
 
-    };
+    }; // class surface
 
 
     void

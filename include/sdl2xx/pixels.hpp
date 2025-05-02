@@ -229,9 +229,6 @@ namespace sdl::pixels {
         explicit
         palette(unsigned n);
 
-        /// Move constructor.
-        palette(palette&& other)
-            noexcept;
 
         // Named constructor: from a palette, increase ref
         [[nodiscard]]
@@ -241,6 +238,11 @@ namespace sdl::pixels {
             noexcept;
 
 
+        /// Move constructor.
+        palette(palette&& other)
+            noexcept = default;
+
+
         ~palette()
             noexcept;
 
@@ -248,7 +250,7 @@ namespace sdl::pixels {
         /// Move assignment.
         palette&
         operator =(palette&& other)
-            noexcept;
+            noexcept = default;
 
 
         void
@@ -276,16 +278,20 @@ namespace sdl::pixels {
 
     struct format : basic_wrapper<SDL_PixelFormat*> {
 
+        using parent_t = basic_wrapper<SDL_PixelFormat*>;
+
         // Inherit constructors.
-        using basic_wrapper::basic_wrapper;
+        using parent_t::parent_t;
 
 
         explicit
         format(format_enum fmt);
 
+
         /// Move constructor.
         format(format&& other)
-            noexcept;
+            noexcept = default;
+
 
         // Named constructor: from a format, increase ref
         [[nodiscard]]
@@ -302,7 +308,7 @@ namespace sdl::pixels {
         /// Move assignment.
         format&
         operator =(format&& other)
-            noexcept;
+            noexcept = default;
 
 
         void

@@ -19,12 +19,12 @@
 
 #include <SDL_gamecontroller.h>
 
-#include "basic_wrapper.hpp"
 #include "error.hpp"
 #include "joysticks.hpp"
+#include "observable_wrapper.hpp"
 #include "sensors.hpp"
 #include "string.hpp"
-#include <vector>
+#include "vector.hpp"
 
 
 namespace sdl::game_controllers {
@@ -33,7 +33,8 @@ namespace sdl::game_controllers {
 
     using std::filesystem::path;
 
-    using guid = joysticks::guid;
+    using joysticks::instance_id;
+    using joysticks::guid;
 
 
     enum class type {
@@ -342,12 +343,14 @@ namespace sdl::game_controllers {
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 12)
 
-    // TODO: allow non-owning wrapper
 
-    struct game_controller : basic_wrapper<SDL_GameController*> {
+    struct game_controller : observable_wrapper<SDL_GameController*> {
+
+        using parent_t = observable_wrapper<SDL_GameController*>;
+
 
         // Inherit constructors.
-        using basic_wrapper::basic_wrapper;
+        using parent_t::parent_t;
 
 
         explicit
@@ -356,15 +359,39 @@ namespace sdl::game_controllers {
 
         /// Move constructor.
         game_controller(game_controller&& other)
-            noexcept;
+            noexcept = default;
+
+
+#if SDL_VERSION_ATLEAST(2, 0, 4)
+
+        // Named constructor: from id, return observer.
+        [[nodiscard]]
+        static
+        game_controller
+        from_id(instance_id id);
+
+#endif // SDL_VERSION_ATLEAST(2, 0, 4)
+
+
+#if SDL_VERSION_ATLEAST(2, 0, 12)
+
+        // Named constructor: from player index, return observer.
+        [[nodiscard]]
+        static
+        game_controller
+        from_player(int index);
+
+#endif // SDL_VERSION_ATLEAST(2, 0, 12)
+
 
         ~game_controller()
             noexcept;
 
+
         /// Move assignment.
         game_controller&
         operator =(game_controller&& other)
-            noexcept;
+            noexcept = default;
 
 
         void
@@ -715,6 +742,11 @@ namespace sdl::game_controllers {
 #endif // SDL_VERSION_ATLEAST(2, 0, 18)
 
 
+        // Note: result is an observer instance.
+        [[nodiscard]]
+        joysticks::joystick
+        get_joystick()
+            const;
 
     }; // struct game_controller
 
@@ -739,25 +771,6 @@ namespace sdl::game_controllers {
     using joysticks::axis_min;
     using joysticks::axis_max;
     using joysticks::axis_dead_zone;
-
-
-
-#if SDL_VERSION_ATLEAST(2, 0, 4)
-
-// TODO: wrap SDL_GameControllerFromInstanceID()
-
-#endif // SDL_VERSION_ATLEAST(2, 0, 4)
-
-
-#if SDL_VERSION_ATLEAST(2, 0, 12)
-
-// TODO: wrap SDL_GameControllerFromPlayerIndex()
-
-#endif // SDL_VERSION_ATLEAST(2, 0, 12)
-
-
-// TODO: wrap SDL_GameControllerGetJoystick()
-
 
 } // namespace sdl::game_controllers
 

@@ -119,29 +119,10 @@ namespace sdl::audio {
     }
 
 
-    device::device(device&& other)
-        noexcept
-    {
-        acquire(other.release());
-    }
-
-
     device::~device()
         noexcept
     {
         destroy();
-    }
-
-
-    device&
-    device::operator =(device&& other)
-        noexcept
-    {
-        if (this != &other) {
-            destroy();
-            acquire(other.release());
-        }
-        return *this;
     }
 
 
@@ -358,29 +339,10 @@ namespace sdl::audio {
     }
 
 
-    stream::stream(stream&& other)
-        noexcept
-    {
-        acquire(other.release());
-    }
-
-
     stream::~stream()
         noexcept
     {
         destroy();
-    }
-
-
-    stream&
-    stream::operator =(stream&& other)
-        noexcept
-    {
-        if (this != &other) {
-            destroy();
-            acquire(other.release());
-        }
-        return *this;
     }
 
 
@@ -489,7 +451,5 @@ namespace sdl::audio {
                            size,
                            volume);
     }
-
-
 
 } // namespace sdl::audio

@@ -36,17 +36,10 @@ namespace sdl {
     using vertex = SDL_Vertex;
 
 
-    class renderer : public basic_wrapper<SDL_Renderer*> {
+    struct renderer : basic_wrapper<SDL_Renderer*> {
 
-        void* user_data = nullptr;
+        using parent_t = basic_wrapper<SDL_Renderer*>;
 
-
-        void
-        link_this()
-            noexcept;
-
-
-    public:
 
         enum flag : Uint32 {
             software       = SDL_RENDERER_SOFTWARE,
@@ -120,14 +113,11 @@ namespace sdl {
 
 
         void
-        acquire(std::tuple<SDL_Renderer*, void*> state)
+        acquire(state_t state)
             noexcept;
 
-        void
-        acquire(SDL_Renderer* ren)
-            noexcept;
 
-        std::tuple<SDL_Renderer*, void*>
+        state_t
         release()
             noexcept;
 
@@ -511,9 +501,7 @@ namespace sdl {
         get_wrapper(const SDL_Renderer* ren)
             noexcept;
 
-    };
-
-
+    }; // struct renderer
 
 } // namespace sdl
 

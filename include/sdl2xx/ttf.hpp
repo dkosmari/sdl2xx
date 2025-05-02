@@ -86,6 +86,9 @@ namespace sdl::ttf {
 
     struct font : basic_wrapper<TTF_Font*> {
 
+        using parent_t = basic_wrapper<TTF_Font*>;
+
+
         struct dpi_opt {
             unsigned h;
             unsigned v;
@@ -120,7 +123,7 @@ namespace sdl::ttf {
 
         /// Move constructor.
         font(font&& other)
-            noexcept;
+            noexcept = default;
 
 
         ~font()
@@ -130,7 +133,7 @@ namespace sdl::ttf {
         /// Move assignment.
         font&
         operator =(font&& other)
-            noexcept;
+            noexcept = default;
 
 
         void

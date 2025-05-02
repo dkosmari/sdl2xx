@@ -302,28 +302,43 @@ namespace sdl::game_controllers {
     }
 
 
-    game_controller::game_controller(game_controller&& other)
-        noexcept :
-        basic_wrapper{other.release()}
-    {}
+#if SDL_VERSION_ATLEAST(2, 0, 4)
+
+    game_controller
+    game_controller::from_id(instance_id id)
+    {
+        auto raw = SDL_GameControllerFromInstanceID(id);
+        if (!raw)
+            throw error{};
+        game_controller result;
+        result.acquire(raw, false);
+        return result;
+    }
+
+#endif // SDL_VERSION_ATLEAST(2, 0, 4)
+
+
+#if SDL_VERSION_ATLEAST(2, 0, 12)
+
+    game_controller
+    game_controller::from_player(int index)
+    {
+        // TODO: wrap SDL_GameControllerFromPlayerIndex()
+        auto raw = SDL_GameControllerFromPlayerIndex(index);
+        if (!raw)
+            throw error{};
+        game_controller result;
+        result.acquire(raw, false);
+        return result;
+    }
+
+#endif // SDL_VERSION_ATLEAST(2, 0, 12)
 
 
     game_controller::~game_controller()
         noexcept
     {
         destroy();
-    }
-
-
-    game_controller&
-    game_controller::operator =(game_controller&& other)
-        noexcept
-    {
-        if (this != &other) {
-            destroy();
-            acquire(other.release());
-        }
-        return *this;
     }
 
 
@@ -342,8 +357,11 @@ namespace sdl::game_controllers {
     game_controller::destroy()
         noexcept
     {
-        if (raw)
-            SDL_GameControllerClose(release());
+        if (raw) {
+            auto [old_raw, old_owner] = release();
+            if (old_owner)
+                SDL_GameControllerClose(old_raw);
+        }
     }
 
 
@@ -821,6 +839,19 @@ namespace sdl::game_controllers {
     }
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 18)
+
+
+    joysticks::joystick
+    game_controller::get_joystick()
+        const
+    {
+        auto j = SDL_GameControllerGetJoystick(raw);
+        if (!j)
+            throw error{};
+        joysticks::joystick result;
+        result.acquire(j);
+        return result;
+    }
 
 
     void

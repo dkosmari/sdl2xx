@@ -18,10 +18,10 @@
 #include <SDL_joystick.h>
 #include <SDL_version.h>
 
-#include "basic_wrapper.hpp"
 #include "color.hpp"
 #include "error.hpp"
 #include "guid.hpp"
+#include "observable_wrapper.hpp"
 #include "string.hpp"
 #include "vec2.hpp"
 
@@ -230,14 +230,17 @@ namespace sdl::joysticks {
 #endif // SDL_VERSION_ATLEAST(2, 0, 6)
 
 
-    struct joystick : basic_wrapper<SDL_Joystick*> {
+    struct joystick : observable_wrapper<SDL_Joystick*> {
+
+        using parent_t = observable_wrapper<SDL_Joystick*>;
+
 
         // Inherit constructors.
-        using basic_wrapper::basic_wrapper;
+        using parent_t::parent_t;
 
         /// Move constructor.
         joystick(joystick&& other)
-            noexcept;
+            noexcept = default;
 
 
         explicit
@@ -251,7 +254,7 @@ namespace sdl::joysticks {
         /// Move assignment.
         joystick&
         operator =(joystick&& other)
-            noexcept;
+            noexcept = default;
 
 
         void

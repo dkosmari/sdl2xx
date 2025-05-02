@@ -114,7 +114,7 @@ namespace sdl {
                      dont_destroy_t)
         noexcept
     {
-        acquire({surf, nullptr, false});
+        acquire(surf, false, nullptr);
     }
 
 
@@ -126,7 +126,7 @@ namespace sdl {
 
 
     surface::surface(const surface& other) :
-        basic_wrapper{}
+        parent_t{}
     {
         create(other);
     }
@@ -255,11 +255,14 @@ namespace sdl {
     void
     surface::create(const surface& other)
     {
-        auto ptr = SDL_DuplicateSurface(other.raw);
-        if (!ptr)
-            throw error{};
-        destroy();
-        acquire(ptr);
+        if (other.raw) {
+            auto ptr = SDL_DuplicateSurface(other.raw);
+            if (!ptr)
+                throw error{};
+            destroy();
+            acquire(ptr);
+        } else
+            destroy();
     }
 
 
@@ -296,48 +299,43 @@ namespace sdl {
         noexcept
     {
         if (raw) {
-            auto [old_surf, old_user_data, old_owner] = release();
+            auto [old_raw, old_owner, old_user_data] = release();
             if (old_owner)
-                SDL_FreeSurface(old_surf);
+                SDL_FreeSurface(old_raw);
         }
 
     }
 
 
     void
-    surface::acquire(const std::tuple<SDL_Surface*, void*, bool>& state)
+    surface::acquire(state_t state)
         noexcept
     {
-        basic_wrapper::acquire(get<0>(state));
-        user_data = get<1>(state);
-        owner = get<2>(state);
+        parent_t::acquire({
+                std::move(get<0>(state)),
+                std::move(get<1>(state))
+            });
+        user_data = get<2>(state);
         link_this();
     }
 
 
     void
-    surface::acquire(SDL_Surface* new_raw)
+    surface::acquire(SDL_Surface* new_raw,
+                     bool new_owner,
+                     void* new_user_data)
         noexcept
     {
-        basic_wrapper::acquire(new_raw);
-        user_data = nullptr;
-        owner = true;
-        link_this();
+        acquire({new_raw, new_owner, new_user_data});
     }
 
 
-    std::tuple<SDL_Surface*, void*, bool>
+    surface::state_t
     surface::release()
         noexcept
     {
-        auto old_owner = owner;
-        user_data = nullptr;
-        owner = true;
-        return {
-            basic_wrapper::release(),
-            set_user_data(nullptr),
-            old_owner
-        };
+        return std::tuple_cat(parent_t::release(),
+                              std::tuple(set_user_data(nullptr)));
     }
 
 

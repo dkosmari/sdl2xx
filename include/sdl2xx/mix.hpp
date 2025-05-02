@@ -219,8 +219,12 @@ namespace sdl::mix {
 
     struct chunk : basic_wrapper<Mix_Chunk*> {
 
+        using parent_t = basic_wrapper<Mix_Chunk*>;
+
+
         // Inherit constructors.
         using basic_wrapper::basic_wrapper;
+
 
         chunk(const path& filename);
 
@@ -242,7 +246,7 @@ namespace sdl::mix {
 
         /// Move constructor.
         chunk(chunk&& other)
-            noexcept;
+            noexcept = default;
 
 
         ~chunk()
@@ -252,7 +256,7 @@ namespace sdl::mix {
         /// Move assignment.
         chunk&
         operator =(chunk&& other)
-            noexcept;
+            noexcept = default;
 
 
         void
@@ -374,8 +378,11 @@ namespace sdl::mix {
 
     struct music : basic_wrapper<Mix_Music*> {
 
+        using parent_t = basic_wrapper<Mix_Music*>;
+
+
         // Inherit constructors.
-        using basic_wrapper::basic_wrapper;
+        using parent_t::parent_t;
 
 
         enum class type {
@@ -404,7 +411,8 @@ namespace sdl::mix {
 
         /// Move constructor.
         music(music&& other)
-            noexcept;
+            noexcept = default;
+
 
         ~music()
             noexcept;
@@ -413,7 +421,7 @@ namespace sdl::mix {
         /// Move assignment.
         music&
         operator =(music&& other)
-            noexcept;
+            noexcept = default;
 
 
         void

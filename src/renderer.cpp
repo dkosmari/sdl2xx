@@ -20,6 +20,10 @@ namespace sdl {
 
         namespace detail {
 
+            // This implements a table to map raw pointesr to their C++ wrapper.
+            // TODO: these should all be protected by a mutex.
+
+
             using element_t = std::pair<const SDL_Renderer*,
                                         const renderer*>;
 
@@ -91,15 +95,6 @@ namespace sdl {
     } // namespace
 
 
-    void
-    renderer::link_this()
-        noexcept
-    {
-        if (raw)
-            detail::update(raw, this);
-    }
-
-
     int
     renderer::get_num_drivers()
     {
@@ -142,8 +137,7 @@ namespace sdl {
 
 
     renderer::renderer(renderer&& other)
-        noexcept :
-        basic_wrapper{}
+        noexcept
     {
         acquire(other.release());
     }
@@ -196,40 +190,27 @@ namespace sdl {
     renderer::destroy()
         noexcept
     {
-        if (raw) {
-            auto [old_raw, old_user_data] = release();
-            SDL_DestroyRenderer(old_raw);
-        }
+        if (raw)
+            SDL_DestroyRenderer(release());
     }
 
 
     void
-    renderer::acquire(std::tuple<SDL_Renderer*, void*> state)
+    renderer::acquire(state_t state)
         noexcept
     {
-        basic_wrapper::acquire(get<0>(state));
-        user_data = get<1>(state);
-        link_this();
+        parent_t::acquire(state);
+        if (raw)
+            detail::update(raw, this);
     }
 
 
-    void
-    renderer::acquire(SDL_Renderer* ren)
-        noexcept
-    {
-        acquire({ren, nullptr});
-    }
-
-
-    std::tuple<SDL_Renderer*, void*>
+    renderer::state_t
     renderer::release()
         noexcept
     {
-        void* old_user_data = user_data;
-        user_data = nullptr;
-        auto old_raw = basic_wrapper::release();
-        detail::remove(old_raw);
-        return {old_raw, old_user_data};
+        detail::remove(raw);
+        return parent_t::release();
     }
 
 

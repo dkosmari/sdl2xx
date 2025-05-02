@@ -102,29 +102,9 @@ namespace sdl::ttf {
     }
 
 
-    font::font(font&& other)
-        noexcept :
-        basic_wrapper{}
-    {
-        acquire(other.release());
-    }
-
-
     font::~font()
     {
         destroy();
-    }
-
-
-    font&
-    font::operator =(font&& other)
-        noexcept
-    {
-        if  (this != &other) {
-            destroy();
-            acquire(other.release());
-        }
-        return *this;
     }
 
 

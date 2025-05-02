@@ -125,25 +125,25 @@ namespace sdl {
 
 
     void
-    window::acquire(std::tuple<SDL_Window*, unique_ptr<surface>> state)
+    window::acquire(state_t state)
         noexcept
     {
-        basic_wrapper::acquire(get<0>(state));
+        basic_wrapper::acquire(std::move(get<0>(state)));
         surf = std::move(get<1>(state));
         link_this();
     }
 
 
     void
-    window::acquire(SDL_Window* w)
+    window::acquire(SDL_Window* new_raw,
+                    unique_ptr<surface> new_surf)
         noexcept
     {
-        acquire({w, nullptr});
+        acquire({new_raw, std::move(new_surf)});
     }
 
 
-    std::tuple<SDL_Window*,
-               unique_ptr<surface>>
+    window::state_t
     window::release()
         noexcept
     {
