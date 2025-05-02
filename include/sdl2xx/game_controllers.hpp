@@ -33,7 +33,7 @@ namespace sdl::game_controllers {
 
     using std::filesystem::path;
 
-    using guide = joysticks::guid;
+    using guid = joysticks::guid;
 
 
     enum class type {
