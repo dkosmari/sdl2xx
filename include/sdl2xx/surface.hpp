@@ -342,12 +342,15 @@ namespace sdl {
             const noexcept;
 
 
-        // TODO: overload for color?
         void
         set_color_key(Uint32 key);
 
         void
+        set_color_key(color key);
+
+        void
         unset_color_key();
+
 
         [[nodiscard]]
         bool

@@ -18,7 +18,7 @@
 
 #include "angle.hpp"
 #include "audio.hpp"
-#include "basic_wrapper.hpp"
+#include "observable_wrapper.hpp"
 #include "string.hpp"
 #include "vector.hpp"
 
@@ -207,7 +207,6 @@ namespace sdl::mix {
     }; // struct device
 
 
-
     [[nodiscard]]
     std::optional<spec_t>
     query();
@@ -217,13 +216,13 @@ namespace sdl::mix {
     allocate_channels(int num);
 
 
-    struct chunk : basic_wrapper<Mix_Chunk*> {
+    struct chunk : observable_wrapper<Mix_Chunk*> {
 
-        using parent_t = basic_wrapper<Mix_Chunk*>;
+        using parent_t = observable_wrapper<Mix_Chunk*>;
 
 
         // Inherit constructors.
-        using basic_wrapper::basic_wrapper;
+        using parent_t::parent_t;
 
 
         chunk(const path& filename);
@@ -374,6 +373,12 @@ namespace sdl::mix {
 
     }; // struct chunk
 
+
+    // Note: return observer chunk.
+    [[nodiscard]]
+    chunk
+    get_chunk(unsigned channel)
+        noexcept;
 
 
     struct music : basic_wrapper<Mix_Music*> {
@@ -976,10 +981,6 @@ namespace sdl::mix {
     const char*
     get_timidity_cfg()
         noexcept;
-
-
-    // TODO: wrap Mix_GetChunk()
-
 
 } // namespace sdl::mix
 

@@ -537,6 +537,15 @@ namespace sdl {
 
 
     void
+    surface::set_color_key(color key)
+    {
+        auto fmt = get_format();
+        Uint32 pixel = fmt.map_rgba(key);
+        set_color_key(pixel);
+    }
+
+
+    void
     surface::unset_color_key()
     {
         if (SDL_SetColorKey(raw, SDL_FALSE, 0) < 0)

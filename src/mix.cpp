@@ -282,8 +282,11 @@ namespace sdl::mix {
     chunk::destroy()
         noexcept
     {
-        if (raw)
-            Mix_FreeChunk(release());
+        if (raw) {
+            auto [old_raw, old_owner] = release();
+            if (old_owner)
+                Mix_FreeChunk(old_raw);
+        }
     }
 
 
@@ -424,6 +427,17 @@ namespace sdl::mix {
     {
         int result = Mix_VolumeChunk(raw, map_to_volume(new_volume));
         return result / float(max_volume);
+    }
+
+
+    chunk
+    get_chunk(unsigned channel)
+        noexcept
+    {
+        auto raw = Mix_GetChunk(channel);
+        chunk result;
+        result.acquire(raw, false);
+        return result;
     }
 
 

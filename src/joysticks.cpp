@@ -345,6 +345,30 @@ namespace sdl::joysticks {
     }
 
 
+    joystick
+    joystick::from_id(instance_id id)
+    {
+        auto raw = SDL_JoystickFromInstanceID(id);
+        if (!raw)
+            throw error{};
+        joystick result;
+        result.acquire(raw, false);
+        return result;
+    }
+
+
+    joystick
+    joystick::from_player(int index)
+    {
+        auto raw = SDL_JoystickFromPlayerIndex(index);
+        if  (!raw)
+            throw error{};
+        joystick result;
+        result.acquire(raw, false);
+        return result;
+    }
+
+
     joystick::~joystick()
         noexcept
     {
