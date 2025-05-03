@@ -540,8 +540,13 @@ namespace sdl::game_controller {
 #if SDL_VERSION_ATLEAST(2, 0, 14)
 
         [[nodiscard]]
-        std::optional<const char*>
+        const char*
         get_serial()
+            const;
+
+        [[nodiscard]]
+        std::expected<const char*, error>
+        try_get_serial()
             const noexcept;
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 14)

@@ -528,13 +528,24 @@ namespace sdl::game_controller {
 
 #if SDL_VERSION_ATLEAST(2, 0, 14)
 
-    std::optional<const char*>
+    const char*
     device::get_serial()
+        const
+    {
+        auto result = try_get_serial();
+        if (!result)
+            throw result.error();
+        return *result;
+    }
+
+
+    std::expected<const char*, error>
+    device::try_get_serial()
         const noexcept
     {
         const char* serial = SDL_GameControllerGetSerial(raw);
         if (!serial)
-            return {};
+            return unexpected{error{}};
         return serial;
     }
 
