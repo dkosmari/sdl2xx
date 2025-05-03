@@ -28,6 +28,7 @@ sdl2xx_HEADERS = \
 	include/sdl2xx/clipboard.hpp \
 	include/sdl2xx/color.hpp \
 	include/sdl2xx/display.hpp \
+	include/sdl2xx/endian.hpp \
 	include/sdl2xx/error.hpp \
 	include/sdl2xx/events.hpp \
 	include/sdl2xx/game_controllers.hpp \

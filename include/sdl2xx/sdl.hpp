@@ -16,6 +16,7 @@
 #include "clipboard.hpp"
 #include "color.hpp"
 #include "display.hpp"
+#include "endian.hpp"
 #include "error.hpp"
 #include "events.hpp"
 #include "game_controllers.hpp"
