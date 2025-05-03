@@ -24,6 +24,7 @@
 #include "guid.hpp"
 #include "init.hpp"
 #include "joysticks.hpp"
+#include "mouse.hpp"
 #include "pixels.hpp"
 #include "rect.hpp"
 #include "renderer.hpp"

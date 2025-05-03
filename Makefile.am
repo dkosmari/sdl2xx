@@ -36,6 +36,7 @@ sdl2xx_HEADERS = \
 	include/sdl2xx/guid.hpp \
 	include/sdl2xx/init.hpp \
 	include/sdl2xx/joysticks.hpp \
+	include/sdl2xx/mouse.hpp \
 	include/sdl2xx/owner_wrapper.hpp \
 	include/sdl2xx/pixels.hpp \
 	include/sdl2xx/rect.hpp \
@@ -87,6 +88,7 @@ libsdl2xx_a_SOURCES = \
 	src/impl/utils.cpp \
 	src/impl/utils.hpp \
 	src/joysticks.cpp \
+	src/mouse.cpp \
 	src/pixels.cpp \
 	src/rect.cpp \
 	src/renderer.cpp \

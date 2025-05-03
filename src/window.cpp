@@ -9,6 +9,7 @@
 #include <utility>
 
 #include <SDL_keyboard.h>
+#include <SDL_mouse.h>
 
 #include "window.hpp"
 
@@ -791,6 +792,23 @@ namespace sdl {
         if (!win)
             return nullptr;
         return reinterpret_cast<window*>(SDL_GetWindowData(win, wrapper_key));
+    }
+
+
+    void
+    window::warp_mouse(int x,
+                       int y)
+        noexcept
+    {
+        SDL_WarpMouseInWindow(raw, x, y);
+    }
+
+
+    void
+    window::warp_mouse(vec2 pos)
+        noexcept
+    {
+        warp_mouse(pos.x, pos.y);
     }
 
 } // namespace sdl

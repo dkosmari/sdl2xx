@@ -596,6 +596,16 @@ namespace sdl {
         get_wrapper(SDL_Window* win)
             noexcept;
 
+
+        void
+        warp_mouse(int x,
+                   int y)
+            noexcept;
+
+        void
+        warp_mouse(vec2 pos)
+            noexcept;
+
     }; // class window
 
 } // namespace sdl
