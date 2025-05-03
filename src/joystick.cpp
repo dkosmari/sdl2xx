@@ -10,7 +10,7 @@
 
 #include <SDL_events.h>         // SDL_QUERY
 
-#include "joysticks.hpp"
+#include "joystick.hpp"
 
 #include "impl/utils.hpp"
 
@@ -18,7 +18,7 @@
 using std::expected;
 using std::unexpected;
 
-namespace sdl::joysticks {
+namespace sdl::joystick {
 
     using impl::utils::map_to_uint16;
 
@@ -196,7 +196,7 @@ namespace sdl::joysticks {
     {
         if (!locked) {
             locked = true;
-            sdl::joysticks::lock();
+            sdl::joystick::lock();
         }
     }
 
@@ -206,7 +206,7 @@ namespace sdl::joysticks {
         noexcept
     {
         if (locked) {
-            sdl::joysticks::unlock();
+            sdl::joystick::unlock();
             locked = false;
         }
     }
@@ -215,7 +215,7 @@ namespace sdl::joysticks {
 
 
     unsigned
-    get_num_joysticks()
+    get_num_devices()
     {
         int result = SDL_NumJoysticks();
         if (result < 0)
@@ -320,7 +320,7 @@ namespace sdl::joysticks {
     get_type(unsigned index)
         noexcept
     {
-        return static_cast<type>(SDL_JoystickGetDeviceType(index));
+        return convert(SDL_JoystickGetDeviceType(index));
     }
 
 
@@ -336,7 +336,7 @@ namespace sdl::joysticks {
 #endif // SDL_VERSION_ATLEAST(2, 0, 6)
 
 
-    joystick::joystick(unsigned index)
+    device::device(unsigned index)
     {
         auto j = SDL_JoystickOpen(index);
         if (!j)
@@ -345,31 +345,31 @@ namespace sdl::joysticks {
     }
 
 
-    joystick
-    joystick::from_id(instance_id id)
+    device
+    device::from_id(instance_id id)
     {
         if (!SDL_JoystickFromInstanceID(id))
             throw error{};
-        for (unsigned i = 0; i < get_num_joysticks(); ++i)
-            if (id == joysticks::get_id(i))
-                return joystick{i};
+        for (unsigned i = 0; i < get_num_devices(); ++i)
+            if (id == joystick::get_id(i))
+                return device{i};
         throw error{"unknown error"};
     }
 
 
-    joystick
-    joystick::from_player(int player)
+    device
+    device::from_player(int player)
     {
         if (!SDL_JoystickFromPlayerIndex(player))
             throw error{};
-        for (unsigned i = 0; i < get_num_joysticks(); ++i)
-            if (player == joysticks::get_player(i))
-                return joystick{i};
+        for (unsigned i = 0; i < get_num_devices(); ++i)
+            if (player == joystick::get_player(i))
+                return device{i};
         throw error{"unknown error"};
     }
 
 
-    joystick::~joystick()
+    device::~device()
         noexcept
     {
         destroy();
@@ -377,7 +377,7 @@ namespace sdl::joysticks {
 
 
     void
-    joystick::destroy()
+    device::destroy()
         noexcept
     {
         if (raw)
@@ -388,8 +388,8 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 14)
 
     void
-    joystick::set_virtual_axis(unsigned axis,
-                               Sint16 value)
+    device::set_virtual_axis(unsigned axis,
+                             Sint16 value)
     {
         if (SDL_JoystickSetVirtualAxis(raw, axis, value))
             throw error{};
@@ -397,8 +397,8 @@ namespace sdl::joysticks {
 
 
     void
-    joystick::set_virtual_button(unsigned button,
-                                 bool value)
+    device::set_virtual_button(unsigned button,
+                               bool value)
     {
         if (SDL_JoystickSetVirtualButton(raw, button, value))
             throw error{};
@@ -406,10 +406,10 @@ namespace sdl::joysticks {
 
 
     void
-    joystick::set_virtual_hat(unsigned hat,
-                              hat_dir value)
+    device::set_virtual_hat(unsigned hat,
+                            hat_dir value)
     {
-        if (SDL_JoystickSetVirtualHat(raw, hat, static_cast<Uint8>(value)))
+        if (SDL_JoystickSetVirtualHat(raw, hat, convert(value)))
             throw error{};
     }
 
@@ -417,7 +417,7 @@ namespace sdl::joysticks {
 
 
     const char*
-    joystick::get_name()
+    device::get_name()
         const
     {
         auto result = try_get_name();
@@ -428,7 +428,7 @@ namespace sdl::joysticks {
 
 
     expected<const char*, error>
-    joystick::try_get_name()
+    device::try_get_name()
         const noexcept
     {
         auto name = SDL_JoystickName(raw);
@@ -440,26 +440,26 @@ namespace sdl::joysticks {
 
 #if SDL_VERSION_ATLEAST(2, 24, 0)
 
-        const char*
-        joystick::get_path()
-            const
-        {
-            auto result = try_get_path();
-            if (!result)
-                throw result.error();
-            return *result;
-        }
+    const char*
+    device::get_path()
+        const
+    {
+        auto result = try_get_path();
+        if (!result)
+            throw result.error();
+        return *result;
+    }
 
 
-        expected<const char*, error>
-        joystick::try_get_path()
-            const noexcept
-        {
-            auto result = SDL_JoystickPath(raw);
-            if (!result)
-                return unexpected{error{}};
-            return result;
-        }
+    expected<const char*, error>
+    device::try_get_path()
+        const noexcept
+    {
+        auto result = SDL_JoystickPath(raw);
+        if (!result)
+            return unexpected{error{}};
+        return result;
+    }
 
 #endif // SDL_VERSION_ATLEAST(2, 24, 0)
 
@@ -467,7 +467,7 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 9)
 
     int
-    joystick::get_player()
+    device::get_player()
         const noexcept
     {
         return SDL_JoystickGetPlayerIndex(raw);
@@ -479,7 +479,7 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 12)
 
     void
-    joystick::set_player(int player)
+    device::set_player(int player)
         noexcept
     {
         SDL_JoystickSetPlayerIndex(raw, player);
@@ -489,7 +489,7 @@ namespace sdl::joysticks {
 
 
     guid
-    joystick::get_guid()
+    device::get_guid()
         const noexcept
     {
         return SDL_JoystickGetGUID(raw);
@@ -499,7 +499,7 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 6)
 
     Uint16
-    joystick::get_vendor()
+    device::get_vendor()
         const noexcept
     {
         return SDL_JoystickGetVendor(raw);
@@ -507,7 +507,7 @@ namespace sdl::joysticks {
 
 
     Uint16
-    joystick::get_product()
+    device::get_product()
         const noexcept
     {
         return SDL_JoystickGetProduct(raw);
@@ -515,7 +515,7 @@ namespace sdl::joysticks {
 
 
     Uint16
-    joystick::get_version()
+    device::get_version()
         const noexcept
     {
         return SDL_JoystickGetProductVersion(raw);
@@ -527,7 +527,7 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 24, 0)
 
     Uint16
-    joystick::get_firmware()
+    device::get_firmware()
         const noexcept
     {
         return SDL_JoystickGetFirmwareVersion(raw);
@@ -539,7 +539,7 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 14)
 
     const char*
-    joystick::get_serial()
+    device::get_serial()
         const
     {
         auto result = try_get_serial();
@@ -550,7 +550,7 @@ namespace sdl::joysticks {
 
 
     expected<const char*, error>
-    joystick::try_get_serial()
+    device::try_get_serial()
         const noexcept
     {
         auto serial = SDL_JoystickGetSerial(raw);
@@ -565,17 +565,17 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 6)
 
     type
-    joystick::get_type()
+    device::get_type()
         const noexcept
     {
-        return static_cast<type>(SDL_JoystickGetType(raw));
+        return convert(SDL_JoystickGetType(raw));
     }
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 6)
 
 
     bool
-    joystick::is_attached()
+    device::is_attached()
         const noexcept
     {
         return SDL_JoystickGetAttached(raw);
@@ -583,7 +583,7 @@ namespace sdl::joysticks {
 
 
     instance_id
-    joystick::get_id()
+    device::get_id()
         const
     {
         int result = SDL_JoystickInstanceID(raw);
@@ -594,7 +594,7 @@ namespace sdl::joysticks {
 
 
     unsigned
-    joystick::get_num_axes()
+    device::get_num_axes()
         const
     {
         int axes = SDL_JoystickNumAxes(raw);
@@ -605,7 +605,7 @@ namespace sdl::joysticks {
 
 
     unsigned
-    joystick::get_num_balls()
+    device::get_num_balls()
         const
     {
         int balls = SDL_JoystickNumBalls(raw);
@@ -616,7 +616,7 @@ namespace sdl::joysticks {
 
 
     unsigned
-    joystick::get_num_hats()
+    device::get_num_hats()
         const
     {
         int hats = SDL_JoystickNumHats(raw);
@@ -627,7 +627,7 @@ namespace sdl::joysticks {
 
 
     unsigned
-    joystick::get_num_buttons()
+    device::get_num_buttons()
         const
     {
         int buttons = SDL_JoystickNumButtons(raw);
@@ -638,7 +638,7 @@ namespace sdl::joysticks {
 
 
     Sint16
-    joystick::get_axis(unsigned axis)
+    device::get_axis(unsigned axis)
         const noexcept
     {
         return SDL_JoystickGetAxis(raw, axis);
@@ -648,7 +648,7 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 6)
 
     std::optional<Sint16>
-    joystick::get_axis_initial_state(unsigned axis)
+    device::get_axis_initial_state(unsigned axis)
         const noexcept
     {
         Sint16 state;
@@ -661,7 +661,7 @@ namespace sdl::joysticks {
 
 
     hat_dir
-    joystick::get_hat(unsigned hat)
+    device::get_hat(unsigned hat)
         const noexcept
     {
         return static_cast<hat_dir>(SDL_JoystickGetHat(raw, hat));
@@ -669,7 +669,7 @@ namespace sdl::joysticks {
 
 
     vec2
-    joystick::get_ball(unsigned ball)
+    device::get_ball(unsigned ball)
         const
     {
         vec2 result;
@@ -680,7 +680,7 @@ namespace sdl::joysticks {
 
 
     bool
-    joystick::get_button(unsigned button)
+    device::get_button(unsigned button)
         const noexcept
     {
         return SDL_JoystickGetButton(raw, button);
@@ -690,9 +690,9 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 9)
 
     bool
-    joystick::rumble(float low,
-                     float high,
-                     milliseconds duration)
+    device::rumble(float low,
+                   float high,
+                   milliseconds duration)
         noexcept
     {
         return !SDL_JoystickRumble(raw,
@@ -707,9 +707,9 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 14)
 
     bool
-    joystick::rumble_triggers(float left,
-                              float right,
-                              milliseconds duration)
+    device::rumble_triggers(float left,
+                            float right,
+                            milliseconds duration)
         noexcept
     {
         return !SDL_JoystickRumbleTriggers(raw,
@@ -720,7 +720,7 @@ namespace sdl::joysticks {
 
 
     bool
-    joystick::has_led()
+    device::has_led()
         const noexcept
     {
         return SDL_JoystickHasLED(raw);
@@ -728,9 +728,9 @@ namespace sdl::joysticks {
 
 
     bool
-    joystick::set_led(Uint8 red,
-                      Uint8 green,
-                      Uint8 blue)
+    device::set_led(Uint8 red,
+                    Uint8 green,
+                    Uint8 blue)
         noexcept
     {
         return !SDL_JoystickSetLED(raw, red, green, blue);
@@ -738,7 +738,7 @@ namespace sdl::joysticks {
 
 
     bool
-    joystick::set_led(color c)
+    device::set_led(color c)
         noexcept
     {
         return set_led(c.r, c.g, c.b);
@@ -750,7 +750,7 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 18)
 
     bool
-    joystick::has_rumble()
+    device::has_rumble()
         const noexcept
     {
         return SDL_JoystickHasRumble(raw);
@@ -758,7 +758,7 @@ namespace sdl::joysticks {
 
 
     bool
-    joystick::has_rumble_on_triggers()
+    device::has_rumble_on_triggers()
         const noexcept
     {
         return SDL_JoystickHasRumbleTriggers(raw);
@@ -770,8 +770,8 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 16)
 
     bool
-    joystick::send_effect(const void* payload,
-                    std::size_t size)
+    device::send_effect(const void* payload,
+                        std::size_t size)
         noexcept
     {
         return !SDL_JoystickSendEffect(raw, payload, size);
@@ -783,10 +783,10 @@ namespace sdl::joysticks {
 #if SDL_VERSION_ATLEAST(2, 0, 4)
 
     power_level
-    joystick::get_power_level()
+    device::get_power_level()
         const noexcept
     {
-        return static_cast<power_level>(SDL_JoystickCurrentPowerLevel(raw));
+        return convert(SDL_JoystickCurrentPowerLevel(raw));
     }
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 4)
@@ -800,7 +800,7 @@ namespace sdl::joysticks {
                    unsigned buttons,
                    unsigned hats)
     {
-        int idx = SDL_JoystickAttachVirtual(static_cast<SDL_JoystickType>(t),
+        int idx = SDL_JoystickAttachVirtual(convert(t),
                                             axes,
                                             buttons,
                                             hats);
@@ -883,4 +883,4 @@ namespace sdl::joysticks {
             throw error{};
     }
 
-} // namespace sdl::joysticks
+} // namespace sdl::joystick

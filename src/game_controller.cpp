@@ -12,7 +12,7 @@
 
 #include <SDL_events.h>         // SDL_QUERY
 
-#include "game_controllers.hpp"
+#include "game_controller.hpp"
 #include "unique_ptr.hpp"
 #include "impl/utils.hpp"
 
@@ -21,7 +21,7 @@ using std::expected;
 using std::unexpected;
 
 
-namespace sdl::game_controllers {
+namespace sdl::game_controller {
 
     using impl::utils::map_to_uint16;
 
@@ -296,7 +296,7 @@ namespace sdl::game_controllers {
 #endif // SDL_VERSION_ATLEAST(2, 0, 12)
 
 
-    game_controller::game_controller(unsigned index)
+    device::device(unsigned index)
     {
         create(index);
     }
@@ -304,14 +304,14 @@ namespace sdl::game_controllers {
 
 #if SDL_VERSION_ATLEAST(2, 0, 4)
 
-    game_controller
-    game_controller::from_id(instance_id id)
+    device
+    device::from_id(instance_id id)
     {
         if (!SDL_GameControllerFromInstanceID(id))
             throw error{};
-        for (unsigned i = 0; i < joysticks::get_num_joysticks(); ++i)
-            if (id == joysticks::get_id(i))
-                return game_controller{i};
+        for (unsigned i = 0; i < joystick::get_num_devices(); ++i)
+            if (id == joystick::get_id(i))
+                return device{i};
         throw error{"unknown error"};
     }
 
@@ -320,21 +320,21 @@ namespace sdl::game_controllers {
 
 #if SDL_VERSION_ATLEAST(2, 0, 12)
 
-    game_controller
-    game_controller::from_player(int player)
+    device
+    device::from_player(int player)
     {
         if (!SDL_GameControllerFromPlayerIndex(player))
             throw error{};
-        for (unsigned i = 0; i < joysticks::get_num_joysticks(); ++i)
-            if (player == joysticks::get_player(i))
-                return game_controller{i};
+        for (unsigned i = 0; i < joystick::get_num_devices(); ++i)
+            if (player == joystick::get_player(i))
+                return device{i};
         throw error{"unknown error"};
     }
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 12)
 
 
-    game_controller::~game_controller()
+    device::~device()
         noexcept
     {
         destroy();
@@ -342,7 +342,7 @@ namespace sdl::game_controllers {
 
 
     void
-    game_controller::create(unsigned index)
+    device::create(unsigned index)
     {
         auto ptr = SDL_GameControllerOpen(index);
         if (!ptr)
@@ -353,7 +353,7 @@ namespace sdl::game_controllers {
 
 
     void
-    game_controller::destroy()
+    device::destroy()
         noexcept
     {
         if (raw)
@@ -362,7 +362,7 @@ namespace sdl::game_controllers {
 
 
     string
-    game_controller::get_mapping()
+    device::get_mapping()
         const
     {
         auto result = try_get_mapping();
@@ -373,7 +373,7 @@ namespace sdl::game_controllers {
 
 
     std::expected<string, error>
-    game_controller::try_get_mapping()
+    device::try_get_mapping()
         const
     {
         unique_ptr<char> str{SDL_GameControllerMapping(raw)};
@@ -389,7 +389,7 @@ namespace sdl::game_controllers {
 
 
     std::optional<const char*>
-    game_controller::get_name()
+    device::get_name()
         const noexcept
     {
         const char* name = SDL_GameControllerName(raw);
@@ -402,7 +402,7 @@ namespace sdl::game_controllers {
 #if SDL_VERSION_ATLEAST(2, 24, 0)
 
     std::optional<const char*>
-    game_controller::get_path()
+    device::get_path()
         const noexcept
     {
         const char* p = SDL_GameControllerPath(raw);
@@ -417,7 +417,7 @@ namespace sdl::game_controllers {
 #if SDL_VERSION_ATLEAST(2, 0, 12)
 
     type
-    game_controller::get_type()
+    device::get_type()
         const noexcept
     {
         return convert(SDL_GameControllerGetType(raw));
@@ -429,7 +429,7 @@ namespace sdl::game_controllers {
 #if SDL_VERSION_ATLEAST(2, 0, 9)
 
     int
-    game_controller::get_player()
+    device::get_player()
         const noexcept
     {
         return SDL_GameControllerGetPlayerIndex(raw);
@@ -441,7 +441,7 @@ namespace sdl::game_controllers {
 #if SDL_VERSION_ATLEAST(2, 0, 12)
 
     void
-    game_controller::set_player(int player)
+    device::set_player(int player)
         noexcept
     {
         SDL_GameControllerSetPlayerIndex(raw, player);
@@ -453,7 +453,7 @@ namespace sdl::game_controllers {
 #if SDL_VERSION_ATLEAST(2, 0, 6)
 
     Uint16
-    game_controller::get_vendor()
+    device::get_vendor()
         const noexcept
     {
         return SDL_GameControllerGetVendor(raw);
@@ -461,7 +461,7 @@ namespace sdl::game_controllers {
 
 
     Uint16
-    game_controller::get_product()
+    device::get_product()
         const noexcept
     {
         return SDL_GameControllerGetProduct(raw);
@@ -469,7 +469,7 @@ namespace sdl::game_controllers {
 
 
     Uint16
-    game_controller::get_version()
+    device::get_version()
         const noexcept
     {
         return SDL_GameControllerGetProductVersion(raw);
@@ -481,7 +481,7 @@ namespace sdl::game_controllers {
 #if SDL_VERSION_ATLEAST(2, 24, 0)
 
     Uint16
-    game_controller::get_firmware()
+    device::get_firmware()
         const noexcept
     {
         return SDL_GameControllerGetFirmwareVersion(raw);
@@ -493,7 +493,7 @@ namespace sdl::game_controllers {
 #if SDL_VERSION_ATLEAST(2, 0, 14)
 
     std::optional<const char*>
-    game_controller::get_serial()
+    device::get_serial()
         const noexcept
     {
         const char* serial = SDL_GameControllerGetSerial(raw);
@@ -506,7 +506,7 @@ namespace sdl::game_controllers {
 
 
     bool
-    game_controller::is_attached()
+    device::is_attached()
         const noexcept
     {
         return SDL_GameControllerGetAttached(raw);
@@ -514,7 +514,7 @@ namespace sdl::game_controllers {
 
 
     button_bind
-    game_controller::get_bind(axis a)
+    device::get_bind(axis a)
         const noexcept
     {
         return SDL_GameControllerGetBindForAxis(raw, convert(a));
@@ -524,7 +524,7 @@ namespace sdl::game_controllers {
 #if SDL_VERSION_ATLEAST(2, 0, 14)
 
     bool
-    game_controller::has_axis(axis a)
+    device::has_axis(axis a)
         const noexcept
     {
         return SDL_GameControllerHasAxis(raw, convert(a));
@@ -534,7 +534,7 @@ namespace sdl::game_controllers {
 
 
     Sint16
-    game_controller::get_axis(axis a)
+    device::get_axis(axis a)
         const noexcept
     {
         return SDL_GameControllerGetAxis(raw, convert(a));
@@ -542,7 +542,7 @@ namespace sdl::game_controllers {
 
 
     button_bind
-    game_controller::get_bind(button b)
+    device::get_bind(button b)
         const noexcept
     {
         return SDL_GameControllerGetBindForButton(raw, convert(b));
@@ -552,7 +552,7 @@ namespace sdl::game_controllers {
 #if SDL_VERSION_ATLEAST(2, 0, 14)
 
     bool
-    game_controller::has_button(button b)
+    device::has_button(button b)
         const noexcept
     {
         return SDL_GameControllerHasButton(raw, convert(b));
@@ -562,7 +562,7 @@ namespace sdl::game_controllers {
 
 
     bool
-    game_controller::get_button(button b)
+    device::get_button(button b)
         const noexcept
     {
         return SDL_GameControllerGetButton(raw, convert(b));
@@ -572,7 +572,7 @@ namespace sdl::game_controllers {
 #if SDL_VERSION_ATLEAST(2, 0, 14)
 
     unsigned
-    game_controller::get_num_touchpads()
+    device::get_num_touchpads()
         const noexcept
     {
         return SDL_GameControllerGetNumTouchpads(raw);
@@ -580,16 +580,16 @@ namespace sdl::game_controllers {
 
 
     unsigned
-    game_controller::get_num_touchpad_fingers(unsigned touchpad)
+    device::get_num_touchpad_fingers(unsigned touchpad)
         const noexcept
     {
         return SDL_GameControllerGetNumTouchpadFingers(raw, touchpad);
     }
 
 
-    game_controller::finger_state
-    game_controller::get_touchpad_finger(unsigned touchpad,
-                                         unsigned finger)
+    device::finger_state
+    device::get_touchpad_finger(unsigned touchpad,
+                                unsigned finger)
         const
     {
         finger_state result;
@@ -606,7 +606,7 @@ namespace sdl::game_controllers {
 
 
     bool
-    game_controller::has_sensor(sensors::type t)
+    device::has_sensor(sensor::type t)
         const noexcept
     {
         return SDL_GameControllerHasSensor(raw, convert(t));
@@ -614,8 +614,8 @@ namespace sdl::game_controllers {
 
 
     bool
-    game_controller::set_sensor(sensors::type t,
-                                bool enabled)
+    device::set_sensor(sensor::type t,
+                       bool enabled)
         noexcept
     {
         return !SDL_GameControllerSetSensorEnabled(raw,
@@ -625,7 +625,7 @@ namespace sdl::game_controllers {
 
 
     bool
-    game_controller::is_enabled(sensors::type t)
+    device::is_enabled(sensor::type t)
         const noexcept
     {
         return SDL_GameControllerIsSensorEnabled(raw, convert(t));
@@ -633,9 +633,9 @@ namespace sdl::game_controllers {
 
 
     bool
-    game_controller::get_values(sensors::type t,
-                                float* buf,
-                                std::size_t count)
+    device::get_values(sensor::type t,
+                       float* buf,
+                       std::size_t count)
         noexcept
     {
         return !SDL_GameControllerGetSensorData(raw, convert(t), buf, count);
@@ -643,8 +643,8 @@ namespace sdl::game_controllers {
 
 
     bool
-    game_controller::get_values(sensors::type t,
-                                std::span<float> buf)
+    device::get_values(sensor::type t,
+                       std::span<float> buf)
         noexcept
     {
         return get_values(t, buf.data(), buf.size());
@@ -652,8 +652,8 @@ namespace sdl::game_controllers {
 
 
     vector<float>
-    game_controller::get_values(sensors::type t,
-                                std::size_t count)
+    device::get_values(sensor::type t,
+                       std::size_t count)
     {
         vector<float> values(count);
         if (!get_values(t, values))
@@ -667,7 +667,7 @@ namespace sdl::game_controllers {
 #if SDL_VERSION_ATLEAST(2, 0, 16)
 
     float
-    game_controller::get_sensor_rate(sensors::type t)
+    device::get_sensor_rate(sensor::type t)
         const noexcept
     {
         return SDL_GameControllerGetSensorDataRate(raw, convert(t));
@@ -679,9 +679,9 @@ namespace sdl::game_controllers {
 #if SDL_VERSION_ATLEAST(2, 26, 0)
 
     std::pair<bool, Uint64>
-    game_controller::get_values_timestamp(sensors::type t,
-                                          float* buf,
-                                          std::size_t count)
+    device::get_values_timestamp(sensor::type t,
+                                 float* buf,
+                                 std::size_t count)
         noexcept
     {
         Uint64 timestamp;
@@ -698,8 +698,8 @@ namespace sdl::game_controllers {
 
 
     std::pair<bool, Uint64>
-    game_controller::get_values_timestamp(sensors::type t,
-                                          std::span<float> buf)
+    device::get_values_timestamp(sensor::type t,
+                                 std::span<float> buf)
         noexcept
     {
         return get_values_timestamp(t, buf.data(), buf.size());
@@ -707,8 +707,8 @@ namespace sdl::game_controllers {
 
 
     std::pair<vector<float>, Uint64>
-    game_controller::get_values_timestamp(sensors::type t,
-                                          std::size_t count)
+    device::get_values_timestamp(sensor::type t,
+                                 std::size_t count)
     {
         vector<float> values(count);
         auto [success, timestamp] = get_values_timestamp(t, values);
@@ -727,9 +727,9 @@ namespace sdl::game_controllers {
 #if SDL_VERSION_ATLEAST(2, 0, 9)
 
     bool
-    game_controller::rumble(float low,
-                            float high,
-                            milliseconds duration)
+    device::rumble(float low,
+                   float high,
+                   milliseconds duration)
         noexcept
     {
         return !SDL_GameControllerRumble(raw,
@@ -744,9 +744,9 @@ namespace sdl::game_controllers {
 #if SDL_VERSION_ATLEAST(2, 0, 14)
 
     bool
-    game_controller::rumble_triggers(float left,
-                                     float right,
-                                     milliseconds duration)
+    device::rumble_triggers(float left,
+                            float right,
+                            milliseconds duration)
         noexcept
     {
         return !SDL_GameControllerRumbleTriggers(raw,
@@ -757,7 +757,7 @@ namespace sdl::game_controllers {
 
 
     bool
-    game_controller::has_led()
+    device::has_led()
         const noexcept
     {
         return SDL_GameControllerHasLED(raw);
@@ -765,9 +765,9 @@ namespace sdl::game_controllers {
 
 
     bool
-    game_controller::set_led(Uint8 red,
-                             Uint8 green,
-                             Uint8 blue)
+    device::set_led(Uint8 red,
+                    Uint8 green,
+                    Uint8 blue)
         noexcept
     {
         return !SDL_GameControllerSetLED(raw, red, green, blue);
@@ -775,7 +775,7 @@ namespace sdl::game_controllers {
 
 
     bool
-    game_controller::set_led(color c)
+    device::set_led(color c)
         noexcept
     {
         return set_led(c.r, c.g, c.b);
@@ -787,7 +787,7 @@ namespace sdl::game_controllers {
 #if SDL_VERSION_ATLEAST(2, 0, 18)
 
     bool
-    game_controller::has_rumble()
+    device::has_rumble()
         const noexcept
     {
         return SDL_GameControllerHasRumble(raw);
@@ -795,7 +795,7 @@ namespace sdl::game_controllers {
 
 
     bool
-    game_controller::has_rumble_on_triggers()
+    device::has_rumble_on_triggers()
         const noexcept
     {
         return SDL_GameControllerHasRumbleTriggers(raw);
@@ -807,8 +807,8 @@ namespace sdl::game_controllers {
 #if SDL_VERSION_ATLEAST(2, 0, 16)
 
     bool
-    game_controller::send_effect(const void* buf,
-                                 std::size_t size)
+    device::send_effect(const void* buf,
+                        std::size_t size)
         noexcept
     {
         return !SDL_GameControllerSendEffect(raw, buf, size);
@@ -820,7 +820,7 @@ namespace sdl::game_controllers {
 #if SDL_VERSION_ATLEAST(2, 0, 18)
 
     const char*
-    game_controller::get_apple_sf_symbol(button b)
+    device::get_apple_sf_symbol(button b)
         const noexcept
     {
         return SDL_GameControllerGetAppleSFSymbolsNameForButton(raw, convert(b));
@@ -828,7 +828,7 @@ namespace sdl::game_controllers {
 
 
     const char*
-    game_controller::get_apple_sf_symbol(axis a)
+    device::get_apple_sf_symbol(axis a)
         const noexcept
     {
         return SDL_GameControllerGetAppleSFSymbolsNameForAxis(raw, convert(a));
@@ -837,16 +837,18 @@ namespace sdl::game_controllers {
 #endif // SDL_VERSION_ATLEAST(2, 0, 18)
 
 
-    joysticks::joystick
-    game_controller::get_joystick()
+    joystick::device
+    device::get_joystick()
         const
     {
         auto j = SDL_GameControllerGetJoystick(raw);
         if (!j)
             throw error{};
-        joysticks::joystick result;
-        result.acquire(j);
-        return result;
+        auto id = SDL_JoystickInstanceID(j);
+        for (unsigned i = 0; i < joystick::get_num_devices(); ++i)
+            if (id == joystick::get_id(i))
+                return joystick::device{i};
+        throw error{"unknown error"};
     }
 
 
@@ -873,4 +875,4 @@ namespace sdl::game_controllers {
         SDL_GameControllerUpdate();
     }
 
-} // namespace sdl::game_controllers
+} // namespace sdl::game_controller

@@ -6,16 +6,16 @@
  * SPDX-License-Identifier: Zlib
  */
 
-#include "sensors.hpp"
+#include "sensor.hpp"
+
 
 #if SDL_VERSION_ATLEAST(2, 0, 9)
-
 
 using std::expected;
 using std::unexpected;
 
 
-namespace sdl::sensors {
+namespace sdl::sensor {
 
 #if SDL_VERSION_ATLEAST(2, 0, 14)
 
@@ -77,7 +77,7 @@ namespace sdl::sensors {
     {
         if (!locked) {
             locked = true;
-            sdl::sensors::lock();
+            sdl::sensor::lock();
         }
     }
 
@@ -87,7 +87,7 @@ namespace sdl::sensors {
         noexcept
     {
         if (locked) {
-            sdl::sensors::unlock();
+            sdl::sensor::unlock();
             locked = false;
         }
     }
@@ -96,7 +96,7 @@ namespace sdl::sensors {
 
 
     unsigned
-    get_num_sensors()
+    get_num_devices()
         noexcept
     {
         return SDL_NumSensors();
@@ -150,26 +150,26 @@ namespace sdl::sensors {
     }
 
 
-    sensor::sensor(unsigned index)
+    device::device(unsigned index)
     {
         create(index);
     }
 
 
-    sensor
-    sensor::from_id(instance_id id)
+    device
+    device::from_id(instance_id id)
     {
-        // TODO: wrap SDL_SensorFromInstanceID()
         auto raw = SDL_SensorFromInstanceID(id);
         if (!raw)
             throw error{};
-        sensor result;
-        result.acquire(raw, false);
-        return result;
+        for (unsigned i = 0; i < get_num_devices(); ++i)
+            if (id == sensor::get_id(i))
+                return device{i};
+        throw error{"unknown error"};
     }
 
 
-    sensor::~sensor()
+    device::~device()
         noexcept
     {
         destroy();
@@ -177,7 +177,7 @@ namespace sdl::sensors {
 
 
     void
-    sensor::create(unsigned index)
+    device::create(unsigned index)
     {
         auto ptr = SDL_SensorOpen(index);
         if (!ptr)
@@ -188,19 +188,16 @@ namespace sdl::sensors {
 
 
     void
-    sensor::destroy()
+    device::destroy()
         noexcept
     {
-        if (raw) {
-            auto [old_raw, old_owner] = release();
-            if (old_owner)
-                SDL_SensorClose(old_raw);
-        }
+        if (raw)
+            SDL_SensorClose(release());
     }
 
 
     const char*
-    sensor::get_name()
+    device::get_name()
         const noexcept
     {
         return SDL_SensorGetName(raw);
@@ -208,7 +205,7 @@ namespace sdl::sensors {
 
 
     type
-    sensor::get_type()
+    device::get_type()
         const noexcept
     {
         return convert(SDL_SensorGetType(raw));
@@ -216,7 +213,7 @@ namespace sdl::sensors {
 
 
     int
-    sensor::get_platform_type()
+    device::get_platform_type()
         const noexcept
     {
         return SDL_SensorGetNonPortableType(raw);
@@ -224,7 +221,7 @@ namespace sdl::sensors {
 
 
     instance_id
-    sensor::get_id()
+    device::get_id()
         const noexcept
     {
         return SDL_SensorGetInstanceID(raw);
@@ -232,7 +229,7 @@ namespace sdl::sensors {
 
 
     bool
-    sensor::get_values(float* buf,
+    device::get_values(float* buf,
                        std::size_t count)
         noexcept
     {
@@ -241,7 +238,7 @@ namespace sdl::sensors {
 
 
     bool
-    sensor::get_values(std::span<float> buf)
+    device::get_values(std::span<float> buf)
         noexcept
     {
         return get_values(buf.data(), buf.size());
@@ -249,7 +246,7 @@ namespace sdl::sensors {
 
 
     vector<float>
-    sensor::get_values(std::size_t count)
+    device::get_values(std::size_t count)
     {
         vector<float> values(count);
         if (!get_values(values))
@@ -261,7 +258,7 @@ namespace sdl::sensors {
 #if SDL_VERSION_ATLEAST(2, 26, 0)
 
     std::pair<bool, Uint64>
-    sensor::get_values_timestamp(float* buf,
+    device::get_values_timestamp(float* buf,
                                  std::size_t count)
         noexcept
     {
@@ -275,7 +272,7 @@ namespace sdl::sensors {
 
 
     std::pair<bool, Uint64>
-    sensor::get_values_timestamp(std::span<float> buf)
+    device::get_values_timestamp(std::span<float> buf)
         noexcept
     {
         return get_values_timestamp(buf.data(), buf.size());
@@ -283,7 +280,7 @@ namespace sdl::sensors {
 
 
     std::pair<vector<float>, Uint64>
-    sensor::get_values_timestamp(std::size_t count)
+    device::get_values_timestamp(std::size_t count)
     {
         vector<float> values(count);
         auto [success, timestamp] = get_values_timestamp(values);
@@ -305,6 +302,6 @@ namespace sdl::sensors {
         SDL_SensorUpdate();
     }
 
-} // namespace sdl::sensors
+} // namespace sdl::sensor
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 9)

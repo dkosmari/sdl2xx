@@ -31,18 +31,18 @@ sdl2xx_HEADERS = \
 	include/sdl2xx/endian.hpp \
 	include/sdl2xx/error.hpp \
 	include/sdl2xx/events.hpp \
-	include/sdl2xx/game_controllers.hpp \
+	include/sdl2xx/game_controller.hpp \
 	include/sdl2xx/gl.hpp \
 	include/sdl2xx/guid.hpp \
 	include/sdl2xx/init.hpp \
-	include/sdl2xx/joysticks.hpp \
+	include/sdl2xx/joystick.hpp \
 	include/sdl2xx/mouse.hpp \
 	include/sdl2xx/owner_wrapper.hpp \
 	include/sdl2xx/pixels.hpp \
 	include/sdl2xx/rect.hpp \
 	include/sdl2xx/renderer.hpp \
 	include/sdl2xx/sdl.hpp \
-	include/sdl2xx/sensors.hpp \
+	include/sdl2xx/sensor.hpp \
 	include/sdl2xx/string.hpp \
 	include/sdl2xx/surface.hpp \
 	include/sdl2xx/texture.hpp \
@@ -81,18 +81,18 @@ libsdl2xx_a_SOURCES = \
 	src/display.cpp \
 	src/error.cpp \
 	src/events.cpp \
-	src/game_controllers.cpp \
+	src/game_controller.cpp \
 	src/gl.cpp \
 	src/guid.cpp \
 	src/init.cpp \
 	src/impl/utils.cpp \
 	src/impl/utils.hpp \
-	src/joysticks.cpp \
+	src/joystick.cpp \
 	src/mouse.cpp \
 	src/pixels.cpp \
 	src/rect.cpp \
 	src/renderer.cpp \
-	src/sensors.cpp \
+	src/sensor.cpp \
 	src/surface.cpp \
 	src/texture.cpp \
 	src/vec2.cpp \

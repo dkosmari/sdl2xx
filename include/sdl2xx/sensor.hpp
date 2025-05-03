@@ -6,8 +6,8 @@
  * SPDX-License-Identifier: Zlib
  */
 
-#ifndef SDL2XX_SENSORS_HPP
-#define SDL2XX_SENSORS_HPP
+#ifndef SDL2XX_SENSOR_HPP
+#define SDL2XX_SENSOR_HPP
 
 #include <expected>
 #include <span>
@@ -18,12 +18,12 @@
 
 #if SDL_VERSION_ATLEAST(2, 0, 9)
 
-#include "owner_wrapper.hpp"
+#include "basic_wrapper.hpp"
 #include "error.hpp"
 #include "vector.hpp"
 
 
-namespace sdl::sensors {
+namespace sdl::sensor {
 
     using instance_id = SDL_SensorID;
 
@@ -107,7 +107,7 @@ namespace sdl::sensors {
 
     [[nodiscard]]
     unsigned
-    get_num_sensors()
+    get_num_devices()
         noexcept;
 
 
@@ -138,36 +138,36 @@ namespace sdl::sensors {
     get_id(unsigned index);
 
 
-    struct sensor : owner_wrapper<SDL_Sensor*> {
+    struct device : basic_wrapper<SDL_Sensor*> {
 
-        using parent_t = owner_wrapper<SDL_Sensor*>;
+        using parent_t = basic_wrapper<SDL_Sensor*>;
 
         // Inherit constructors.
         using parent_t::parent_t;
 
 
         explicit
-        sensor(unsigned index);
+        device(unsigned index);
 
 
         /// Move constructor.
-        sensor(sensor&& other)
+        device(device&& other)
             noexcept = default;
 
 
-        // Named constructor: from instance id, observer.
+        // Named constructor: from instance id.
         [[nodiscard]]
         static
-        sensor
+        device
         from_id(instance_id id);
 
 
-        ~sensor();
+        ~device();
 
 
         /// Move assignment.
-        sensor&
-        operator =(sensor&& other)
+        device&
+        operator =(device&& other)
             noexcept = default;
 
 
@@ -239,7 +239,7 @@ namespace sdl::sensors {
 
 #endif // SDL_VERSION_ATLEAST(2, 26, 0)
 
-    }; // struct sensor
+    }; // struct device
 
 
     static constexpr float gravity = SDL_STANDARD_GRAVITY;
@@ -249,7 +249,7 @@ namespace sdl::sensors {
     update()
         noexcept;
 
-} // namespace sdl::sensors
+} // namespace sdl::sensor
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 9)
 

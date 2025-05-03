@@ -6,8 +6,8 @@
  * SPDX-License-Identifier: Zlib
  */
 
-#ifndef SDL2XX_GAME_CONTROLLERS_HPP
-#define SDL2XX_GAME_CONTROLLERS_HPP
+#ifndef SDL2XX_GAME_CONTROLLER_HPP
+#define SDL2XX_GAME_CONTROLLER_HPP
 
 #include <chrono>
 #include <expected>
@@ -21,20 +21,20 @@
 
 #include "basic_wrapper.hpp"
 #include "error.hpp"
-#include "joysticks.hpp"
-#include "sensors.hpp"
+#include "joystick.hpp"
+#include "sensor.hpp"
 #include "string.hpp"
 #include "vector.hpp"
 
 
-namespace sdl::game_controllers {
+namespace sdl::game_controller {
 
     using std::chrono::milliseconds;
 
     using std::filesystem::path;
 
-    using joysticks::instance_id;
-    using joysticks::guid;
+    using joystick::instance_id;
+    using joystick::guid;
 
 
     enum class type {
@@ -344,7 +344,7 @@ namespace sdl::game_controllers {
 #endif // SDL_VERSION_ATLEAST(2, 0, 12)
 
 
-    struct game_controller : basic_wrapper<SDL_GameController*> {
+    struct device : basic_wrapper<SDL_GameController*> {
 
         using parent_t = basic_wrapper<SDL_GameController*>;
 
@@ -354,11 +354,11 @@ namespace sdl::game_controllers {
 
 
         explicit
-        game_controller(unsigned index);
+        device(unsigned index);
 
 
         /// Move constructor.
-        game_controller(game_controller&& other)
+        device(device&& other)
             noexcept = default;
 
 
@@ -367,7 +367,7 @@ namespace sdl::game_controllers {
         // Named constructor: from id.
         [[nodiscard]]
         static
-        game_controller
+        device
         from_id(instance_id id);
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 4)
@@ -378,19 +378,19 @@ namespace sdl::game_controllers {
         // Named constructor: from player index.
         [[nodiscard]]
         static
-        game_controller
+        device
         from_player(int player);
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 12)
 
 
-        ~game_controller()
+        ~device()
             noexcept;
 
 
         /// Move assignment.
-        game_controller&
-        operator =(game_controller&& other)
+        device&
+        operator =(device&& other)
             noexcept = default;
 
 
@@ -582,38 +582,38 @@ namespace sdl::game_controllers {
 
         [[nodiscard]]
         bool
-        has_sensor(sensors::type t)
+        has_sensor(sensor::type t)
             const noexcept;
 
 
         bool
-        set_sensor(sensors::type t,
+        set_sensor(sensor::type t,
                    bool enabled)
             noexcept;
 
 
         [[nodiscard]]
         bool
-        is_enabled(sensors::type t)
+        is_enabled(sensor::type t)
             const noexcept;
 
 
         [[nodiscard]]
         bool
-        get_values(sensors::type t,
+        get_values(sensor::type t,
                    float* buf,
                    std::size_t count)
             noexcept;
 
         [[nodiscard]]
         bool
-        get_values(sensors::type t,
+        get_values(sensor::type t,
                    std::span<float> buf)
             noexcept;
 
         [[nodiscard]]
         vector<float>
-        get_values(sensors::type t,
+        get_values(sensor::type t,
                    std::size_t count);
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 14)
@@ -623,7 +623,7 @@ namespace sdl::game_controllers {
 
         [[nodiscard]]
         float
-        get_sensor_rate(sensors::type t)
+        get_sensor_rate(sensor::type t)
             const noexcept;
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 16)
@@ -633,21 +633,21 @@ namespace sdl::game_controllers {
 
         [[nodiscard]]
         std::pair<bool, Uint64>
-        get_values_timestamp(sensors::type t,
+        get_values_timestamp(sensor::type t,
                              float* buf,
                              std::size_t count)
             noexcept;
 
         [[nodiscard]]
         std::pair<bool, Uint64>
-        get_values_timestamp(sensors::type t,
+        get_values_timestamp(sensor::type t,
                              std::span<float> buf)
             noexcept;
 
 
         [[nodiscard]]
         std::pair<vector<float>, Uint64>
-        get_values_timestamp(sensors::type t,
+        get_values_timestamp(sensor::type t,
                              std::size_t count);
 
 #endif // SDL_VERSION_ATLEAST(2, 26, 0)
@@ -742,13 +742,12 @@ namespace sdl::game_controllers {
 #endif // SDL_VERSION_ATLEAST(2, 0, 18)
 
 
-        // Note: result is an observer instance.
         [[nodiscard]]
-        joysticks::joystick
+        joystick::device
         get_joystick()
             const;
 
-    }; // struct game_controller
+    }; // struct device
 
 
 
@@ -768,10 +767,10 @@ namespace sdl::game_controllers {
         noexcept;
 
 
-    using joysticks::axis_min;
-    using joysticks::axis_max;
-    using joysticks::axis_dead_zone;
+    using joystick::axis_min;
+    using joystick::axis_max;
+    using joystick::axis_dead_zone;
 
-} // namespace sdl::game_controllers
+} // namespace sdl::game_controller
 
 #endif

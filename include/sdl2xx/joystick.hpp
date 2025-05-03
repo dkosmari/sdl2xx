@@ -6,8 +6,8 @@
  * SPDX-License-Identifier: Zlib
  */
 
-#ifndef SDL2XX_JOYSTICKS_HPP
-#define SDL2XX_JOYSTICKS_HPP
+#ifndef SDL2XX_JOYSTICK_HPP
+#define SDL2XX_JOYSTICK_HPP
 
 #include <chrono>
 #include <expected>
@@ -26,7 +26,7 @@
 #include "vec2.hpp"
 
 
-namespace sdl::joysticks {
+namespace sdl::joystick {
 
     using std::chrono::milliseconds;
 
@@ -51,6 +51,26 @@ namespace sdl::joysticks {
     };
 
 
+    [[nodiscard]]
+    constexpr
+    type
+    convert(SDL_JoystickType t)
+        noexcept
+    {
+        return static_cast<type>(t);
+    }
+
+
+    [[nodiscard]]
+    constexpr
+    SDL_JoystickType
+    convert(type t)
+        noexcept
+    {
+        return static_cast<SDL_JoystickType>(t);
+    }
+
+
     string
     to_string(type t);
 
@@ -70,6 +90,26 @@ namespace sdl::joysticks {
         unknown = SDL_JOYSTICK_POWER_UNKNOWN,
         wired   = SDL_JOYSTICK_POWER_WIRED,
     };
+
+
+    [[nodiscard]]
+    constexpr
+    power_level
+    convert(SDL_JoystickPowerLevel lvl)
+        noexcept
+    {
+        return static_cast<power_level>(lvl);
+    }
+
+
+    [[nodiscard]]
+    constexpr
+    SDL_JoystickPowerLevel
+    convert(power_level lvl)
+        noexcept
+    {
+        return static_cast<SDL_JoystickPowerLevel>(lvl);
+    }
 
 
     string
@@ -96,6 +136,16 @@ namespace sdl::joysticks {
         up_left    = SDL_HAT_LEFTUP,    // same as left_up
         up_right   = SDL_HAT_RIGHTUP,   // same as right_up
     };
+
+
+    [[nodiscard]]
+    constexpr
+    Uint8
+    convert(hat_dir dir)
+        noexcept
+    {
+        return static_cast<Uint8>(dir);
+    }
 
 
     string
@@ -154,7 +204,7 @@ namespace sdl::joysticks {
 
     [[nodiscard]]
     unsigned
-    get_num_joysticks();
+    get_num_devices();
 
 
     [[nodiscard]]
@@ -230,7 +280,7 @@ namespace sdl::joysticks {
 #endif // SDL_VERSION_ATLEAST(2, 0, 6)
 
 
-    struct joystick : basic_wrapper<SDL_Joystick*> {
+    struct device : basic_wrapper<SDL_Joystick*> {
 
         using parent_t = basic_wrapper<SDL_Joystick*>;
 
@@ -239,35 +289,35 @@ namespace sdl::joysticks {
         using parent_t::parent_t;
 
         /// Move constructor.
-        joystick(joystick&& other)
+        device(device&& other)
             noexcept = default;
 
 
         explicit
-        joystick(unsigned index);
+        device(unsigned index);
 
 
         // Named constructor: from instance id.
         [[nodiscard]]
         static
-        joystick
+        device
         from_id(instance_id id);
 
 
         // Named constructor: from player index.
         [[nodiscard]]
         static
-        joystick
+        device
         from_player(int player);
 
 
-        ~joystick()
+        ~device()
             noexcept;
 
 
         /// Move assignment.
-        joystick&
-        operator =(joystick&& other)
+        device&
+        operator =(device&& other)
             noexcept = default;
 
 
@@ -556,7 +606,7 @@ namespace sdl::joysticks {
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 4)
 
-    }; // struct joystick
+    }; // struct device
 
 
 #if SDL_VERSION_ATLEAST(2, 0, 14)
@@ -638,6 +688,6 @@ namespace sdl::joysticks {
     static constexpr Sint16 axis_min = SDL_JOYSTICK_AXIS_MIN;
     static constexpr Sint16 axis_dead_zone = 8000;
 
-} // namespace sdk::joysticks
+} // namespace sdk::joystick
 
 #endif
