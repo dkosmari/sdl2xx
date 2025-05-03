@@ -348,24 +348,20 @@ namespace sdl::joystick {
     device
     device::from_id(instance_id id)
     {
-        if (!SDL_JoystickFromInstanceID(id))
-            throw error{};
         for (unsigned i = 0; i < get_num_devices(); ++i)
             if (id == joystick::get_id(i))
                 return device{i};
-        throw error{"unknown error"};
+        throw error{"invalid instance id"};
     }
 
 
     device
     device::from_player(int player)
     {
-        if (!SDL_JoystickFromPlayerIndex(player))
-            throw error{};
         for (unsigned i = 0; i < get_num_devices(); ++i)
             if (player == joystick::get_player(i))
                 return device{i};
-        throw error{"unknown error"};
+        throw error{"invalid player index"};
     }
 
 

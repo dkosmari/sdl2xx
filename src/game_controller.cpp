@@ -325,12 +325,10 @@ namespace sdl::game_controller {
     device
     device::from_id(instance_id id)
     {
-        if (!SDL_GameControllerFromInstanceID(id))
-            throw error{};
         for (unsigned i = 0; i < joystick::get_num_devices(); ++i)
             if (id == joystick::get_id(i))
                 return device{i};
-        throw error{"unknown error"};
+        throw error{"invalid instance id"};
     }
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 4)
@@ -341,12 +339,10 @@ namespace sdl::game_controller {
     device
     device::from_player(int player)
     {
-        if (!SDL_GameControllerFromPlayerIndex(player))
-            throw error{};
         for (unsigned i = 0; i < joystick::get_num_devices(); ++i)
             if (player == joystick::get_player(i))
                 return device{i};
-        throw error{"unknown error"};
+        throw error{"invalid player index"};
     }
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 12)
