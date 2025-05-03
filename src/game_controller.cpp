@@ -26,6 +26,52 @@ namespace sdl::game_controller {
     using impl::utils::map_to_uint16;
 
 
+    string
+    to_string(type t)
+    {
+        switch (t) {
+            case type::amazon_luna:
+                return "Amazon Luna";
+            case type::google_stadia:
+                return "Google Stadia";
+            case type::nintendo_switch_joycon_left:
+                return "Nintendo Switch Joy-Con L";
+            case type::nintendo_switch_joycon_pair:
+                return "Nintendo Switch Joy-Con L+R";
+            case type::nintendo_switch_joycon_right:
+                return "Nintendo Switch Joy-Con R";
+            case type::nintendo_switch_pro:
+                return "Nintendo Switch Pro Controller";
+            case type::nvidia_shield:
+                return "NVIDIA SHIELD";
+            case type::ps3:
+                return "PlayStation 3";
+            case type::ps4:
+                return "PlayStation 4";
+            case type::ps5:
+                return "PlayStation 5";
+            case type::unknown:
+                return "unknown";
+            case type::virtual_controller:
+                return "virtual controller";
+            case type::xbox_360:
+                return "Xbox 360";
+            case type::xbox_one:
+                return "Xbox One";
+            default:
+                return "invalid";
+        }
+    }
+
+
+    std::ostream&
+    operator <<(std::ostream& out,
+                type t)
+    {
+        return out << to_string(t);
+    }
+
+
     axis
     to_axis(const char* str)
         noexcept

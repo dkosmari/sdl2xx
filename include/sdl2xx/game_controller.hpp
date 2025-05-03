@@ -75,6 +75,15 @@ namespace sdl::game_controller {
     }
 
 
+    string
+    to_string(type t);
+
+
+    std::ostream&
+    operator <<(std::ostream& out,
+                type t);
+
+
     enum class bind_type {
         axis   = SDL_CONTROLLER_BINDTYPE_AXIS,
         button = SDL_CONTROLLER_BINDTYPE_BUTTON,
