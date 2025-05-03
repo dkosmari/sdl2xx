@@ -256,13 +256,6 @@ namespace sdl::game_controller {
     }
 
 
-    unsigned
-    get_num_devices()
-    {
-        return joystick::get_num_devices();
-    }
-
-
     const char*
     get_name(unsigned index)
     {

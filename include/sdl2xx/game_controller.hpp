@@ -318,9 +318,7 @@ namespace sdl::game_controller {
         noexcept;
 
 
-    [[nodiscard]]
-    unsigned
-    get_num_devices();
+    using joystick::get_num_devices;
 
 
     [[nodiscard]]
@@ -356,6 +354,29 @@ namespace sdl::game_controller {
         noexcept;
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 12)
+
+
+#if SDL_VERSION_ATLEAST(2, 0, 9)
+
+    using joystick::get_player;
+
+#endif // SDL_VERSION_ATLEAST(2, 0, 9)
+
+
+    using joystick::get_guid;
+
+
+#if SDL_VERSION_ATLEAST(2, 0, 6)
+
+    using joystick::get_vendor;
+
+    using joystick::get_product;
+
+    using joystick::get_version;
+
+    using joystick::get_id;
+
+#endif // SDL_VERSION_ATLEAST(2, 0, 6)
 
 
     struct device : basic_wrapper<SDL_GameController*> {
