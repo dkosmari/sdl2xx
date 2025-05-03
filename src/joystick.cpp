@@ -389,9 +389,13 @@ namespace sdl::joystick {
 
     void
     device::set_virtual_axis(unsigned axis,
-                             Sint16 value)
+                             double value)
     {
-        if (SDL_JoystickSetVirtualAxis(raw, axis, value))
+        if (SDL_JoystickSetVirtualAxis(raw,
+                                       impl::utils::map_to_int(axis,
+                                                               SDL_JOYSTICK_AXIS_MIN,
+                                                               SDL_JOYSTICK_AXIS_MAX),
+                                       value))
             throw error{};
     }
 
@@ -637,24 +641,28 @@ namespace sdl::joystick {
     }
 
 
-    Sint16
+    double
     device::get_axis(unsigned axis)
         const noexcept
     {
-        return SDL_JoystickGetAxis(raw, axis);
+        return impl::utils::map_to_double(SDL_JoystickGetAxis(raw, axis),
+                                          SDL_JOYSTICK_AXIS_MIN,
+                                          SDL_JOYSTICK_AXIS_MAX);
     }
 
 
 #if SDL_VERSION_ATLEAST(2, 0, 6)
 
-    std::optional<Sint16>
+    std::optional<double>
     device::get_axis_initial_state(unsigned axis)
         const noexcept
     {
         Sint16 state;
         if (!SDL_JoystickGetAxisInitialState(raw, axis, &state))
             return {};
-        return state;
+        return impl::utils::map_to_double(state,
+                                          SDL_JOYSTICK_AXIS_MIN,
+                                          SDL_JOYSTICK_AXIS_MAX);
     }
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 6)

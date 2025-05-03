@@ -533,11 +533,13 @@ namespace sdl::game_controller {
 #endif // SDL_VERSION_ATLEAST(2, 0, 14)
 
 
-    Sint16
+    double
     device::get_axis(axis a)
         const noexcept
     {
-        return SDL_GameControllerGetAxis(raw, convert(a));
+        return impl::utils::map_to_double(SDL_GameControllerGetAxis(raw, convert(a)),
+                                          SDL_JOYSTICK_AXIS_MIN,
+                                          SDL_JOYSTICK_AXIS_MAX);
     }
 
 

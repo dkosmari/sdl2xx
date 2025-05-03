@@ -330,7 +330,7 @@ namespace sdl::joystick {
 
         void
         set_virtual_axis(unsigned axis,
-                         Sint16 value);
+                         double value);
 
 
         void
@@ -490,7 +490,7 @@ namespace sdl::joystick {
 
 
         [[nodiscard]]
-        Sint16
+        double
         get_axis(unsigned axis)
             const noexcept;
 
@@ -498,7 +498,7 @@ namespace sdl::joystick {
 #if SDL_VERSION_ATLEAST(2, 0, 6)
 
         [[nodiscard]]
-        std::optional<Sint16>
+        std::optional<double>
         get_axis_initial_state(unsigned axis)
             const noexcept;
 
@@ -684,9 +684,7 @@ namespace sdl::joystick {
     set_event_polling(bool enabled);
 
 
-    static constexpr Sint16 axis_max = SDL_JOYSTICK_AXIS_MAX;
-    static constexpr Sint16 axis_min = SDL_JOYSTICK_AXIS_MIN;
-    static constexpr Sint16 axis_dead_zone = 8000;
+    static constexpr double axis_dead_zone = 0.25;
 
 } // namespace sdk::joystick
 

@@ -524,7 +524,7 @@ namespace sdl::game_controller {
 
 
         [[nodiscard]]
-        Sint16
+        double
         get_axis(axis a)
             const noexcept;
 
@@ -767,8 +767,6 @@ namespace sdl::game_controller {
         noexcept;
 
 
-    using joystick::axis_min;
-    using joystick::axis_max;
     using joystick::axis_dead_zone;
 
 } // namespace sdl::game_controller
