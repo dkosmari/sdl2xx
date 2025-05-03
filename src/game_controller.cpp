@@ -165,7 +165,6 @@ namespace sdl::game_controller {
 
 #if SDL_VERSION_ATLEAST(2, 0, 6)
 
-    [[nodiscard]]
     unsigned
     get_num_mappings()
         noexcept
@@ -257,28 +256,54 @@ namespace sdl::game_controller {
     }
 
 
-    [[nodiscard]]
-    std::optional<string>
+    unsigned
+    get_num_devices()
+    {
+        return joystick::get_num_devices();
+    }
+
+
+    const char*
     get_name(unsigned index)
+    {
+        auto result = try_get_name(index);
+        if (!result)
+            throw result.error();
+        return *result;
+    }
+
+
+    expected<const char*, error>
+    try_get_name(unsigned index)
         noexcept
     {
         const char* name = SDL_GameControllerNameForIndex(index);
         if (!name)
-            return {};
-        return string(name);
+            return unexpected{error{}};
+        return name;
     }
 
 
 #if SDL_VERSION_ATLEAST(2, 24, 0)
 
-    std::optional<string>
+    const char*
     get_path(unsigned index)
+    {
+        auto result = try_get_path(index);
+        if (!result)
+            throw result.error();
+        return *result;
+    }
+
+
+    expected<const char*, error>
+    try_get_path(unsigned index)
         noexcept
     {
         const char* p = SDL_GameControllerPathForIndex(index);
         if (!p)
-            return {};
-        return string(p);
+            return unexpected{error{}};
+        return p;
     }
 
 #endif // SDL_VERSION_ATLEAST(2, 24, 0)
@@ -388,26 +413,48 @@ namespace sdl::game_controller {
     }
 
 
-    std::optional<const char*>
+    const char*
     device::get_name()
+        const
+    {
+        auto result = try_get_name();
+        if (!result)
+            throw result.error();
+        return *result;
+    }
+
+
+    expected<const char*, error>
+    device::try_get_name()
         const noexcept
     {
         const char* name = SDL_GameControllerName(raw);
         if (!name)
-            return {};
+            return unexpected{error{}};
         return name;
     }
 
 
 #if SDL_VERSION_ATLEAST(2, 24, 0)
 
-    std::optional<const char*>
+    const char*
     device::get_path()
+        const
+    {
+        auto result = try_get_path();
+        if (!result)
+            throw result.error();
+        return *result;
+    }
+
+
+    expected<const char*, error>
+    device::try_get_path()
         const noexcept
     {
         const char* p = SDL_GameControllerPath(raw);
         if (!p)
-            return {};
+            return unexpected{error{}};
         return p;
     }
 

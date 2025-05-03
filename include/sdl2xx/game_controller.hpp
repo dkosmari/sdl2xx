@@ -319,16 +319,30 @@ namespace sdl::game_controller {
 
 
     [[nodiscard]]
-    std::optional<string>
-    get_name(unsigned index)
+    unsigned
+    get_num_devices();
+
+
+    [[nodiscard]]
+    const char*
+    get_name(unsigned index);
+
+
+    [[nodiscard]]
+    std::expected<const char*, error>
+    try_get_name(unsigned index)
         noexcept;
 
 
 #if SDL_VERSION_ATLEAST(2, 24, 0)
 
     [[nodiscard]]
-    std::optional<string>
-    get_path(unsigned index)
+    const char*
+    get_path(unsigned index);
+
+    [[nodiscard]]
+    std::expected<const char*, error>
+    try_get_path(unsigned index)
         noexcept;
 
 #endif // SDL_VERSION_ATLEAST(2, 24, 0)
@@ -415,16 +429,27 @@ namespace sdl::game_controller {
 
 
         [[nodiscard]]
-        std::optional<const char*>
+        const char*
         get_name()
+            const;
+
+        [[nodiscard]]
+        std::expected<const char*, error>
+        try_get_name()
             const noexcept;
 
 
 #if SDL_VERSION_ATLEAST(2, 24, 0)
 
         [[nodiscard]]
-        std::optional<const char*>
+        const char*
         get_path()
+            const;
+
+
+        [[nodiscard]]
+        std::expected<const char*, error>
+        try_get_path()
             const noexcept;
 
 #endif // SDL_VERSION_ATLEAST(2, 24, 0)
