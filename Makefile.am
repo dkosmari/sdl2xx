@@ -25,6 +25,7 @@ sdl2xx_HEADERS = \
 	include/sdl2xx/angle.hpp \
 	include/sdl2xx/basic_wrapper.hpp \
 	include/sdl2xx/blob.hpp \
+	include/sdl2xx/clipboard.hpp \
 	include/sdl2xx/color.hpp \
 	include/sdl2xx/display.hpp \
 	include/sdl2xx/error.hpp \
@@ -73,6 +74,7 @@ libsdl2xx_a_SOURCES = \
 	src/audio.cpp \
 	src/angle.cpp \
 	src/blob.cpp \
+	src/clipboard.cpp \
 	src/color.cpp \
 	src/display.cpp \
 	src/error.cpp \

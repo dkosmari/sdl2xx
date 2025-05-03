@@ -13,6 +13,7 @@
 #include "audio.hpp"
 #include "angle.hpp"
 #include "blob.hpp"
+#include "clipboard.hpp"
 #include "color.hpp"
 #include "display.hpp"
 #include "error.hpp"
