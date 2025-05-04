@@ -18,6 +18,7 @@
 using std::expected;
 using std::unexpected;
 
+
 namespace sdl::joystick {
 
     using impl::utils::map_to_uint16;
@@ -331,6 +332,28 @@ namespace sdl::joystick {
         if (id == -1)
             throw error{};
         return id;
+    }
+
+
+    unsigned
+    get_index(instance_id id)
+    {
+        auto result = try_get_index(id);
+        if (!result)
+            throw result.error();
+        return *result;
+    }
+
+
+    expected<unsigned, error>
+    try_get_index(instance_id id)
+        noexcept
+    {
+        unsigned n = get_num_devices();
+        for (unsigned i = 0; i < n; ++i)
+            if (id == get_id(i))
+                return i;
+        return unexpected{error{"id not found"}};
     }
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 6)

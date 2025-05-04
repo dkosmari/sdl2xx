@@ -327,9 +327,6 @@ namespace sdl::game_controller {
         noexcept;
 
 
-    using joystick::get_num_devices;
-
-
     [[nodiscard]]
     const char*
     get_name(unsigned index);

@@ -277,6 +277,19 @@ namespace sdl::joystick {
     instance_id
     get_id(unsigned index);
 
+
+    // Convenience: get index from id.
+    [[nodiscard]]
+    unsigned
+    get_index(instance_id id);
+
+
+    // Convenience: get index from id.
+    [[nodiscard]]
+    std::expected<unsigned, error>
+    try_get_index(instance_id id)
+        noexcept;
+
 #endif // SDL_VERSION_ATLEAST(2, 0, 6)
 
 
