@@ -27,14 +27,14 @@ namespace sdl::events {
     unsigned
     peep(std::span<event> events,
          action act,
-         Uint32 min_type,
-         Uint32 max_type)
+         Uint32 min,
+         Uint32 max)
     {
         int result = SDL_PeepEvents(events.data(),
                                     events.size(),
                                     static_cast<SDL_eventaction>(act),
-                                    min_type,
-                                    max_type);
+                                    min,
+                                    max);
         if (result < 0)
             throw error{};
         return result;
@@ -57,14 +57,14 @@ namespace sdl::events {
 
     unsigned
     peek(std::span<event> events,
-         Uint32 min_type,
-         Uint32 max_type)
+         Uint32 min,
+         Uint32 max)
     {
         int result = SDL_PeepEvents(events.data(),
                                     events.size(),
                                     SDL_PEEKEVENT,
-                                    min_type,
-                                    max_type);
+                                    min,
+                                    max);
         if (result < 0)
             throw error{};
         return result;
@@ -73,14 +73,14 @@ namespace sdl::events {
 
     unsigned
     get(std::span<event> events,
-        Uint32 min_type,
-        Uint32 max_type)
+        Uint32 min,
+        Uint32 max)
     {
         int result = SDL_PeepEvents(events.data(),
                                     events.size(),
                                     SDL_GETEVENT,
-                                    min_type,
-                                    max_type);
+                                    min,
+                                    max);
         if (result < 0)
             throw error{};
         return result;
@@ -88,53 +88,52 @@ namespace sdl::events {
 
 
     bool
-    has_event(Uint32 type)
+    has_event(Uint32 t)
         noexcept
     {
-        return SDL_HasEvent(type);
+        return SDL_HasEvent(t);
     }
 
 
     bool
-    has_event(Uint32 min_type,
-              Uint32 max_type)
+    has_event(Uint32 min,
+              Uint32 max)
         noexcept
     {
-        return SDL_HasEvents(min_type, max_type);
+        return SDL_HasEvents(min, max);
     }
 
 
     void
-    flush(Uint32 type)
+    flush(Uint32 t)
         noexcept
     {
-        SDL_FlushEvent(type);
+        SDL_FlushEvent(t);
+    }
+
+    void
+    flush(Uint32 min,
+          Uint32 max)
+        noexcept
+    {
+        SDL_FlushEvents(min, max);
     }
 
 
     void
-    remove(Uint32 type)
+    remove(Uint32 t)
         noexcept
     {
-        flush(type);
+        flush(t);
     }
 
 
     void
-    flush(Uint32 min_type,
-          Uint32 max_type)
+    remove(Uint32 min,
+           Uint32 max)
         noexcept
     {
-        SDL_FlushEvents(min_type, max_type);
-    }
-
-
-    void
-    remove(Uint32 min_type,
-           Uint32 max_type)
-        noexcept
-    {
-        flush(min_type, max_type);
+        flush(min, max);
     }
 
 
@@ -279,20 +278,37 @@ namespace sdl::events {
 
 
     bool
-    set_state(Uint32 type,
-              state st)
+    set_enabled(Uint32 t,
+                bool enabled)
         noexcept
     {
-        auto res = SDL_EventState(type, static_cast<int>(st));
-        return res == SDL_ENABLE;
+        int result = SDL_EventState(t, enabled ? SDL_ENABLE : SDL_DISABLE);
+        return result == SDL_ENABLE;
     }
 
 
     bool
-    get_state(Uint32 type)
+    enable(Uint32 t)
         noexcept
     {
-        return set_state(type, state::query);
+        return set_enabled(t, true);
+    }
+
+
+    bool
+    disable(Uint32 t)
+        noexcept
+    {
+        return set_enabled(t, false);
+    }
+
+
+    bool
+    is_enabled(Uint32 t)
+        noexcept
+    {
+        int result = SDL_EventState(t, SDL_QUERY);
+        return result == SDL_ENABLE;
     }
 
 

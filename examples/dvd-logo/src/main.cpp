@@ -383,12 +383,14 @@ struct App {
     void
     handle(const sdl::events::event& e)
     {
+        using sdl::events::type;
+
         switch (e.type) {
-            case SDL_QUIT:
+            case type::e_quit:
                 running = false;
                 break;
 
-            case SDL_KEYDOWN:
+            case type::e_key_down:
                 handle_key_down(e.key);
                 break;
         }

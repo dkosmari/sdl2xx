@@ -41,7 +41,7 @@ int main(int, char* [])
             while (auto event = sdl::events::poll()) {
                 switch (event->type) {
 
-                    case SDL_QUIT:
+                    case sdl::events::type::e_quit:
                         running = false;
                         break;
 
