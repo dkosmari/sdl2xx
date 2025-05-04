@@ -9,6 +9,7 @@
 #ifndef SDL2XX_IMG_HPP
 #define SDL2XX_IMG_HPP
 
+#include <concepts>
 #include <expected>
 #include <filesystem>
 
@@ -62,8 +63,18 @@ namespace sdl::img {
         // Disallow copies.
         init(const init&) = delete;
 
+
         init(Uint32 flags = flag::all)
             noexcept;
+
+
+        template<std::same_as<flag>... Args>
+        requires(sizeof...(Args) > 0)
+        init(Args... args)
+            noexcept :
+            init{static_cast<Uint32>((args | ...))}
+        {}
+
 
         ~init()
             noexcept;
@@ -74,6 +85,16 @@ namespace sdl::img {
     Uint32
     initialize(Uint32 flags = init::all)
         noexcept;
+
+
+    template<std::same_as<init::flag>... Args>
+    requires(sizeof...(Args) > 0)
+    Uint32
+    initialize(Args... args)
+        noexcept
+    {
+        return initialize(static_cast<Uint32>((args | ...)));
+    }
 
 
     [[nodiscard]]

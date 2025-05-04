@@ -10,6 +10,7 @@
 #define SDL2XX_MIX_HPP
 
 #include <chrono>
+#include <concepts>
 #include <filesystem>
 #include <optional>
 #include <span>
@@ -75,6 +76,14 @@ namespace sdl::mix {
         init(Uint32 flags = flag::all)
             noexcept;
 
+        template<std::same_as<flag>... Args>
+        requires(sizeof...(Args) > 0)
+        init(Args... args)
+            noexcept :
+            init{static_cast<Uint32>((args | ...))}
+        {}
+
+
         ~init()
             noexcept;
 
@@ -84,6 +93,16 @@ namespace sdl::mix {
     Uint32
     initialize(Uint32 flags = init::flag::all)
         noexcept;
+
+
+    template<std::same_as<init::flag>... Args>
+    requires(sizeof...(Args) > 0)
+    Uint32
+    initialize(Args... args)
+        noexcept
+    {
+        return initialize(static_cast<Uint32>((args | ...)));
+    }
 
 
     [[nodiscard]]

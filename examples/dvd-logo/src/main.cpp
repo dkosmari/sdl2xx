@@ -184,8 +184,8 @@ struct Logo {
 struct App {
 
     sdl::init sdl_init{
-        sdl::init::flag::video |
-        sdl::init::flag::game_controller |
+        sdl::init::flag::video,
+        sdl::init::flag::game_controller,
         sdl::init::flag::audio
     };
     sdl::img::init img_init;
