@@ -10,6 +10,7 @@
 #include <ostream>
 #include <utility>
 
+#include <SDL_assert.h>
 #include <SDL_events.h>         // SDL_QUERY
 
 #include "game_controller.hpp"
@@ -932,14 +933,21 @@ namespace sdl::game_controller {
 #endif // SDL_VERSION_ATLEAST(2, 0, 18)
 
 
+    instance_id
+    device::get_id()
+        const noexcept
+    {
+        auto j = SDL_GameControllerGetJoystick(raw);
+        SDL_assert_paranoid(j);
+        return SDL_JoystickInstanceID(j);
+    }
+
+
     joystick::device
     device::get_joystick()
         const
     {
-        auto j = SDL_GameControllerGetJoystick(raw);
-        if (!j)
-            throw error{};
-        auto id = SDL_JoystickInstanceID(j);
+        auto id = get_id();
         for (unsigned i = 0; i < joystick::get_num_devices(); ++i)
             if (id == joystick::get_id(i))
                 return joystick::device{i};

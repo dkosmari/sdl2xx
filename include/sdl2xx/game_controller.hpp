@@ -799,6 +799,13 @@ namespace sdl::game_controller {
 #endif // SDL_VERSION_ATLEAST(2, 0, 18)
 
 
+        // Convenience method: get ID.
+        [[nodiscard]]
+        instance_id
+        get_id()
+            const noexcept;
+
+
         [[nodiscard]]
         joystick::device
         get_joystick()
