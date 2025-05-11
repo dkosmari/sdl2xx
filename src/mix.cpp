@@ -78,7 +78,7 @@ namespace sdl::mix {
     open()
     {
         auto [name, spec] = audio::get_default_info(false);
-        open(spec.freq, spec.format, spec.channels, 2048, name, true);
+        open(spec.freq, spec.format, spec.channels, 2048, name, audio::allow::change_any);
     }
 
 
@@ -99,7 +99,7 @@ namespace sdl::mix {
          unsigned channels,
          int chunk_size,
          const char* name,
-         bool allowed_changes)
+         Uint32 allowed_changes)
     {
         if (Mix_OpenAudioDevice(frequency, format, channels,
                                 chunk_size, name, allowed_changes) < 0)
@@ -135,7 +135,7 @@ namespace sdl::mix {
                    unsigned channels,
                    int chunk_size,
                    const char* name,
-                   bool allowed_changes)
+                   Uint32 allowed_changes)
     {
         open(frequency, format, channels, chunk_size, name, allowed_changes);
     }
@@ -173,7 +173,7 @@ namespace sdl::mix {
                    unsigned channels,
                    int chunk_size,
                    const char* name,
-                   bool allowed_changes)
+                   Uint32 allowed_changes)
     {
         close();
         open(frequency, format, channels, chunk_size, name, allowed_changes);

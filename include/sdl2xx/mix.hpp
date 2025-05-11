@@ -131,7 +131,7 @@ namespace sdl::mix {
          unsigned channels,
          int chunk_size,
          const char* name,
-         bool allowed_changes);
+         Uint32 allowed_changes = audio::allow::change_any);
 
     inline
     void
@@ -140,7 +140,7 @@ namespace sdl::mix {
          unsigned channels,
          int chunk_size,
          const concepts::string auto& name,
-         bool allowed_changes)
+         Uint32 allowed_changes = audio::allow::change_any)
     {
         open(frequency, format, channels, chunk_size, name.data(), allowed_changes);
     }
@@ -177,7 +177,7 @@ namespace sdl::mix {
                unsigned channels,
                int chunk_size,
                const char* name,
-               bool allowed_changes);
+               Uint32 allowed_changes = audio::allow::change_any);
 
         inline
         device(int frequency,
@@ -185,7 +185,7 @@ namespace sdl::mix {
                unsigned channels,
                int chunk_size,
                const concepts::string auto& name,
-               bool allowed_changes) :
+               Uint32 allowed_changes = audio::allow::change_any) :
             device{frequency, format, channels, chunk_size, name.data(), allowed_changes}
         {}
 
@@ -209,7 +209,7 @@ namespace sdl::mix {
                unsigned channels,
                int chunk_size,
                const char* name,
-               bool allowed_changes);
+               Uint32 allowed_changes = audio::allow::change_any);
 
         inline
         void
@@ -218,7 +218,7 @@ namespace sdl::mix {
                unsigned channels,
                int chunk_size,
                const concepts::string auto& name,
-               bool allowed_changes)
+               Uint32 allowed_changes = audio::allow::change_any)
         {
             reopen(frequency, format, channels, chunk_size, name.data(), allowed_changes);
         }

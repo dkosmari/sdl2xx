@@ -37,6 +37,16 @@ namespace sdl::audio {
     };
 
 
+    enum allow : Uint32 {
+        change_any       = SDL_AUDIO_ALLOW_ANY_CHANGE,
+        change_channels  = SDL_AUDIO_ALLOW_CHANNELS_CHANGE,
+        change_format    = SDL_AUDIO_ALLOW_FORMAT_CHANGE,
+        change_frequency = SDL_AUDIO_ALLOW_FREQUENCY_CHANGE,
+        change_nothing   = 0,
+        change_samples   = SDL_AUDIO_ALLOW_SAMPLES_CHANGE,
+    };
+
+
     [[nodiscard]]
     unsigned
     get_num_drivers();
@@ -101,13 +111,13 @@ namespace sdl::audio {
         device(const char* name,
                bool is_capture,
                const spec_t& desired,
-               bool allowed_changes);
+               Uint32 allowed_changes = allow::change_any);
 
         inline
         device(const concepts::string auto& name,
                bool is_capture,
                const spec_t& desired,
-               bool allowed_changes) :
+               Uint32 allowed_changes = allow::change_any) :
             device{name.empty() ? nullptr : name.data(),
                    is_capture, desired, allowed_changes}
         {}
@@ -132,14 +142,14 @@ namespace sdl::audio {
         create(const char* name,
                bool is_capture,
                const spec_t& desired,
-               bool allowed_changes);
+               Uint32 allowed_changes = allow::change_any);
 
         void
         create(const char* name,
                bool is_capture,
                const spec_t& desired,
                spec_t& obtained,
-               bool allowed_changes);
+               Uint32 allowed_changes = allow::change_any);
 
 
         void

@@ -113,7 +113,7 @@ namespace sdl::audio {
     device::device(const char* name,
                    bool is_capture,
                    const spec_t& desired,
-                   bool allowed_changes)
+                   Uint32 allowed_changes)
     {
         create(name, is_capture, desired, allowed_changes);
     }
@@ -130,7 +130,7 @@ namespace sdl::audio {
     device::create(const char* name,
                    bool is_capture,
                    const spec_t& desired,
-                   bool allowed_changes)
+                   Uint32 allowed_changes)
     {
         auto id = SDL_OpenAudioDevice(name,
                                       is_capture,
@@ -149,7 +149,7 @@ namespace sdl::audio {
                    bool is_capture,
                    const spec_t& desired,
                    spec_t& obtained,
-                   bool allowed_changes)
+                   Uint32 allowed_changes)
     {
         auto id = SDL_OpenAudioDevice(name,
                                       is_capture,
