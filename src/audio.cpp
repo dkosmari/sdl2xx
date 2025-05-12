@@ -132,6 +132,7 @@ namespace sdl::audio {
                    const spec_t& desired,
                    Uint32 allowed_changes)
     {
+        destroy();
         auto id = SDL_OpenAudioDevice(name,
                                       is_capture,
                                       &desired,
@@ -139,7 +140,6 @@ namespace sdl::audio {
                                       allowed_changes);
         if (!id)
             throw error{};
-        destroy();
         acquire(id);
     }
 
@@ -151,6 +151,7 @@ namespace sdl::audio {
                    spec_t& obtained,
                    Uint32 allowed_changes)
     {
+        destroy();
         auto id = SDL_OpenAudioDevice(name,
                                       is_capture,
                                       &desired,
@@ -158,7 +159,6 @@ namespace sdl::audio {
                                       allowed_changes);
         if (!id)
             throw error{};
-        destroy();
         acquire(id);
     }
 
