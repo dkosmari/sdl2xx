@@ -40,14 +40,14 @@ namespace sdl {
 
     public:
 
-        using parent_t = basic_wrapper<SDL_Texture*>;
-        using state_t = std::tuple<raw_type,
-                                   void*,
-                                   unique_ptr<surface>>;
+        using parent_type = basic_wrapper<SDL_Texture*>;
+        using state_type = std::tuple<raw_type,
+                                      void*,
+                                      unique_ptr<surface>>;
 
 
         // Inherit constructors.
-        using basic_wrapper::basic_wrapper;
+        using parent_type::parent_type;
 
 
         texture(SDL_Texture* tex)
@@ -95,7 +95,7 @@ namespace sdl {
 
 
         void
-        acquire(state_t state)
+        acquire(state_type state)
             noexcept;
 
         void
@@ -105,7 +105,7 @@ namespace sdl {
             noexcept;
 
 
-        state_t
+        state_type
         release()
             noexcept;
 

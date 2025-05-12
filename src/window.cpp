@@ -118,7 +118,7 @@ namespace sdl {
     window::destroy()
         noexcept
     {
-        if (raw) {
+        if (is_valid()) {
             auto [w, s] = release();
             SDL_DestroyWindow(w);
         }
@@ -126,10 +126,10 @@ namespace sdl {
 
 
     void
-    window::acquire(state_t state)
+    window::acquire(state_type state)
         noexcept
     {
-        basic_wrapper::acquire(std::move(get<0>(state)));
+        parent_type::acquire(std::move(get<0>(state)));
         surf = std::move(get<1>(state));
         link_this();
     }
@@ -144,12 +144,12 @@ namespace sdl {
     }
 
 
-    window::state_t
+    window::state_type
     window::release()
         noexcept
     {
         return {
-            basic_wrapper::release(),
+            parent_type::release(),
             std::move(surf)
         };
     }

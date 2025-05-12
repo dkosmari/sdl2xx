@@ -30,7 +30,7 @@ namespace sdl::mix {
 
     using std::filesystem::path;
 
-    using audio::format_t;
+    using audio::format;
 
 
     using dbl_seconds = std::chrono::duration<double>;
@@ -121,13 +121,13 @@ namespace sdl::mix {
 
     void
     open(int frequency,
-         format_t format,
+         format fmt,
          unsigned channels,
          int chunk_size);
 
     void
     open(int frequency,
-         format_t format,
+         format fmt,
          unsigned channels,
          int chunk_size,
          const char* name,
@@ -136,13 +136,13 @@ namespace sdl::mix {
     inline
     void
     open(int frequency,
-         format_t format,
+         format fmt,
          unsigned channels,
          int chunk_size,
          const concepts::string auto& name,
          Uint32 allowed_changes = audio::allow::change_any)
     {
-        open(frequency, format, channels, chunk_size, name.data(), allowed_changes);
+        open(frequency, fmt, channels, chunk_size, name.data(), allowed_changes);
     }
 
 
@@ -151,9 +151,9 @@ namespace sdl::mix {
         noexcept;
 
 
-    struct spec_t {
+    struct spec {
         int frequency;
-        format_t format;
+        format fmt;
         unsigned channels;
     };
 
@@ -168,12 +168,12 @@ namespace sdl::mix {
         device();
 
         device(int frequency,
-               format_t format,
+               format fmt,
                unsigned channels,
                int chunk_size);
 
         device(int frequency,
-               format_t format,
+               format fmt,
                unsigned channels,
                int chunk_size,
                const char* name,
@@ -181,12 +181,12 @@ namespace sdl::mix {
 
         inline
         device(int frequency,
-               format_t format,
+               format fmt,
                unsigned channels,
                int chunk_size,
                const concepts::string auto& name,
                Uint32 allowed_changes = audio::allow::change_any) :
-            device{frequency, format, channels, chunk_size, name.data(), allowed_changes}
+            device{frequency, fmt, channels, chunk_size, name.data(), allowed_changes}
         {}
 
 
@@ -199,13 +199,13 @@ namespace sdl::mix {
 
         void
         reopen(int frequency,
-               format_t format,
+               format fmt,
                unsigned channels,
                int chunk_size);
 
         void
         reopen(int frequency,
-               format_t format,
+               format fmt,
                unsigned channels,
                int chunk_size,
                const char* name,
@@ -214,20 +214,20 @@ namespace sdl::mix {
         inline
         void
         reopen(int frequency,
-               format_t format,
+               format fmt,
                unsigned channels,
                int chunk_size,
                const concepts::string auto& name,
                Uint32 allowed_changes = audio::allow::change_any)
         {
-            reopen(frequency, format, channels, chunk_size, name.data(), allowed_changes);
+            reopen(frequency, fmt, channels, chunk_size, name.data(), allowed_changes);
         }
 
     }; // struct device
 
 
     [[nodiscard]]
-    std::optional<spec_t>
+    std::optional<spec>
     query();
 
 
@@ -237,11 +237,11 @@ namespace sdl::mix {
 
     struct chunk : owner_wrapper<Mix_Chunk*> {
 
-        using parent_t = owner_wrapper<Mix_Chunk*>;
+        using parent_type = owner_wrapper<Mix_Chunk*>;
 
 
         // Inherit constructors.
-        using parent_t::parent_t;
+        using parent_type::parent_type;
 
 
         chunk(const path& filename);
@@ -402,11 +402,11 @@ namespace sdl::mix {
 
     struct music : basic_wrapper<Mix_Music*> {
 
-        using parent_t = basic_wrapper<Mix_Music*>;
+        using parent_type = basic_wrapper<Mix_Music*>;
 
 
         // Inherit constructors.
-        using parent_t::parent_t;
+        using parent_type::parent_type;
 
 
         enum class type {

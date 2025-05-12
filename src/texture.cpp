@@ -110,7 +110,7 @@ namespace sdl {
     texture::destroy()
         noexcept
     {
-        if (raw) {
+        if (is_valid()) {
             auto [old_raw, old_user_data, old_locked_surface] = release();
             SDL_DestroyTexture(old_raw);
         }
@@ -118,10 +118,10 @@ namespace sdl {
 
 
     void
-    texture::acquire(state_t state)
+    texture::acquire(state_type state)
         noexcept
     {
-        parent_t::acquire(get<0>(state));
+        parent_type::acquire(get<0>(state));
         user_data = get<1>(state);
         locked_surface = std::move(get<2>(state));
         link_this();
@@ -138,14 +138,12 @@ namespace sdl {
     }
 
 
-    std::tuple<SDL_Texture*,
-               void*,
-               unique_ptr<surface>>
+    texture::state_type
     texture::release()
         noexcept
     {
         return {
-            basic_wrapper::release(),
+            parent_type::release(),
             set_user_data(nullptr),
             std::move(locked_surface)
         };

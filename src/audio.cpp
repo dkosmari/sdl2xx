@@ -78,30 +78,30 @@ namespace sdl::audio {
     }
 
 
-    spec_t
+    spec
     get_spec(unsigned index,
              bool is_capture)
     {
-        spec_t spec;
-        if (SDL_GetAudioDeviceSpec(index, is_capture, &spec))
+        spec result;
+        if (SDL_GetAudioDeviceSpec(index, is_capture, &result))
             throw error{};
-        return spec;
+        return result;
     }
 
 
-    std::pair<string, spec_t>
+    std::pair<string, spec>
     get_default_info(bool is_capture)
     {
-        spec_t spec;
+        spec sp;
         char* raw_name = nullptr;
-        if (SDL_GetDefaultAudioInfo(&raw_name, &spec, is_capture))
+        if (SDL_GetDefaultAudioInfo(&raw_name, &sp, is_capture))
             throw error{};
         try {
             string name;
             if (raw_name)
                 name = raw_name;
             SDL_free(raw_name);
-            return {std::move(name), std::move(spec)};
+            return {std::move(name), std::move(sp)};
         }
         catch (...) {
             SDL_free(raw_name);
@@ -112,7 +112,7 @@ namespace sdl::audio {
 
     device::device(const char* name,
                    bool is_capture,
-                   const spec_t& desired,
+                   const spec& desired,
                    Uint32 allowed_changes)
     {
         create(name, is_capture, desired, allowed_changes);
@@ -129,7 +129,7 @@ namespace sdl::audio {
     void
     device::create(const char* name,
                    bool is_capture,
-                   const spec_t& desired,
+                   const spec& desired,
                    Uint32 allowed_changes)
     {
         destroy();
@@ -147,8 +147,8 @@ namespace sdl::audio {
     void
     device::create(const char* name,
                    bool is_capture,
-                   const spec_t& desired,
-                   spec_t& obtained,
+                   const spec& desired,
+                   spec& obtained,
                    Uint32 allowed_changes)
     {
         destroy();
@@ -167,7 +167,7 @@ namespace sdl::audio {
     device::destroy()
         noexcept
     {
-        if (raw)
+        if (is_valid())
             SDL_CloseAudioDevice(release());
     }
 
@@ -275,31 +275,31 @@ namespace sdl::audio {
     }
 
 
-    std::pair<blob, spec_t>
+    std::pair<blob, spec>
     load_wav(SDL_RWops* src,
              bool close_src)
     {
-        spec_t spec;
+        spec sp;
         Uint8* buf;
         Uint32 size;
-        if (!SDL_LoadWAV_RW(src, close_src, &spec, &buf, &size))
+        if (!SDL_LoadWAV_RW(src, close_src, &sp, &buf, &size))
             throw error{};
         // Note: SDL_FreeWAV() is just SDL_free()
-        return {blob{buf, size}, std::move(spec)};
+        return {blob{buf, size}, std::move(sp)};
     }
 
 
-    std::pair<blob, spec_t>
+    std::pair<blob, spec>
     load_wav(const path& filename)
     {
         return load_wav(SDL_RWFromFile(filename.c_str(), "rb"), true);
     }
 
 
-    converter::converter(format_t src_format,
+    converter::converter(format src_format,
                          Uint8 src_channels,
                          int src_rate,
-                         format_t dst_format,
+                         format dst_format,
                          Uint8 dst_channels,
                          int dst_rate)
     {
@@ -327,10 +327,10 @@ namespace sdl::audio {
     }
 
 
-    stream::stream(format_t src_format,
+    stream::stream(format src_format,
                    Uint8 src_channels,
                    int src_rate,
-                   format_t dst_format,
+                   format dst_format,
                    Uint8 dst_channels,
                    int dst_rate)
     {
@@ -347,10 +347,10 @@ namespace sdl::audio {
 
 
     void
-    stream::create(format_t src_format,
+    stream::create(format src_format,
                    Uint8 src_channels,
                    int src_rate,
-                   format_t dst_format,
+                   format dst_format,
                    Uint8 dst_channels,
                    int dst_rate)
     {
@@ -367,7 +367,7 @@ namespace sdl::audio {
     stream::destroy()
         noexcept
     {
-        if (raw)
+        if (is_valid())
             SDL_FreeAudioStream(release());
     }
 
@@ -440,14 +440,14 @@ namespace sdl::audio {
     void
     mix_audio(void* dst,
               const void* src,
-              format_t format,
+              format fmt,
               std::size_t size,
               int volume)
         noexcept
     {
         SDL_MixAudioFormat(static_cast<Uint8*>(dst),
                            static_cast<const Uint8*>(src),
-                           format,
+                           fmt,
                            size,
                            volume);
     }

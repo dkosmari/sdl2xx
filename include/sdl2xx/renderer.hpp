@@ -38,7 +38,7 @@ namespace sdl {
 
     struct renderer : basic_wrapper<SDL_Renderer*> {
 
-        using parent_t = basic_wrapper<SDL_Renderer*>;
+        using parent_type = basic_wrapper<SDL_Renderer*>;
 
 
         enum flag : Uint32 {
@@ -53,6 +53,7 @@ namespace sdl {
         static
         int
         get_num_drivers();
+
 
         struct info_t {
             string name;
@@ -69,7 +70,8 @@ namespace sdl {
 
 
         // Inherit constructors.
-        using basic_wrapper::basic_wrapper;
+        using parent_type::parent_type;
+
 
         explicit
         renderer(SDL_Renderer* ren)
@@ -113,11 +115,11 @@ namespace sdl {
 
 
         void
-        acquire(state_t state)
+        acquire(state_type state)
             noexcept;
 
 
-        state_t
+        state_type
         release()
             noexcept;
 

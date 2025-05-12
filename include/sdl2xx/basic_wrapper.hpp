@@ -12,21 +12,28 @@
 
 namespace sdl {
 
-    template<typename T>
+    // Source: https://github.com/dkosmari/basic_wrapper
+
+    template<typename T,
+             T InvalidValue = T{}>
     class basic_wrapper {
 
     protected:
 
-        T raw = {};
+        T raw{InvalidValue};
 
 
+        // Note: we can't call destroy() from the derived class from here.
         ~basic_wrapper()
             noexcept = default;
+
 
     public:
 
         using raw_type = T;
-        using state_t = raw_type;
+        using state_type = raw_type;
+
+        static constexpr raw_type invalid_value = InvalidValue;
 
 
         constexpr
@@ -64,6 +71,7 @@ namespace sdl {
         }
 
 
+        // Remember to always call destroy() from the derived class' destructor.
         virtual
         void
         destroy()
@@ -75,7 +83,7 @@ namespace sdl {
         is_valid()
             const noexcept
         {
-            return raw;
+            return raw != invalid_value;
         }
 
 
@@ -84,7 +92,7 @@ namespace sdl {
         operator bool()
             const noexcept
         {
-            return raw;
+            return is_valid();
         }
 
 
@@ -105,14 +113,14 @@ namespace sdl {
 
 
         void
-        acquire(state_t new_state)
+        acquire(state_type new_state)
             noexcept
         {
             raw = new_state;
         }
 
 
-        state_t
+        state_type
         release()
             noexcept
         {

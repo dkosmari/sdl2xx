@@ -43,9 +43,9 @@ namespace sdl {
 
     public:
 
-        using parent_t = basic_wrapper<SDL_Window*>;
+        using parent_type = basic_wrapper<SDL_Window*>;
 
-        using state_t = std::tuple<raw_type, unique_ptr<surface>>;
+        using state_type = std::tuple<raw_type, unique_ptr<surface>>;
 
 
         enum flag : Uint32 {
@@ -82,7 +82,7 @@ namespace sdl {
 
 
         // Inherit constructors.
-        using parent_t::parent_t;
+        using parent_type::parent_type;
 
 
         explicit
@@ -175,7 +175,7 @@ namespace sdl {
 
 
         void
-        acquire(state_t state)
+        acquire(state_type state)
             noexcept;
 
         void
@@ -184,7 +184,7 @@ namespace sdl {
             noexcept;
 
 
-        state_t
+        state_type
         release()
             noexcept;
 

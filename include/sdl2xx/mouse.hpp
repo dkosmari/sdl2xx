@@ -242,11 +242,11 @@ namespace sdl::mouse {
 
     struct cursor : basic_wrapper<SDL_Cursor*> {
 
-        using parent_t = basic_wrapper<SDL_Cursor*>;
+        using parent_type = basic_wrapper<SDL_Cursor*>;
 
 
         // Inherit constructors.
-        using parent_t::parent_t;
+        using parent_type::parent_type;
 
 
         cursor(const Uint8* data,

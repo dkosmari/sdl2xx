@@ -20,7 +20,7 @@ namespace sdl {
 
         namespace detail {
 
-            // This implements a table to map raw pointesr to their C++ wrapper.
+            // This implements a table to map raw pointers to their C++ wrapper.
             // TODO: these should all be protected by a mutex.
 
 
@@ -190,27 +190,27 @@ namespace sdl {
     renderer::destroy()
         noexcept
     {
-        if (raw)
+        if (is_valid())
             SDL_DestroyRenderer(release());
     }
 
 
     void
-    renderer::acquire(state_t state)
+    renderer::acquire(state_type state)
         noexcept
     {
-        parent_t::acquire(state);
+        parent_type::acquire(state);
         if (raw)
             detail::update(raw, this);
     }
 
 
-    renderer::state_t
+    renderer::state_type
     renderer::release()
         noexcept
     {
         detail::remove(raw);
-        return parent_t::release();
+        return parent_type::release();
     }
 
 

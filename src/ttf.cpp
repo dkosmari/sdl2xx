@@ -224,7 +224,7 @@ namespace sdl::ttf {
     font::destroy()
         noexcept
     {
-        if (raw)
+        if (is_valid())
             TTF_CloseFont(release());
     }
 

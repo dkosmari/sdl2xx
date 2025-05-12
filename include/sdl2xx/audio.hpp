@@ -25,9 +25,20 @@ namespace sdl::audio {
 
     using std::filesystem::path;
 
-    using spec_t = SDL_AudioSpec;
 
-    using format_t = SDL_AudioFormat;
+    using format = SDL_AudioFormat;
+
+
+    struct spec : SDL_AudioSpec {
+
+        // Ensure everything is zero-initialized.
+        constexpr
+        spec()
+            noexcept :
+            SDL_AudioSpec{}
+        {}
+
+    };
 
 
     enum class status {
@@ -90,33 +101,33 @@ namespace sdl::audio {
 
 
     [[nodiscard]]
-    spec_t
+    spec
     get_spec(unsigned index,
              bool is_capture);
 
 
     [[nodiscard]]
-    std::pair<string, spec_t>
+    std::pair<string, spec>
     get_default_info(bool is_capture);
 
 
     struct device : basic_wrapper<SDL_AudioDeviceID> {
 
-        using parent_t = basic_wrapper<SDL_AudioDeviceID>;
+        using parent_type = basic_wrapper<SDL_AudioDeviceID>;
 
         // Inherit constructors.
-        using parent_t::parent_t;
+        using parent_type::parent_type;
 
 
         device(const char* name,
                bool is_capture,
-               const spec_t& desired,
+               const spec& desired,
                Uint32 allowed_changes = allow::change_any);
 
         inline
         device(const concepts::string auto& name,
                bool is_capture,
-               const spec_t& desired,
+               const spec& desired,
                Uint32 allowed_changes = allow::change_any) :
             device{name.empty() ? nullptr : name.data(),
                    is_capture, desired, allowed_changes}
@@ -141,14 +152,14 @@ namespace sdl::audio {
         void
         create(const char* name,
                bool is_capture,
-               const spec_t& desired,
+               const spec& desired,
                Uint32 allowed_changes = allow::change_any);
 
         void
         create(const char* name,
                bool is_capture,
-               const spec_t& desired,
-               spec_t& obtained,
+               const spec& desired,
+               spec& obtained,
                Uint32 allowed_changes = allow::change_any);
 
 
@@ -255,13 +266,13 @@ namespace sdl::audio {
 
 
     [[nodiscard]]
-    std::pair<blob, spec_t>
+    std::pair<blob, spec>
     load_wav(SDL_RWops* src,
              bool close_src);
 
 
     [[nodiscard]]
-    std::pair<blob, spec_t>
+    std::pair<blob, spec>
     load_wav(const path& filename);
 
 
@@ -270,10 +281,10 @@ namespace sdl::audio {
         bool needed = false;
 
 
-        converter(format_t src_format,
+        converter(format src_format,
                   Uint8 src_channels,
                   int src_rate,
-                  format_t dst_format,
+                  format dst_format,
                   Uint8 dst_channels,
                   int dst_rate);
 
@@ -290,17 +301,17 @@ namespace sdl::audio {
 
     struct stream : basic_wrapper<SDL_AudioStream*> {
 
-        using parent_t = basic_wrapper<SDL_AudioStream*>;
+        using parent_type = basic_wrapper<SDL_AudioStream*>;
 
 
         // Inherit constructors.
-        using parent_t::parent_t;
+        using parent_type::parent_type;
 
 
-        stream(format_t src_format,
+        stream(format src_format,
                Uint8 src_channels,
                int src_rate,
-               format_t dst_format,
+               format dst_format,
                Uint8 dst_channels,
                int dst_rate);
 
@@ -321,10 +332,10 @@ namespace sdl::audio {
 
 
         void
-        create(format_t src_format,
+        create(format src_format,
                Uint8 src_channels,
                int src_rate,
-               format_t dst_format,
+               format dst_format,
                Uint8 dst_channels,
                int dst_rate);
 
@@ -374,7 +385,7 @@ namespace sdl::audio {
     void
     mix_audio(void* dst,
               const void* src,
-              format_t format,
+              format fmt,
               std::size_t size,
               int volume)
         noexcept;
@@ -383,12 +394,12 @@ namespace sdl::audio {
     void
     mix_audio(std::span<T> dst,
               std::span<T> src,
-              format_t format,
+              format fmt,
               int volume)
     {
         mix_audio(dst.data(),
                   src.data(),
-                  format,
+                  fmt,
                   src.size_bytes(),
                   volume);
     }

@@ -191,7 +191,7 @@ namespace sdl::sensor {
     device::destroy()
         noexcept
     {
-        if (raw)
+        if (is_valid())
             SDL_SensorClose(release());
     }
 

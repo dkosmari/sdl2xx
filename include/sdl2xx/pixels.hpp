@@ -222,8 +222,11 @@ namespace sdl::pixels {
 
     struct palette : basic_wrapper<SDL_Palette*> {
 
+        using parent_type = basic_wrapper<SDL_Palette*>;
+
+
         // Inherit constructors.
-        using basic_wrapper::basic_wrapper;
+        using parent_type::parent_type;
 
 
         explicit
@@ -278,10 +281,11 @@ namespace sdl::pixels {
 
     struct format : basic_wrapper<SDL_PixelFormat*> {
 
-        using parent_t = basic_wrapper<SDL_PixelFormat*>;
+        using parent_type = basic_wrapper<SDL_PixelFormat*>;
+
 
         // Inherit constructors.
-        using parent_t::parent_t;
+        using parent_type::parent_type;
 
 
         explicit

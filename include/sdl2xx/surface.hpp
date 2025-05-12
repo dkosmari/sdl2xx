@@ -37,11 +37,11 @@ namespace sdl {
 
     public:
 
-        using parent_t = owner_wrapper<SDL_Surface*>;
+        using parent_type = owner_wrapper<SDL_Surface*>;
 
-        using state_t = std::tuple<
-            std::tuple_element_t<0, parent_t::state_t>,
-            std::tuple_element_t<1, parent_t::state_t>,
+        using state_type = std::tuple<
+            std::tuple_element_t<0, parent_type::state_type>,
+            std::tuple_element_t<1, parent_type::state_type>,
             void*
             >;
 
@@ -51,7 +51,7 @@ namespace sdl {
 
 
         // Inherit constructors.
-        using parent_t::parent_t;
+        using parent_type::parent_type;
 
 
         surface(Uint32 flags,
@@ -176,7 +176,7 @@ namespace sdl {
 
 
         void
-        acquire(state_t state)
+        acquire(state_type state)
             noexcept;
 
         void
@@ -186,7 +186,7 @@ namespace sdl {
             noexcept;
 
 
-        state_t
+        state_type
         release()
             noexcept;
 

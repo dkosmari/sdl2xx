@@ -17,10 +17,12 @@
 
 namespace sdl {
 
-    // This wrapper allows an instance to be just an observer.
-    // Observer instances do not destroy the raw object.
-    template<typename T>
-    class owner_wrapper : public basic_wrapper<T> {
+    // Source: https://github.com/dkosmari/basic_wrapper
+
+    // This wrapper has an "owner" flag. When false, it will not destroy the raw object.
+    template<typename T,
+             T InvalidValue = T{}>
+    class owner_wrapper : public basic_wrapper<T, InvalidValue> {
 
     protected:
 
@@ -29,14 +31,13 @@ namespace sdl {
 
     public:
 
-        using parent_t = basic_wrapper<T>;
+        using parent_type = basic_wrapper<T, InvalidValue>;
 
-        using state_t = std::tuple<typename parent_t::state_t,
-                                   bool>;
+        using state_type = std::tuple<typename parent_type::state_type, bool>;
 
 
         // Inherit constructors.
-        using parent_t::parent_t;
+        using parent_type::parent_type;
 
 
         /// Move constructor.
@@ -61,36 +62,36 @@ namespace sdl {
 
 
         void
-        acquire(state_t state)
+        acquire(state_type state)
             noexcept
         {
-            parent_t::acquire(std::move(get<0>(state)));
+            parent_type::acquire(std::move(get<0>(state)));
             owner = get<1>(state);
         }
 
 
         void
-        acquire(typename parent_t::state_t new_p_state,
+        acquire(typename parent_type::state_type new_parent_state,
                 bool new_owner = true)
             noexcept
         {
-            acquire(state_t{new_p_state, new_owner});
+            acquire(state_type{new_parent_state, new_owner});
         }
 
 
-        state_t
+        state_type
         release()
             noexcept
         {
             bool old_owner = owner;
             owner = false;
-            return state_t{
-                parent_t::release(),
+            return state_type{
+                parent_type::release(),
                 old_owner
             };
         }
 
-    };
+    }; // class owner_wrapper
 
 } // namespace sdl
 

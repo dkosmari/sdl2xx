@@ -377,7 +377,7 @@ namespace sdl::pixels {
     palette::destroy()
         noexcept
     {
-        if (raw)
+        if (is_valid())
             SDL_FreePalette(release());
     }
 
@@ -436,7 +436,7 @@ namespace sdl::pixels {
     format::destroy()
         noexcept
     {
-        if (raw)
+        if (is_valid())
             SDL_FreeFormat(release());
     }
 

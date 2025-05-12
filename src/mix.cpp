@@ -19,6 +19,7 @@ namespace sdl::mix {
 
     using impl::utils::map_to_uint8;
 
+
     namespace {
 
         unsigned
@@ -84,24 +85,24 @@ namespace sdl::mix {
 
     void
     open(int frequency,
-         format_t format,
+         format fmt,
          unsigned channels,
          int chunk_size)
     {
-        if (Mix_OpenAudio(frequency, format, channels, chunk_size) < 0)
+        if (Mix_OpenAudio(frequency, fmt, channels, chunk_size) < 0)
             throw error{};
     }
 
 
     void
     open(int frequency,
-         format_t format,
+         format fmt,
          unsigned channels,
          int chunk_size,
          const char* name,
          Uint32 allowed_changes)
     {
-        if (Mix_OpenAudioDevice(frequency, format, channels,
+        if (Mix_OpenAudioDevice(frequency, fmt, channels,
                                 chunk_size, name, allowed_changes) < 0)
             throw error{};
     }
@@ -122,22 +123,22 @@ namespace sdl::mix {
 
 
     device::device(int frequency,
-                   format_t format,
+                   format fmt,
                    unsigned channels,
                    int chunk_size)
     {
-        open(frequency, format, channels, chunk_size);
+        open(frequency, fmt, channels, chunk_size);
     }
 
 
     device::device(int frequency,
-                   format_t format,
+                   format fmt,
                    unsigned channels,
                    int chunk_size,
                    const char* name,
                    Uint32 allowed_changes)
     {
-        open(frequency, format, channels, chunk_size, name, allowed_changes);
+        open(frequency, fmt, channels, chunk_size, name, allowed_changes);
     }
 
 
@@ -158,37 +159,37 @@ namespace sdl::mix {
 
     void
     device::reopen(int frequency,
-                   format_t format,
+                   format fmt,
                    unsigned channels,
                    int chunk_size)
     {
         close();
-        open(frequency, format, channels, chunk_size);
+        open(frequency, fmt, channels, chunk_size);
     }
 
 
     void
     device::reopen(int frequency,
-                   format_t format,
+                   format fmt,
                    unsigned channels,
                    int chunk_size,
                    const char* name,
                    Uint32 allowed_changes)
     {
         close();
-        open(frequency, format, channels, chunk_size, name, allowed_changes);
+        open(frequency, fmt, channels, chunk_size, name, allowed_changes);
     }
 
 
-    std::optional<spec_t>
+    std::optional<spec>
     query()
     {
         int channels;
-        spec_t spec;
-        if (!Mix_QuerySpec(&spec.frequency, &spec.format, &channels))
+        spec sp;
+        if (!Mix_QuerySpec(&sp.frequency, &sp.fmt, &channels))
             return {};
-        spec.channels = channels;
-        return spec;
+        sp.channels = channels;
+        return sp;
     }
 
 
@@ -282,7 +283,7 @@ namespace sdl::mix {
     chunk::destroy()
         noexcept
     {
-        if (raw) {
+        if (is_valid()) {
             auto [old_raw, old_owner] = release();
             if (old_owner)
                 Mix_FreeChunk(old_raw);

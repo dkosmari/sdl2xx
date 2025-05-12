@@ -417,7 +417,7 @@ namespace sdl::game_controller {
     device::destroy()
         noexcept
     {
-        if (raw)
+        if (is_valid())
             SDL_GameControllerClose(release());
     }
 

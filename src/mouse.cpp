@@ -282,7 +282,7 @@ namespace sdl::mouse {
     cursor::destroy()
         noexcept
     {
-        if (raw)
+        if (is_valid())
             SDL_FreeCursor(release());
     }
 

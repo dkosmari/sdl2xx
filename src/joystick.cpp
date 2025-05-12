@@ -399,7 +399,7 @@ namespace sdl::joystick {
     device::destroy()
         noexcept
     {
-        if (raw)
+        if (is_valid())
             SDL_JoystickClose(release());
     }
 
