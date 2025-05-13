@@ -49,9 +49,9 @@ PKG_CHECK_MODULES([SDL2], [$sdl_libs])
 
 
 AC_ARG_ENABLE([examples],
-              [AS_HELP_STRING([--disable-examples], [disable building examples])],
+              [AS_HELP_STRING([--enable-examples], [enable building examples])],
               [],
-              [enable_examples=yes])
+              [enable_examples=no])
 AM_CONDITIONAL([ENABLE_EXAMPLES], [test x$enable_examples = xyes])
 
 

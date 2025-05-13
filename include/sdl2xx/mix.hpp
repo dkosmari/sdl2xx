@@ -255,9 +255,10 @@ namespace sdl::mix {
         chunk(const void* samples,
               std::size_t size);
 
-        template<typename T>
+        template<typename T,
+                 std::size_t E>
         inline
-        chunk(std::span<T> samples) :
+        chunk(std::span<const T, E> samples) :
             chunk{samples.data(), samples.size_bytes()}
         {}
 
@@ -291,9 +292,10 @@ namespace sdl::mix {
         create(const void* samples,
                std::size_t size);
 
-        inline
+        template<typename T,
+                 std::size_t E>
         void
-        create(std::span<auto> samples)
+        create(std::span<const T, E> samples)
         {
             create(samples.data(), samples.size_bytes());
         }

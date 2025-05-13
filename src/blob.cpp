@@ -10,6 +10,11 @@
 
 namespace sdl {
 
+    blob::blob(std::size_t size) :
+        ptr{make_unique<Uint8[]>(size)}
+    {}
+
+
     blob::blob(Uint8* raw_data,
                std::size_t size)
         noexcept :

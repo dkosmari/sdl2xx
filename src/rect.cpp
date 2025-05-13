@@ -78,7 +78,7 @@ namespace sdl {
 
     [[nodiscard]]
     std::pair<rect, bool>
-    enclose(std::span<vec2> points)
+    enclose(std::span<const vec2> points)
         noexcept
     {
         rect result;
@@ -92,7 +92,7 @@ namespace sdl {
 
     [[nodiscard]]
     std::pair<rect, bool>
-    enclose(std::span<vec2> points,
+    enclose(std::span<const vec2> points,
             const rect& clip)
         noexcept
     {

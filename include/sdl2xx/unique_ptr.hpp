@@ -10,6 +10,7 @@
 #define SDL2XX_UNIQUE_PTR_HPP
 
 #include <memory>
+#include <type_traits>
 #include <utility>
 
 #include "allocator.hpp"
@@ -65,6 +66,7 @@ namespace sdl {
 
     template<typename T,
              typename... Args>
+    requires(!std::is_array_v<T>)
     unique_ptr<T>
     make_unique(Args&&... args)
     {
@@ -83,21 +85,28 @@ namespace sdl {
     }
 
 
-    template<typename T>
-    unique_ptr<T[]>
+    template<typename A>
+    requires(std::is_unbounded_array_v<A>)
+    unique_ptr<A>
     make_unique(std::size_t count)
     {
+        // Avoid trying to do zero-sized allocations.
+        if (!count)
+            return {nullptr, 0};
+
+        using T = std::remove_extent_t<A>;
+
         T* ptr = nullptr;
         std::size_t constructed = 0;
         try {
             ptr = malloc_allocator::allocate_as<T*>(count * sizeof(T));
             if (!ptr)
-                return {};
+                return {nullptr, count};
             for (std::size_t i = 0; i < count; ++i) {
                 std::construct_at(ptr + i);
                 ++constructed;
             }
-            return unique_ptr<T[]>{ptr, count};
+            return {ptr, count};
         }
         catch (...) {
             // Destroy every constructed object in reverse order.

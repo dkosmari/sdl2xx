@@ -531,4 +531,14 @@ namespace sdl::pixels {
         SDL_CalculateGammaRamp(gamma, ramp.data());
     }
 
+
+    void
+    calculate_gamma_ramp(float gamma,
+                         std::span<Uint16> ramp)
+    {
+        if (ramp.size() < 256)
+            throw error{"ramp length must be >= 256"};
+        calculate_gamma_ramp(gamma, std::span<Uint16, 256>(ramp));
+    }
+
 } // namespace sdl::pixels

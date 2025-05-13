@@ -19,6 +19,7 @@
 #include "basic_wrapper.hpp"
 #include "blob.hpp"
 #include "string.hpp"
+#include "vector.hpp"
 
 
 namespace sdl::audio {
@@ -191,9 +192,10 @@ namespace sdl::audio {
         play(const void* samples,
              std::size_t size);
 
-        template<typename T>
+        template<typename T,
+                 std::size_t E>
         void
-        play(std::span<const T> samples)
+        play(std::span<const T, E> samples)
         {
             play(samples.data(), samples.size_bytes());
         }
@@ -205,10 +207,11 @@ namespace sdl::audio {
             std::size_t size)
             noexcept;
 
-        template<typename T>
+        template<typename T,
+                 std::size_t E>
         [[nodiscard]]
         std::span<T>
-        capture(std::span<T> buf)
+        capture(std::span<T, E> buf)
             noexcept
         {
             std::size_t result = capture(buf.size(), buf.size_bytes());
@@ -349,11 +352,13 @@ namespace sdl::audio {
         put(const void* buf,
             std::size_t size);
 
+        template<typename T,
+                 std::size_t E>
         void
-        put(std::span<const char> samples);
-
-        void
-        put(std::span<const Uint8> samples);
+        put(std::span<const T, E> samples)
+        {
+            put(samples.data(), samples.size_bytes());
+        }
 
         void
         put(const blob& samples);
@@ -363,6 +368,18 @@ namespace sdl::audio {
         std::size_t
         get(void* buf,
             std::size_t size);
+
+
+        template<typename T,
+                 std::size_t E>
+        std::size_t
+        get(std::span<T, E> buf)
+        {
+            return get(buf.data(), buf.size_bytes());
+        }
+
+        vector<Uint8>
+        get(std::size_t size);
 
 
         [[nodiscard]]
@@ -390,10 +407,11 @@ namespace sdl::audio {
               int volume)
         noexcept;
 
-    template<typename T>
+    template<typename T,
+             std::size_t E>
     void
-    mix_audio(std::span<T> dst,
-              std::span<T> src,
+    mix_audio(std::span<T, E> dst,
+              std::span<T, E> src,
               format fmt,
               int volume)
     {

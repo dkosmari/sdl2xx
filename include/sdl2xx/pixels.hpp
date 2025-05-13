@@ -389,6 +389,10 @@ namespace sdl::pixels {
                          std::span<Uint16, 256> ramp)
         noexcept;
 
+    void
+    calculate_gamma_ramp(float gamma,
+                         std::span<Uint16> ramp);
+
 } // namespace sdl::pixels
 
 #endif

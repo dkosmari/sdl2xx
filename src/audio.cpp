@@ -382,20 +382,6 @@ namespace sdl::audio {
 
 
     void
-    stream::put(std::span<const char> samples)
-    {
-        put(samples.data(), samples.size());
-    }
-
-
-    void
-    stream::put(std::span<const Uint8> samples)
-    {
-        put(samples.data(), samples.size());
-    }
-
-
-    void
     stream::put(const blob& samples)
     {
         put(samples.data());
@@ -409,6 +395,16 @@ namespace sdl::audio {
         int result = SDL_AudioStreamGet(raw, buf, size);
         if (result < 0)
             throw error{};
+        return result;
+    }
+
+
+    vector<Uint8>
+    stream::get(std::size_t size)
+    {
+        vector<Uint8> result(size);
+        std::size_t rs = get(std::span(result));
+        result.resize(rs);
         return result;
     }
 

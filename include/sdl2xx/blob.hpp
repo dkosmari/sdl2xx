@@ -27,6 +27,9 @@ namespace sdl {
         blob()
             noexcept = default;
 
+        explicit
+        blob(std::size_t size);
+
         blob(Uint8* raw_data,
              std::size_t size)
             noexcept;

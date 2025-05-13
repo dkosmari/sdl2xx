@@ -772,10 +772,11 @@ namespace sdl::game_controller {
                     std::size_t size)
             noexcept;
 
-        template<typename T>
+        template<typename T,
+                 std::size_t E>
         inline
         bool
-        send_effect(std::span<const T> payload)
+        send_effect(std::span<const T, E> payload)
             noexcept
         {
             return send_effect(payload.data(), payload.size_bytes());

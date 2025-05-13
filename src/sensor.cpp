@@ -249,7 +249,7 @@ namespace sdl::sensor {
     device::get_values(std::size_t count)
     {
         vector<float> values(count);
-        if (!get_values(values))
+        if (!get_values(std::span(values)))
             return {};
         return values;
     }
@@ -283,7 +283,7 @@ namespace sdl::sensor {
     device::get_values_timestamp(std::size_t count)
     {
         vector<float> values(count);
-        auto [success, timestamp] = get_values_timestamp(values);
+        auto [success, timestamp] = get_values_timestamp(std::span(values));
         if (!success)
             return {{}, {}};
         return {
