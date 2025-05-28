@@ -335,9 +335,19 @@ namespace sdl::img {
     load_avif(SDL_RWops* src);
 
     [[nodiscard]]
+    surface
+    load_avif(const path& filename);
+
+    [[nodiscard]]
     std::expected<surface, error>
     try_load_avif(SDL_RWops* src)
         noexcept;
+
+    [[nodiscard]]
+    std::expected<surface, error>
+    try_load_avif(const path& filename)
+        noexcept;
+
 #endif
 
 
@@ -346,8 +356,17 @@ namespace sdl::img {
     load_bmp(SDL_RWops* src);
 
     [[nodiscard]]
+    surface
+    load_bmp(const path& filename);
+
+    [[nodiscard]]
     std::expected<surface, error>
     try_load_bmp(SDL_RWops* src)
+        noexcept;
+
+    [[nodiscard]]
+    std::expected<surface, error>
+    try_load_bmp(const path& filename)
         noexcept;
 
 
@@ -356,8 +375,17 @@ namespace sdl::img {
     load_cur(SDL_RWops* src);
 
     [[nodiscard]]
+    surface
+    load_cur(const path& filename);
+
+    [[nodiscard]]
     std::expected<surface, error>
     try_load_cur(SDL_RWops* src)
+        noexcept;
+
+    [[nodiscard]]
+    std::expected<surface, error>
+    try_load_cur(const path& filename)
         noexcept;
 
 
@@ -366,8 +394,17 @@ namespace sdl::img {
     load_gif(SDL_RWops* src);
 
     [[nodiscard]]
+    surface
+    load_gif(const path& filename);
+
+    [[nodiscard]]
     std::expected<surface, error>
     try_load_gif(SDL_RWops* src)
+        noexcept;
+
+    [[nodiscard]]
+    std::expected<surface, error>
+    try_load_gif(const path& filename)
         noexcept;
 
 
@@ -376,8 +413,17 @@ namespace sdl::img {
     load_ico(SDL_RWops* src);
 
     [[nodiscard]]
+    surface
+    load_ico(const path& filename);
+
+    [[nodiscard]]
     std::expected<surface, error>
     try_load_ico(SDL_RWops* src)
+        noexcept;
+
+    [[nodiscard]]
+    std::expected<surface, error>
+    try_load_ico(const path& filename)
         noexcept;
 
 
@@ -386,8 +432,17 @@ namespace sdl::img {
     load_jpg(SDL_RWops* src);
 
     [[nodiscard]]
+    surface
+    load_jpg(const path& filename);
+
+    [[nodiscard]]
     std::expected<surface, error>
     try_load_jpg(SDL_RWops* src)
+        noexcept;
+
+    [[nodiscard]]
+    std::expected<surface, error>
+    try_load_jpg(const path& filename)
         noexcept;
 
 
@@ -398,8 +453,17 @@ namespace sdl::img {
     load_jxl(SDL_RWops* src);
 
     [[nodiscard]]
+    surface
+    load_jxl(const path& filename);
+
+    [[nodiscard]]
     std::expected<surface, error>
     try_load_jxl(SDL_RWops* src)
+        noexcept;
+
+    [[nodiscard]]
+    std::expected<surface, error>
+    try_load_jxl(const path& filename)
         noexcept;
 
 #endif
@@ -410,8 +474,17 @@ namespace sdl::img {
     load_lbm(SDL_RWops* src);
 
     [[nodiscard]]
+    surface
+    load_lbm(const path& filename);
+
+    [[nodiscard]]
     std::expected<surface, error>
     try_load_lbm(SDL_RWops* src)
+        noexcept;
+
+    [[nodiscard]]
+    std::expected<surface, error>
+    try_load_lbm(const path& filename)
         noexcept;
 
 
@@ -420,8 +493,17 @@ namespace sdl::img {
     load_pcx(SDL_RWops* src);
 
     [[nodiscard]]
+    surface
+    load_pcx(const path& filename);
+
+    [[nodiscard]]
     std::expected<surface, error>
     try_load_pcx(SDL_RWops* src)
+        noexcept;
+
+    [[nodiscard]]
+    std::expected<surface, error>
+    try_load_pcx(const path& filename)
         noexcept;
 
 
@@ -430,8 +512,17 @@ namespace sdl::img {
     load_png(SDL_RWops* src);
 
     [[nodiscard]]
+    surface
+    load_png(const path& filename);
+
+    [[nodiscard]]
     std::expected<surface, error>
     try_load_png(SDL_RWops* src)
+        noexcept;
+
+    [[nodiscard]]
+    std::expected<surface, error>
+    try_load_png(const path& filename)
         noexcept;
 
 
@@ -440,8 +531,17 @@ namespace sdl::img {
     load_pnm(SDL_RWops* src);
 
     [[nodiscard]]
+    surface
+    load_pnm(const path& filename);
+
+    [[nodiscard]]
     std::expected<surface, error>
     try_load_pnm(SDL_RWops* src)
+        noexcept;
+
+    [[nodiscard]]
+    std::expected<surface, error>
+    try_load_pnm(const path& filename)
         noexcept;
 
 
@@ -452,8 +552,17 @@ namespace sdl::img {
     load_svg(SDL_RWops* src);
 
     [[nodiscard]]
+    surface
+    load_svg(const path& filename);
+
+    [[nodiscard]]
     std::expected<surface, error>
     try_load_svg(SDL_RWops* src)
+        noexcept;
+
+    [[nodiscard]]
+    std::expected<surface, error>
+    try_load_svg(const path& filename)
         noexcept;
 
 #endif // SDL_IMAGE_VERSION_ATLEAST(2, 0, 2)
@@ -468,6 +577,23 @@ namespace sdl::img {
              int height);
 
     [[nodiscard]]
+    surface
+    load_svg(SDL_RWops* src,
+             vec2 size);
+
+    [[nodiscard]]
+    surface
+    load_svg(const path& filename,
+             int width,
+             int height);
+
+    [[nodiscard]]
+    surface
+    load_svg(const path& filename,
+             vec2 size);
+
+
+    [[nodiscard]]
     std::expected<surface, error>
     try_load_svg(SDL_RWops* src,
                  int width,
@@ -475,22 +601,23 @@ namespace sdl::img {
         noexcept;
 
     [[nodiscard]]
-    inline
-    surface
-    load_svg(SDL_RWops* src,
-             vec2 size)
-    {
-        return load_svg(src, size.x, size.y);
-    }
-
-    [[nodiscard]]
-    inline
     std::expected<surface, error>
     try_load_svg(SDL_RWops* src,
                  vec2 size)
-    {
-        return try_load_svg(src, size.x, size.y);
-    }
+        noexcept;
+
+    [[nodiscard]]
+    std::expected<surface, error>
+    try_load_svg(const path& filename,
+                 int width,
+                 int height)
+        noexcept;
+
+    [[nodiscard]]
+    std::expected<surface, error>
+    try_load_svg(const path& filename,
+                 vec2 size)
+        noexcept;
 
 #endif // SDL_IMAGE_VERSION_ATLEAST(2, 6, 0)
 
@@ -502,19 +629,38 @@ namespace sdl::img {
     load_qoi(SDL_RWops* src);
 
     [[nodiscard]]
+    surface
+    load_qoi(const path& filename);
+
+    [[nodiscard]]
     std::expected<surface, error>
     try_load_qoi(SDL_RWops* src)
         noexcept;
 
+    [[nodiscard]]
+    std::expected<surface, error>
+    try_load_qoi(const path& filename)
+        noexcept;
+
 #endif // SDL_IMAGE_VERSION_ATLEAST(2, 6, 0)
+
 
     [[nodiscard]]
     surface
     load_tif(SDL_RWops* src);
 
     [[nodiscard]]
+    surface
+    load_tif(const path& filename);
+
+    [[nodiscard]]
     std::expected<surface, error>
     try_load_tif(SDL_RWops* src)
+        noexcept;
+
+    [[nodiscard]]
+    std::expected<surface, error>
+    try_load_tif(const path& filename)
         noexcept;
 
 
@@ -523,8 +669,17 @@ namespace sdl::img {
     load_webp(SDL_RWops* src);
 
     [[nodiscard]]
+    surface
+    load_webp(const path& filename);
+
+    [[nodiscard]]
     std::expected<surface, error>
     try_load_webp(SDL_RWops* src)
+        noexcept;
+
+    [[nodiscard]]
+    std::expected<surface, error>
+    try_load_webp(const path& filename)
         noexcept;
 
 
@@ -533,8 +688,17 @@ namespace sdl::img {
     load_xcf(SDL_RWops* src);
 
     [[nodiscard]]
+    surface
+    load_xcf(const path& filename);
+
+    [[nodiscard]]
     std::expected<surface, error>
     try_load_xcf(SDL_RWops* src)
+        noexcept;
+
+    [[nodiscard]]
+    std::expected<surface, error>
+    try_load_xcf(const path& filename)
         noexcept;
 
 
@@ -543,13 +707,22 @@ namespace sdl::img {
     load_xpm(SDL_RWops* src);
 
     [[nodiscard]]
+    surface
+    load_xpm(const path& filename);
+
+    [[nodiscard]]
+    surface
+    load_xpm(char* xpm[]);
+
+    [[nodiscard]]
     std::expected<surface, error>
     try_load_xpm(SDL_RWops* src)
         noexcept;
 
     [[nodiscard]]
-    surface
-    load_xpm(char* xpm[]);
+    std::expected<surface, error>
+    try_load_xpm(const path& filename)
+        noexcept;
 
     [[nodiscard]]
     std::expected<surface, error>
@@ -575,8 +748,17 @@ namespace sdl::img {
     load_xv(SDL_RWops* src);
 
     [[nodiscard]]
+    surface
+    load_xv(const path& filename);
+
+    [[nodiscard]]
     std::expected<surface, error>
     try_load_xv(SDL_RWops* src)
+        noexcept;
+
+    [[nodiscard]]
+    std::expected<surface, error>
+    try_load_xv(const path& filename)
         noexcept;
 
 
@@ -587,18 +769,18 @@ namespace sdl::img {
              const path& filename,
              int quality);
 
+    void
+    save_jpg(const surface& src,
+             SDL_RWops* dst,
+             bool close_dst,
+             int quality);
+
     [[nodiscard]]
     std::expected<void, error>
     try_save_jpg(const surface& src,
                  const path& filename,
                  int quality)
         noexcept;
-
-    void
-    save_jpg(const surface& src,
-             SDL_RWops* dst,
-             bool close_dst,
-             int quality);
 
     [[nodiscard]]
     std::expected<void, error>
@@ -615,17 +797,16 @@ namespace sdl::img {
     save_png(const surface& src,
              const path& filename);
 
+    void
+    save_png(const surface& src,
+             SDL_RWops* dst,
+             bool close_dst);
+
     [[nodiscard]]
     std::expected<void, error>
     try_save_png(const surface& src,
                  const path& filename)
         noexcept;
-
-
-    void
-    save_png(const surface& src,
-             SDL_RWops* dst,
-             bool close_dst);
 
     [[nodiscard]]
     std::expected<void, error>
@@ -651,28 +832,26 @@ namespace sdl::img {
     load_animation(const path& filename);
 
     [[nodiscard]]
-    std::expected<animation, error>
-    try_load_animation(const path& filename)
-        noexcept;
-
-
-    [[nodiscard]]
     animation
     load_animation(SDL_RWops* src,
                    bool close_src);
-
-    [[nodiscard]]
-    std::expected<animation, error>
-    try_load_animation(SDL_RWops* src,
-                       bool close_src)
-        noexcept;
-
 
     [[nodiscard]]
     animation
     load_animation(SDL_RWops* src,
                    bool close_src,
                    const char* type);
+
+    [[nodiscard]]
+    std::expected<animation, error>
+    try_load_animation(const path& filename)
+        noexcept;
+
+    [[nodiscard]]
+    std::expected<animation, error>
+    try_load_animation(SDL_RWops* src,
+                       bool close_src)
+        noexcept;
 
     [[nodiscard]]
     std::expected<animation, error>
