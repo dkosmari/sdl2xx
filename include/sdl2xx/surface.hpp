@@ -19,7 +19,9 @@
 #include "color.hpp"
 #include "pixels.hpp"
 #include "rect.hpp"
+#include "rwops.hpp"
 
+// TODO: implement try_ methods with expected results.
 
 namespace sdl {
 
@@ -322,12 +324,20 @@ namespace sdl {
         [[nodiscard]]
         static
         surface
+        load_bmp(rwops& src);
+
+        [[nodiscard]]
+        static
+        surface
         load_bmp(const path& filename);
 
 
         void
         save_bmp(SDL_RWops* dst,
-                 bool close);
+                 bool close_dst);
+
+        void
+        save_bmp(rwops& dst);
 
         void
         save_bmp(const path& filename);

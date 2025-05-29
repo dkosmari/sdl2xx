@@ -102,6 +102,21 @@ namespace sdl::ttf {
     }
 
 
+    font::font(rwops& src,
+               int pt_size)
+    {
+        create(src, pt_size);
+    }
+
+
+    font::font(rwops& src,
+               int pt_size,
+               const options& opt)
+    {
+        create(src, pt_size, opt);
+    }
+
+
     font::~font()
     {
         destroy();
@@ -217,6 +232,23 @@ namespace sdl::ttf {
 
         destroy();
         acquire(ptr);
+    }
+
+
+    void
+    font::create(rwops& src,
+                 int pt_size)
+    {
+        create(src.data(), false, pt_size);
+    }
+
+
+    void
+    font::create(rwops& src,
+                 int pt_size,
+                 const options& opt)
+    {
+        create(src.data(), false, pt_size, opt);
     }
 
 

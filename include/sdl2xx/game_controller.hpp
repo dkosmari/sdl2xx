@@ -22,6 +22,7 @@
 #include "basic_wrapper.hpp"
 #include "error.hpp"
 #include "joystick.hpp"
+#include "rwops.hpp"
 #include "sensor.hpp"
 #include "string.hpp"
 #include "vector.hpp"
@@ -241,11 +242,18 @@ namespace sdl::game_controller {
                  bool close_src);
 
     unsigned
+    add_mappings(rwops& src);
+
+    unsigned
     add_mappings(const path& filename);
 
     std::expected<unsigned, error>
     try_add_mappings(SDL_RWops* src,
                      bool close_src)
+        noexcept;
+
+    std::expected<unsigned, error>
+    try_add_mappings(rwops& src)
         noexcept;
 
     std::expected<unsigned, error>

@@ -290,9 +290,17 @@ namespace sdl::audio {
 
 
     std::pair<blob, spec>
+    load_wav(rwops& src)
+    {
+        return load_wav(src.data(), false);
+    }
+
+
+    std::pair<blob, spec>
     load_wav(const path& filename)
     {
-        return load_wav(SDL_RWFromFile(filename.c_str(), "rb"), true);
+        rwops src{filename, "rb"};
+        return load_wav(src);
     }
 
 

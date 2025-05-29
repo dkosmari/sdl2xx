@@ -18,6 +18,7 @@
 
 #include "basic_wrapper.hpp"
 #include "color.hpp"
+#include "rwops.hpp"
 #include "string.hpp"
 #include "surface.hpp"
 #include "vec2.hpp"
@@ -121,6 +122,13 @@ namespace sdl::ttf {
              int pt_size,
              const options& opt);
 
+        font(rwops& src,
+             int pt_size);
+
+        font(rwops& src,
+             int pt_size,
+             const options& opt);
+
 
         /// Move constructor.
         font(font&& other)
@@ -157,6 +165,15 @@ namespace sdl::ttf {
                int pt_size,
                const options& opt);
 
+
+        void
+        create(rwops& src,
+               int pt_size);
+
+        void
+        create(rwops& src,
+               int pt_size,
+               const options& opt);
 
         void
         destroy()

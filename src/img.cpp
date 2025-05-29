@@ -78,6 +78,14 @@ namespace sdl::img {
     }
 
 
+    surface
+    load(rwops& src,
+         const char* type)
+    {
+        return load(src.data(), false, type);
+    }
+
+
     expected<surface, error>
     try_load(SDL_RWops* src,
              bool close_src,
@@ -88,6 +96,15 @@ namespace sdl::img {
         if (!surf)
             return unexpected{error{}};
         return surface{surf};
+    }
+
+
+    expected<surface, error>
+    try_load(rwops& src,
+             const char* type)
+        noexcept
+    {
+        return try_load(src.data(), false, type);
     }
 
 
@@ -123,6 +140,13 @@ namespace sdl::img {
     }
 
 
+    surface
+    load(rwops& src)
+    {
+        return load(src.data(), false);
+    }
+
+
     expected<surface, error>
     try_load(SDL_RWops* src,
              bool close_src)
@@ -133,6 +157,14 @@ namespace sdl::img {
             return unexpected{error{}};
         return surface{surf};
 
+    }
+
+
+    expected<surface, error>
+    try_load(rwops& src)
+        noexcept
+    {
+        return try_load(src.data(), false);
     }
 
 
@@ -171,6 +203,14 @@ namespace sdl::img {
     }
 
 
+    texture
+    load_texture(renderer& ren,
+                 rwops& src)
+    {
+        return load_texture(ren, src.data(), false);
+    }
+
+
     expected<texture, error>
     try_load_texture(renderer& ren,
                      SDL_RWops* src,
@@ -185,6 +225,15 @@ namespace sdl::img {
     }
 
 
+    expected<texture, error>
+    try_load_texture(renderer& ren,
+                     rwops& src)
+        noexcept
+    {
+        return try_load_texture(ren, src.data(), false);
+    }
+
+
     texture
     load_texture(renderer& ren,
                  SDL_RWops* src,
@@ -195,6 +244,15 @@ namespace sdl::img {
         if (!result)
             throw result.error();
         return std::move(*result);
+    }
+
+
+    texture
+    load_texture(renderer& ren,
+                 rwops& src,
+                 const char* type)
+    {
+        return load_texture(ren, src.data(), false, type);
     }
 
 
@@ -212,6 +270,16 @@ namespace sdl::img {
     }
 
 
+    expected<texture, error>
+    try_load_texture(renderer& ren,
+                     rwops& src,
+                     const char* type)
+        noexcept
+    {
+        return try_load_texture(ren, src.data(), false, type);
+    }
+
+
 #if SDL_IMAGE_VERSION_ATLEAST(2, 6, 0)
 
     bool
@@ -219,6 +287,14 @@ namespace sdl::img {
         noexcept
     {
         return IMG_isAVIF(src);
+    }
+
+
+    bool
+    is_avif(rwops& src)
+        noexcept
+    {
+        return is_avif(src.data());
     }
 
 #endif // SDL_IMAGE_VERSION_ATLEAST(2, 6, 0)
@@ -233,10 +309,26 @@ namespace sdl::img {
 
 
     bool
+    is_bmp(rwops& src)
+        noexcept
+    {
+        return is_bmp(src.data());
+    }
+
+
+    bool
     is_cur(SDL_RWops* src)
         noexcept
     {
         return IMG_isCUR(src);
+    }
+
+
+    bool
+    is_cur(rwops& src)
+        noexcept
+    {
+        return is_cur(src.data());
     }
 
 
@@ -249,10 +341,26 @@ namespace sdl::img {
 
 
     bool
+    is_gif(rwops& src)
+        noexcept
+    {
+        return is_gif(src.data());
+    }
+
+
+    bool
     is_ico(SDL_RWops* src)
         noexcept
     {
         return IMG_isICO(src);
+    }
+
+
+    bool
+    is_ico(rwops& src)
+        noexcept
+    {
+        return is_ico(src.data());
     }
 
 
@@ -264,6 +372,14 @@ namespace sdl::img {
     }
 
 
+    bool
+    is_jpg(rwops& src)
+        noexcept
+    {
+        return is_jpg(src.data());
+    }
+
+
 #if SDL_IMAGE_VERSION_ATLEAST(2, 6, 0)
 
     bool
@@ -271,6 +387,14 @@ namespace sdl::img {
         noexcept
     {
         return IMG_isJXL(src);
+    }
+
+
+    bool
+    is_jxl(rwops& src)
+        noexcept
+    {
+        return is_jxl(src.data());
     }
 
 #endif // SDL_IMAGE_VERSION_ATLEAST(2, 6, 0)
@@ -285,10 +409,26 @@ namespace sdl::img {
 
 
     bool
+    is_lbm(rwops& src)
+        noexcept
+    {
+        return is_lbm(src.data());
+    }
+
+
+    bool
     is_pcx(SDL_RWops* src)
         noexcept
     {
         return IMG_isPCX(src);
+    }
+
+
+    bool
+    is_pcx(rwops& src)
+        noexcept
+    {
+        return is_pcx(src.data());
     }
 
 
@@ -301,10 +441,26 @@ namespace sdl::img {
 
 
     bool
+    is_png(rwops& src)
+        noexcept
+    {
+        return is_png(src.data());
+    }
+
+
+    bool
     is_pnm(SDL_RWops* src)
         noexcept
     {
         return IMG_isPNM(src);
+    }
+
+
+    bool
+    is_pnm(rwops& src)
+        noexcept
+    {
+        return is_pnm(src.data());
     }
 
 
@@ -315,6 +471,14 @@ namespace sdl::img {
         noexcept
     {
         return IMG_isSVG(src);
+    }
+
+
+    bool
+    is_svg(rwops& src)
+            noexcept
+    {
+        return is_svg(src.data());
     }
 
 #endif // SDL_IMAGE_VERSION_ATLEAST(2, 0, 2)
@@ -329,6 +493,14 @@ namespace sdl::img {
         return IMG_isQOI(src);
     }
 
+
+    bool
+    is_qoi(rwops& src)
+        noexcept
+    {
+        return is_qoi(src.data());
+    }
+
 #endif // SDL_IMAGE_VERSION_ATLEAST(2, 6, 0)
 
 
@@ -341,10 +513,26 @@ namespace sdl::img {
 
 
     bool
+    is_tif(rwops& src)
+        noexcept
+    {
+        return is_tif(src.data());
+    }
+
+
+    bool
     is_xcf(SDL_RWops* src)
         noexcept
     {
         return IMG_isXCF(src);
+    }
+
+
+    bool
+    is_xcf(rwops& src)
+        noexcept
+    {
+        return is_xcf(src.data());
     }
 
 
@@ -357,6 +545,14 @@ namespace sdl::img {
 
 
     bool
+    is_xpm(rwops& src)
+        noexcept
+    {
+        return is_xpm(src.data());
+    }
+
+
+    bool
     is_xv(SDL_RWops* src)
         noexcept
     {
@@ -365,10 +561,26 @@ namespace sdl::img {
 
 
     bool
+    is_xv(rwops& src)
+        noexcept
+    {
+        return is_xv(src.data());
+    }
+
+
+    bool
     is_webp(SDL_RWops* src)
         noexcept
     {
         return IMG_isWEBP(src);
+    }
+
+
+    bool
+    is_webp(rwops& src)
+        noexcept
+    {
+        return is_webp(src.data());
     }
 
 
@@ -381,6 +593,13 @@ namespace sdl::img {
         if (!result)
             throw result.error();
         return std::move(*result);
+    }
+
+
+    surface
+    load_avif(rwops& src)
+    {
+        return load_avif(src.data());
     }
 
 
@@ -406,15 +625,24 @@ namespace sdl::img {
 
 
     expected<surface, error>
+    try_load_avif(rwops& src)
+        noexcept
+    {
+        return try_load_avif(src.data());
+    }
+
+
+    expected<surface, error>
     try_load_avif(const path& filename)
         noexcept
     {
-        auto src = SDL_RWFromFile(filename.c_str(), "rb");
-        if (!src)
-            return unexpected{error{}};
-        auto result = try_load_avif(src);
-        SDL_RWclose(src);
-        return result;
+        try {
+            rwops src{filename, "rb"};
+            return try_load_avif(src);
+        }
+        catch (error& e) {
+            return unexpected{e};
+        }
     }
 
 #endif // SDL_IMAGE_VERSION_ATLEAST(2, 6, 0)
@@ -427,6 +655,13 @@ namespace sdl::img {
         if (!result)
             throw result.error();
         return std::move(*result);
+    }
+
+
+    surface
+    load_bmp(rwops& src)
+    {
+        return load_bmp(src.data());
     }
 
 
@@ -452,15 +687,24 @@ namespace sdl::img {
 
 
     expected<surface, error>
+    try_load_bmp(rwops& src)
+        noexcept
+    {
+        return try_load_bmp(src.data());
+    }
+
+
+    expected<surface, error>
     try_load_bmp(const path& filename)
         noexcept
     {
-        auto src = SDL_RWFromFile(filename.c_str(), "rb");
-        if (!src)
-            return unexpected{error{}};
-        auto result = try_load_bmp(src);
-        SDL_RWclose(src);
-        return result;
+        try {
+            rwops src{filename, "rb"};
+            return try_load_bmp(src);
+        }
+        catch (error& e) {
+            return unexpected{e};
+        }
     }
 
 
@@ -471,6 +715,13 @@ namespace sdl::img {
         if (!result)
             throw result.error();
         return std::move(*result);
+    }
+
+
+    surface
+    load_cur(rwops& src)
+    {
+        return load_cur(src.data());
     }
 
 
@@ -496,15 +747,24 @@ namespace sdl::img {
 
 
     expected<surface, error>
+    try_load_cur(rwops& src)
+        noexcept
+    {
+        return try_load_cur(src.data());
+    }
+
+
+    expected<surface, error>
     try_load_cur(const path& filename)
         noexcept
     {
-        auto src = SDL_RWFromFile(filename.c_str(), "rb");
-        if (!src)
-            return unexpected{error{}};
-        auto result = try_load_cur(src);
-        SDL_RWclose(src);
-        return result;
+        try {
+            rwops src{filename, "rb"};
+            return try_load_cur(src);
+        }
+        catch (error& e) {
+            return unexpected{e};
+        }
     }
 
 
@@ -515,6 +775,13 @@ namespace sdl::img {
         if (!result)
             throw result.error();
         return std::move(*result);
+    }
+
+
+    surface
+    load_gif(rwops& src)
+    {
+        return load_gif(src.data());
     }
 
 
@@ -540,15 +807,24 @@ namespace sdl::img {
 
 
     expected<surface, error>
+    try_load_gif(rwops& src)
+        noexcept
+    {
+        return try_load_gif(src.data());
+    }
+
+
+    expected<surface, error>
     try_load_gif(const path& filename)
         noexcept
     {
-        auto src = SDL_RWFromFile(filename.c_str(), "rb");
-        if (!src)
-            return unexpected{error{}};
-        auto result = try_load_gif(src);
-        SDL_RWclose(src);
-        return result;
+        try {
+            rwops src{filename, "rb"};
+            return try_load_gif(src);
+        }
+        catch (error& e) {
+            return unexpected{e};
+        }
     }
 
 
@@ -559,6 +835,13 @@ namespace sdl::img {
         if (!result)
             throw result.error();
         return std::move(*result);
+    }
+
+
+    surface
+    load_ico(rwops& src)
+    {
+        return load_ico(src.data());
     }
 
 
@@ -584,15 +867,24 @@ namespace sdl::img {
 
 
     expected<surface, error>
+    try_load_ico(rwops& src)
+        noexcept
+    {
+        return try_load_ico(src.data());
+    }
+
+
+    expected<surface, error>
     try_load_ico(const path& filename)
         noexcept
     {
-        auto src = SDL_RWFromFile(filename.c_str(), "rb");
-        if (!src)
-            return unexpected{error{}};
-        auto result = try_load_ico(src);
-        SDL_RWclose(src);
-        return result;
+        try {
+            rwops src{filename, "rb"};
+            return try_load_ico(src);
+        }
+        catch (error& e) {
+            return unexpected{e};
+        }
     }
 
 
@@ -603,6 +895,13 @@ namespace sdl::img {
         if (!result)
             throw result.error();
         return std::move(*result);
+    }
+
+
+    surface
+    load_jpg(rwops& src)
+    {
+        return load_jpg(src.data());
     }
 
 
@@ -628,15 +927,24 @@ namespace sdl::img {
 
 
     expected<surface, error>
+    try_load_jpg(rwops& src)
+        noexcept
+    {
+        return try_load_jpg(src.data());
+    }
+
+
+    expected<surface, error>
     try_load_jpg(const path& filename)
         noexcept
     {
-        auto src = SDL_RWFromFile(filename.c_str(), "rb");
-        if (!src)
-            return unexpected{error{}};
-        auto result = try_load_jpg(src);
-        SDL_RWclose(src);
-        return result;
+        try {
+            rwops src{filename, "rb"};
+            return try_load_jpg(src);
+        }
+        catch (error& e) {
+            return unexpected{e};
+        }
     }
 
 
@@ -649,6 +957,13 @@ namespace sdl::img {
         if (!result)
             throw result.error();
         return std::move(*result);
+    }
+
+
+    surface
+    load_jxl(rwops& src)
+    {
+        return load_jxl(src.data());
     }
 
 
@@ -674,15 +989,24 @@ namespace sdl::img {
 
 
     expected<surface, error>
+    try_load_jxl(rwops& src)
+        noexcept
+    {
+        return try_load_jxl(src.data());
+    }
+
+
+    expected<surface, error>
     try_load_jxl(const path& filename)
         noexcept
     {
-        auto src = SDL_RWFromFile(filename.c_str(), "rb");
-        if (!src)
-            return unexpected{error{}};
-        auto result = try_load_jxl(src);
-        SDL_RWclose(src);
-        return result;
+        try {
+            rwops src{filename, "rb"};
+            return try_load_jxl(src);
+        }
+        catch (error& e) {
+            return unexpected{e};
+        }
     }
 
 #endif // SDL_IMAGE_VERSION_ATLEAST(2, 6, 0)
@@ -695,6 +1019,13 @@ namespace sdl::img {
         if (!result)
             throw result.error();
         return std::move(*result);
+    }
+
+
+    surface
+    load_lbm(rwops& src)
+    {
+        return load_lbm(src.data());
     }
 
 
@@ -720,15 +1051,24 @@ namespace sdl::img {
 
 
     expected<surface, error>
+    try_load_lbm(rwops& src)
+        noexcept
+    {
+        return try_load_lbm(src.data());
+    }
+
+
+    expected<surface, error>
     try_load_lbm(const path& filename)
         noexcept
     {
-        auto src = SDL_RWFromFile(filename.c_str(), "rb");
-        if (!src)
-            return unexpected{error{}};
-        auto result = try_load_lbm(src);
-        SDL_RWclose(src);
-        return result;
+        try {
+            rwops src{filename, "rb"};
+            return try_load_lbm(src);
+        }
+        catch (error& e) {
+            return unexpected{e};
+        }
     }
 
 
@@ -739,6 +1079,13 @@ namespace sdl::img {
         if (!result)
             throw result.error();
         return std::move(*result);
+    }
+
+
+    surface
+    load_pcx(rwops& src)
+    {
+        return load_pcx(src.data());
     }
 
 
@@ -764,15 +1111,24 @@ namespace sdl::img {
 
 
     expected<surface, error>
+    try_load_pcx(rwops& src)
+        noexcept
+    {
+        return try_load_pcx(src.data());
+    }
+
+
+    expected<surface, error>
     try_load_pcx(const path& filename)
         noexcept
     {
-        auto src = SDL_RWFromFile(filename.c_str(), "rb");
-        if (!src)
-            return unexpected{error{}};
-        auto result = try_load_pcx(src);
-        SDL_RWclose(src);
-        return result;
+        try {
+            rwops src{filename, "rb"};
+            return try_load_pcx(src);
+        }
+        catch (error& e) {
+            return unexpected{e};
+        }
     }
 
 
@@ -783,6 +1139,13 @@ namespace sdl::img {
         if (!result)
             throw result.error();
         return std::move(*result);
+    }
+
+
+    surface
+    load_png(rwops& src)
+    {
+        return load_png(src.data());
     }
 
 
@@ -808,15 +1171,24 @@ namespace sdl::img {
 
 
     expected<surface, error>
+    try_load_png(rwops& src)
+        noexcept
+    {
+        return try_load_png(src.data());
+    }
+
+
+    expected<surface, error>
     try_load_png(const path& filename)
         noexcept
     {
-        auto src = SDL_RWFromFile(filename.c_str(), "rb");
-        if (!src)
-            return unexpected{error{}};
-        auto result = try_load_png(src);
-        SDL_RWclose(src);
-        return result;
+        try {
+            rwops src{filename, "rb"};
+            return try_load_png(src);
+        }
+        catch (error& e) {
+            return unexpected{e};
+        }
     }
 
 
@@ -827,6 +1199,13 @@ namespace sdl::img {
         if (!result)
             throw result.error();
         return std::move(*result);
+    }
+
+
+    surface
+    load_pnm(rwops& src)
+    {
+        return load_pnm(src.data());
     }
 
 
@@ -852,15 +1231,24 @@ namespace sdl::img {
 
 
     expected<surface, error>
+    try_load_pnm(rwops& src)
+        noexcept
+    {
+        return try_load_pnm(src.data());
+    }
+
+
+    expected<surface, error>
     try_load_pnm(const path& filename)
         noexcept
     {
-        auto src = SDL_RWFromFile(filename.c_str(), "rb");
-        if (!src)
-            return unexpected{error{}};
-        auto result = try_load_pnm(src);
-        SDL_RWclose(src);
-        return result;
+        try {
+            rwops src{filename, "rb"};
+            return try_load_pnm(src);
+        }
+        catch (error& e) {
+            return unexpected{e};
+        }
     }
 
 
@@ -873,6 +1261,13 @@ namespace sdl::img {
         if (!result)
             throw result.error();
         return std::move(*result);
+    }
+
+
+    surface
+    load_svg(rwops& src)
+    {
+        return load_svg(src.data());
     }
 
 
@@ -898,15 +1293,24 @@ namespace sdl::img {
 
 
     expected<surface, error>
+    try_load_svg(rwops& src)
+        noexcept
+    {
+        return try_load_svg(src.data());
+    }
+
+
+    expected<surface, error>
     try_load_svg(const path& filename)
         noexcept
     {
-        auto src = SDL_RWFromFile(filename.c_str(), "rb");
-        if (!src)
-            return unexpected{error{}};
-        auto result = try_load_svg(src);
-        SDL_RWclose(src);
-        return result;
+        try {
+            rwops src{filename, "rb"};
+            return try_load_svg(src);
+        }
+        catch (error& e) {
+            return unexpected{e};
+        }
     }
 
 #endif // SDL_IMAGE_VERSION_ATLEAST(2, 0, 2)
@@ -927,10 +1331,27 @@ namespace sdl::img {
 
 
     surface
+    load_svg(rwops& src,
+             int width,
+             int height)
+    {
+        return load_svg(src.data(), width, height);
+    }
+
+
+    surface
     load_svg(SDL_RWops* src,
              vec2 size)
     {
         return load_svg(src, size.x, size.y);
+    }
+
+
+    surface
+    load_svg(rwops& src,
+             vec2 size)
+    {
+        return load_svg(src.data(), size);
     }
 
 
@@ -968,6 +1389,16 @@ namespace sdl::img {
 
 
     expected<surface, error>
+    try_load_svg(rwops& src,
+                 int width,
+                 int height)
+        noexcept
+    {
+        return try_load_svg(src.data(), width, height);
+    }
+
+
+    expected<surface, error>
     try_load_svg(SDL_RWops* src,
                   vec2 size)
         noexcept
@@ -977,17 +1408,27 @@ namespace sdl::img {
 
 
     expected<surface, error>
+    try_load_svg(rwops& src,
+                 vec2 size)
+        noexcept
+    {
+        return try_load_svg(src.data(), size);
+    }
+
+
+    expected<surface, error>
     try_load_svg(const path& filename,
                  int width,
                  int height)
         noexcept
     {
-        auto src = SDL_RWFromFile(filename.c_str(), "rb");
-        if (!src)
-            return unexpected{error{}};
-        auto result = try_load_svg(src, width, height);
-        SDL_RWclose(src);
-        return result;
+        try {
+            rwops src{filename, "rb"};
+            return try_load_svg(src, width, height);
+        }
+        catch (error& e) {
+            return unexpected{e};
+        }
     }
 
 
@@ -1015,6 +1456,13 @@ namespace sdl::img {
 
 
     surface
+    load_qoi(rwops& src)
+    {
+        return load_qoi(src.data());
+    }
+
+
+    surface
     load_qoi(const path& filename)
     {
         auto result = try_load_qoi(filename);
@@ -1036,15 +1484,24 @@ namespace sdl::img {
 
 
     expected<surface, error>
+    try_load_qoi(rwops& src)
+        noexcept
+    {
+        return try_load_qoi(src.data());
+    }
+
+
+    expected<surface, error>
     try_load_qoi(const path& filename)
         noexcept
     {
-        auto src = SDL_RWFromFile(filename.c_str(), "rb");
-        if (!src)
-            return unexpected{error{}};
-        auto result = try_load_qoi(src);
-        SDL_RWclose(src);
-        return result;
+        try {
+            rwops src{filename, "rb"};
+            return try_load_qoi(src);
+        }
+        catch (error& e) {
+            return unexpected{e};
+        }
     }
 
 #endif // SDL_IMAGE_VERSION_ATLEAST(2, 6, 0)
@@ -1057,6 +1514,13 @@ namespace sdl::img {
         if (!result)
             throw result.error();
         return std::move(*result);
+    }
+
+
+    surface
+    load_tif(rwops& src)
+    {
+        return load_tif(src.data());
     }
 
 
@@ -1082,15 +1546,24 @@ namespace sdl::img {
 
 
     expected<surface, error>
+    try_load_tif(rwops& src)
+        noexcept
+    {
+        return try_load_tif(src.data());
+    }
+
+
+    expected<surface, error>
     try_load_tif(const path& filename)
         noexcept
     {
-        auto src = SDL_RWFromFile(filename.c_str(), "rb");
-        if (!src)
-            return unexpected{error{}};
-        auto result = try_load_tif(src);
-        SDL_RWclose(src);
-        return result;
+        try {
+            rwops src{filename, "rb"};
+            return try_load_tif(src);
+        }
+        catch (error& e) {
+            return unexpected{e};
+        }
     }
 
 
@@ -1101,6 +1574,13 @@ namespace sdl::img {
         if (!result)
             throw result.error();
         return std::move(*result);
+    }
+
+
+    surface
+    load_webp(rwops& src)
+    {
+        return load_webp(src.data());
     }
 
 
@@ -1126,15 +1606,24 @@ namespace sdl::img {
 
 
     expected<surface, error>
+    try_load_webp(rwops& src)
+        noexcept
+    {
+        return try_load_webp(src.data());
+    }
+
+
+    expected<surface, error>
     try_load_webp(const path& filename)
         noexcept
     {
-        auto src = SDL_RWFromFile(filename.c_str(), "rb");
-        if (!src)
-            return unexpected{error{}};
-        auto result = try_load_webp(src);
-        SDL_RWclose(src);
-        return result;
+        try {
+            rwops src{filename, "rb"};
+            return try_load_webp(src);
+        }
+        catch (error& e) {
+            return unexpected{e};
+        }
     }
 
 
@@ -1145,6 +1634,13 @@ namespace sdl::img {
         if (!result)
             throw result.error();
         return std::move(*result);
+    }
+
+
+    surface
+    load_xcf(rwops& src)
+    {
+        return load_xcf(src.data());
     }
 
 
@@ -1170,15 +1666,24 @@ namespace sdl::img {
 
 
     expected<surface, error>
+    try_load_xcf(rwops& src)
+        noexcept
+    {
+        return try_load_xcf(src.data());
+    }
+
+
+    expected<surface, error>
     try_load_xcf(const path& filename)
         noexcept
     {
-        auto src = SDL_RWFromFile(filename.c_str(), "rb");
-        if (!src)
-            return unexpected{error{}};
-        auto result = try_load_xcf(src);
-        SDL_RWclose(src);
-        return result;
+        try {
+            rwops src{filename, "rb"};
+            return try_load_xcf(src);
+        }
+        catch (error& e) {
+            return unexpected{e};
+        }
     }
 
 
@@ -1189,6 +1694,13 @@ namespace sdl::img {
         if (!result)
             throw result.error();
         return std::move(*result);
+    }
+
+
+    surface
+    load_xpm(rwops& src)
+    {
+        return load_xpm(src.data());
     }
 
 
@@ -1224,15 +1736,24 @@ namespace sdl::img {
 
 
     expected<surface, error>
+    try_load_xpm(rwops& src)
+        noexcept
+    {
+        return try_load_xpm(src.data());
+    }
+
+
+    expected<surface, error>
     try_load_xpm(const path& filename)
         noexcept
     {
-        auto src = SDL_RWFromFile(filename.c_str(), "rb");
-        if (!src)
-            return unexpected{error{}};
-        auto result = try_load_xpm(src);
-        SDL_RWclose(src);
-        return result;
+        try {
+            rwops src{filename, "rb"};
+            return try_load_xpm(src);
+        }
+        catch (error& e) {
+            return unexpected{e};
+        }
     }
 
 
@@ -1283,6 +1804,13 @@ namespace sdl::img {
 
 
     surface
+    load_xv(rwops& src)
+    {
+        return load_xv(src.data());
+    }
+
+
+    surface
     load_xv(const path& filename)
     {
         auto result = try_load_xv(filename);
@@ -1304,15 +1832,24 @@ namespace sdl::img {
 
 
     expected<surface, error>
+    try_load_xv(rwops& src)
+        noexcept
+    {
+        return try_load_xv(src.data());
+    }
+
+
+    expected<surface, error>
     try_load_xv(const path& filename)
         noexcept
     {
-        auto src = SDL_RWFromFile(filename.c_str(), "rb");
-        if (!src)
-            return unexpected{error{}};
-        auto result = try_load_xv(src);
-        SDL_RWclose(src);
-        return result;
+        try {
+            rwops src{filename, "rb"};
+            return try_load_xv(src);
+        }
+        catch (error& e) {
+            return unexpected{e};
+        }
     }
 
 
@@ -1338,6 +1875,15 @@ namespace sdl::img {
         auto result = try_save_jpg(src, dst, close_dst, quality);
         if (!result)
             throw result.error();
+    }
+
+
+    void
+    save_jpg(const surface& src,
+             rwops& dst,
+             int quality)
+    {
+        save_jpg(src, dst.data(), false, quality);
     }
 
 
@@ -1370,6 +1916,16 @@ namespace sdl::img {
         return {};
     }
 
+
+    expected<void, error>
+    try_save_jpg(const surface& src,
+                 rwops& dst,
+                 int quality)
+        noexcept
+    {
+        return try_save_jpg(src, dst.data(), false, quality);
+    }
+
 #endif // SDL_IMAGE_VERSION_ATLEAST(2, 0, 2)
 
 
@@ -1391,6 +1947,14 @@ namespace sdl::img {
         auto result = try_save_png(src, dst, close_dst);
         if (!result)
             throw result.error();
+    }
+
+
+    void
+    save_png(const surface& src,
+             rwops& dst)
+    {
+        save_png(src, dst.data(), false);
     }
 
 
@@ -1417,6 +1981,15 @@ namespace sdl::img {
                            close_dst) < 0)
             return unexpected{error{}};
         return {};
+    }
+
+
+    expected<void, error>
+    try_save_png(const surface& src,
+                 rwops& dst)
+        noexcept
+    {
+        return try_save_png(src, dst.data(), false);
     }
 
 
@@ -1473,6 +2046,13 @@ namespace sdl::img {
 
 
     animation
+    load_animation(rwops& src)
+    {
+        return load_animation(src.data(), false);
+    }
+
+
+    animation
     load_animation(SDL_RWops* src,
                    bool close_src,
                    const char* type)
@@ -1481,6 +2061,14 @@ namespace sdl::img {
         if (!anim)
             throw error{};
         return convert_and_free(anim);
+    }
+
+
+    animation
+    load_animation(rwops& src,
+                   const char* type)
+    {
+        return load_animation(src.data(), false, type);
     }
 
 
@@ -1518,6 +2106,14 @@ namespace sdl::img {
 
 
     expected<animation, error>
+    try_load_animation(rwops& src)
+        noexcept
+    {
+        return try_load_animation(src.data(), false);
+    }
+
+
+    expected<animation, error>
     try_load_animation(SDL_RWops* src,
                        bool close_src,
                        const char* type)
@@ -1535,6 +2131,15 @@ namespace sdl::img {
     }
 
 
+    expected<animation, error>
+    try_load_animation(rwops& src,
+                       const char* type)
+        noexcept
+    {
+        return try_load_animation(src.data(), false, type);
+    }
+
+
     animation
     load_gif_animation(SDL_RWops* src)
     {
@@ -1542,6 +2147,13 @@ namespace sdl::img {
         if (!anim)
             throw error{};
         return convert_and_free(anim);
+    }
+
+
+    animation
+    load_gif_animation(rwops& src)
+    {
+        return load_gif_animation(src.data());
     }
 
 
@@ -1558,6 +2170,14 @@ namespace sdl::img {
         catch (std::exception& e) {
             return unexpected{error{e}};
         }
+    }
+
+
+    expected<animation, error>
+    try_load_gif_animation(rwops& src)
+        noexcept
+    {
+        return try_load_gif_animation(src.data());
     }
 
 #endif // SDL_IMAGE_VERSION_ATLEAST(2, 6, 0)

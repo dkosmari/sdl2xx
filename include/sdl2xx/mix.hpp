@@ -20,6 +20,7 @@
 #include "angle.hpp"
 #include "audio.hpp"
 #include "owner_wrapper.hpp"
+#include "rwops.hpp"
 #include "string.hpp"
 #include "vector.hpp"
 
@@ -250,6 +251,9 @@ namespace sdl::mix {
               bool close_src);
 
         explicit
+        chunk(rwops& src);
+
+        explicit
         chunk(Uint8* ms_wav);
 
         chunk(const void* samples,
@@ -284,6 +288,9 @@ namespace sdl::mix {
         void
         create(SDL_RWops* src,
                bool close_src);
+
+        void
+        create(rwops& src);
 
         void
         create(Uint8* ms_wav);
@@ -435,6 +442,11 @@ namespace sdl::mix {
               bool close_src,
               type t);
 
+        music(rwops& src);
+
+        music(rwops& src,
+              type t);
+
         /// Move constructor.
         music(music&& other)
             noexcept = default;
@@ -460,6 +472,13 @@ namespace sdl::mix {
         void
         create(SDL_RWops* src,
                bool close_src,
+               type t);
+
+        void
+        create(rwops& src);
+
+        void
+        create(rwops& src,
                type t);
 
         void

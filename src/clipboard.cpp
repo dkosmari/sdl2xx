@@ -105,7 +105,7 @@ namespace sdl::clipboard {
     }
 
 
-    std::expected<string, error>
+    expected<string, error>
     try_get_primary_selection()
         noexcept
     {

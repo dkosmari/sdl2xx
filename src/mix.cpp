@@ -213,6 +213,12 @@ namespace sdl::mix {
     }
 
 
+    chunk::chunk(rwops& src)
+    {
+        create(src);
+    }
+
+
     chunk::chunk(Uint8* ms_wav)
     {
         create(ms_wav);
@@ -252,6 +258,13 @@ namespace sdl::mix {
             throw error{};
         destroy();
         acquire(ptr);
+    }
+
+
+    void
+    chunk::create(rwops& src)
+    {
+        create(src.data(), false);
     }
 
 
@@ -463,6 +476,19 @@ namespace sdl::mix {
     }
 
 
+    music::music(rwops& src)
+    {
+        create(src);
+    }
+
+
+    music::music(rwops& src,
+                 type t)
+    {
+        create(src, t);
+    }
+
+
     music::~music()
         noexcept
     {
@@ -505,6 +531,21 @@ namespace sdl::mix {
             throw error{};
         destroy();
         acquire(ptr);
+    }
+
+
+    void
+    music::create(rwops& src)
+    {
+        create(src.data(), false);
+    }
+
+
+    void
+    music::create(rwops& src,
+                  type t)
+    {
+        create(src.data(), false, t);
     }
 
 

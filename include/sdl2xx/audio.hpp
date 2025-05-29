@@ -18,6 +18,7 @@
 
 #include "basic_wrapper.hpp"
 #include "blob.hpp"
+#include "rwops.hpp"
 #include "string.hpp"
 #include "vector.hpp"
 
@@ -273,6 +274,9 @@ namespace sdl::audio {
     load_wav(SDL_RWops* src,
              bool close_src);
 
+    [[nodiscard]]
+    std::pair<blob, spec>
+    load_wav(rwops& src);
 
     [[nodiscard]]
     std::pair<blob, spec>

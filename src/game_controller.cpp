@@ -155,6 +155,13 @@ namespace sdl::game_controller {
 
 
     unsigned
+    add_mappings(rwops& src)
+    {
+        return add_mappings(src.data(), false);
+    }
+
+
+    unsigned
     add_mappings(const path& filename)
     {
         auto result = try_add_mappings(filename);
@@ -173,6 +180,14 @@ namespace sdl::game_controller {
         if (r < 0)
             return unexpected{error{}};
         return r;
+    }
+
+
+    expected<unsigned, error>
+    try_add_mappings(rwops& src)
+        noexcept
+    {
+        return try_add_mappings(src.data(), false);
     }
 
 
@@ -230,7 +245,7 @@ namespace sdl::game_controller {
     }
 
 
-    std::expected<string, error>
+    expected<string, error>
     try_get_mapping(unsigned index)
         noexcept
     {
@@ -258,7 +273,7 @@ namespace sdl::game_controller {
     }
 
 
-    std::expected<string, error>
+    expected<string, error>
     try_get_mapping(const guid& id)
         noexcept
     {
@@ -433,7 +448,7 @@ namespace sdl::game_controller {
     }
 
 
-    std::expected<string, error>
+    expected<string, error>
     device::try_get_mapping()
         const
     {
@@ -586,7 +601,7 @@ namespace sdl::game_controller {
     }
 
 
-    std::expected<const char*, error>
+    expected<const char*, error>
     device::try_get_serial()
         const noexcept
     {

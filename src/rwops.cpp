@@ -393,7 +393,7 @@ namespace sdl {
     }
 
 
-    std::expected<std::size_t, error>
+    expected<std::size_t, error>
     rwops::try_write(const void* buf,
                      std::size_t elem_size,
                      std::size_t count)

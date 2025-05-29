@@ -486,6 +486,13 @@ namespace sdl {
 
 
     surface
+    surface::load_bmp(rwops& src)
+    {
+        return load_bmp(src.data(), false);
+    }
+
+
+    surface
     surface::load_bmp(const path& filename)
     {
         SDL_Surface* surf = SDL_LoadBMP(filename.c_str());
@@ -497,10 +504,17 @@ namespace sdl {
 
     void
     surface::save_bmp(SDL_RWops* dst,
-                      bool close)
+                      bool close_dst)
     {
-        if (SDL_SaveBMP_RW(raw, dst, close) < 0)
+        if (SDL_SaveBMP_RW(raw, dst, close_dst) < 0)
             throw error{};
+    }
+
+
+    void
+    surface::save_bmp(rwops& dst)
+    {
+        save_bmp(dst.data(), false);
     }
 
 
