@@ -38,7 +38,7 @@ namespace sdl {
 
     struct renderer : basic_wrapper<SDL_Renderer*> {
 
-        using parent_type = basic_wrapper<SDL_Renderer*>;
+        using base_type = basic_wrapper<SDL_Renderer*>;
 
 
         enum flag : Uint32 {
@@ -70,7 +70,7 @@ namespace sdl {
 
 
         // Inherit constructors.
-        using parent_type::parent_type;
+        using base_type::base_type;
 
 
         explicit

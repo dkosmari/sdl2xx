@@ -40,14 +40,14 @@ namespace sdl {
 
     public:
 
-        using parent_type = basic_wrapper<SDL_Texture*>;
+        using base_type = basic_wrapper<SDL_Texture*>;
         using state_type = std::tuple<raw_type,
                                       void*,
                                       unique_ptr<surface>>;
 
 
         // Inherit constructors.
-        using parent_type::parent_type;
+        using base_type::base_type;
 
 
         texture(SDL_Texture* tex)

@@ -237,11 +237,11 @@ namespace sdl::mix {
 
     struct chunk : owner_wrapper<Mix_Chunk*> {
 
-        using parent_type = owner_wrapper<Mix_Chunk*>;
+        using base_type = owner_wrapper<Mix_Chunk*>;
 
 
         // Inherit constructors.
-        using parent_type::parent_type;
+        using base_type::base_type;
 
 
         chunk(const path& filename);
@@ -404,11 +404,11 @@ namespace sdl::mix {
 
     struct music : basic_wrapper<Mix_Music*> {
 
-        using parent_type = basic_wrapper<Mix_Music*>;
+        using base_type = basic_wrapper<Mix_Music*>;
 
 
         // Inherit constructors.
-        using parent_type::parent_type;
+        using base_type::base_type;
 
 
         enum class type {

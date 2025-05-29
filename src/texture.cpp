@@ -121,7 +121,7 @@ namespace sdl {
     texture::acquire(state_type state)
         noexcept
     {
-        parent_type::acquire(get<0>(state));
+        base_type::acquire(get<0>(state));
         user_data = get<1>(state);
         locked_surface = std::move(get<2>(state));
         link_this();
@@ -143,7 +143,7 @@ namespace sdl {
         noexcept
     {
         return {
-            parent_type::release(),
+            base_type::release(),
             set_user_data(nullptr),
             std::move(locked_surface)
         };

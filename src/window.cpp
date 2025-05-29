@@ -129,7 +129,7 @@ namespace sdl {
     window::acquire(state_type state)
         noexcept
     {
-        parent_type::acquire(std::move(get<0>(state)));
+        base_type::acquire(std::move(get<0>(state)));
         surf = std::move(get<1>(state));
         link_this();
     }
@@ -149,7 +149,7 @@ namespace sdl {
         noexcept
     {
         return {
-            parent_type::release(),
+            base_type::release(),
             std::move(surf)
         };
     }

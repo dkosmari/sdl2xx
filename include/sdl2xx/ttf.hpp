@@ -86,7 +86,7 @@ namespace sdl::ttf {
 
     struct font : basic_wrapper<TTF_Font*> {
 
-        using parent_type = basic_wrapper<TTF_Font*>;
+        using base_type = basic_wrapper<TTF_Font*>;
 
 
         struct dpi_opt {
@@ -102,7 +102,7 @@ namespace sdl::ttf {
 
 
         // Inherit constructors.
-        using parent_type::parent_type;
+        using base_type::base_type;
 
 
         font(const path& filename,

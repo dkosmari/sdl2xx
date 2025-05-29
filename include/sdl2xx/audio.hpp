@@ -114,10 +114,10 @@ namespace sdl::audio {
 
     struct device : basic_wrapper<SDL_AudioDeviceID> {
 
-        using parent_type = basic_wrapper<SDL_AudioDeviceID>;
+        using base_type = basic_wrapper<SDL_AudioDeviceID>;
 
         // Inherit constructors.
-        using parent_type::parent_type;
+        using base_type::base_type;
 
 
         device(const char* name,
@@ -304,11 +304,11 @@ namespace sdl::audio {
 
     struct stream : basic_wrapper<SDL_AudioStream*> {
 
-        using parent_type = basic_wrapper<SDL_AudioStream*>;
+        using base_type = basic_wrapper<SDL_AudioStream*>;
 
 
         // Inherit constructors.
-        using parent_type::parent_type;
+        using base_type::base_type;
 
 
         stream(format src_format,

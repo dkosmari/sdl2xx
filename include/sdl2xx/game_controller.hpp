@@ -387,11 +387,11 @@ namespace sdl::game_controller {
 
     struct device : basic_wrapper<SDL_GameController*> {
 
-        using parent_type = basic_wrapper<SDL_GameController*>;
+        using base_type = basic_wrapper<SDL_GameController*>;
 
 
         // Inherit constructors.
-        using parent_type::parent_type;
+        using base_type::base_type;
 
 
         explicit

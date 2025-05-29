@@ -126,7 +126,7 @@ namespace sdl {
 
 
     surface::surface(const surface& other) :
-        parent_type{}
+        base_type{}
     {
         create(other);
     }
@@ -311,7 +311,7 @@ namespace sdl {
     surface::acquire(state_type state)
         noexcept
     {
-        parent_type::acquire({
+        base_type::acquire({
                 std::move(get<0>(state)),
                 std::move(get<1>(state))
             });
@@ -334,7 +334,7 @@ namespace sdl {
     surface::release()
         noexcept
     {
-        return std::tuple_cat(parent_type::release(),
+        return std::tuple_cat(base_type::release(),
                               std::tuple(set_user_data(nullptr)));
     }
 

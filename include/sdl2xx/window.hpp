@@ -43,7 +43,7 @@ namespace sdl {
 
     public:
 
-        using parent_type = basic_wrapper<SDL_Window*>;
+        using base_type = basic_wrapper<SDL_Window*>;
 
         using state_type = std::tuple<raw_type, unique_ptr<surface>>;
 
@@ -82,7 +82,7 @@ namespace sdl {
 
 
         // Inherit constructors.
-        using parent_type::parent_type;
+        using base_type::base_type;
 
 
         explicit

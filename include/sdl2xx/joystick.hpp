@@ -295,11 +295,11 @@ namespace sdl::joystick {
 
     struct device : basic_wrapper<SDL_Joystick*> {
 
-        using parent_type = basic_wrapper<SDL_Joystick*>;
+        using base_type = basic_wrapper<SDL_Joystick*>;
 
 
         // Inherit constructors.
-        using parent_type::parent_type;
+        using base_type::base_type;
 
         /// Move constructor.
         device(device&& other)

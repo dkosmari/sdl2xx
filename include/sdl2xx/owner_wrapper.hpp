@@ -31,13 +31,13 @@ namespace sdl {
 
     public:
 
-        using parent_type = basic_wrapper<T, InvalidValue>;
+        using base_type = basic_wrapper<T, InvalidValue>;
 
-        using state_type = std::tuple<typename parent_type::state_type, bool>;
+        using state_type = std::tuple<typename base_type::state_type, bool>;
 
 
         // Inherit constructors.
-        using parent_type::parent_type;
+        using base_type::base_type;
 
 
         /// Move constructor.
@@ -65,13 +65,13 @@ namespace sdl {
         acquire(state_type state)
             noexcept
         {
-            parent_type::acquire(std::move(get<0>(state)));
+            base_type::acquire(std::move(get<0>(state)));
             owner = get<1>(state);
         }
 
 
         void
-        acquire(typename parent_type::state_type new_parent_state,
+        acquire(typename base_type::state_type new_parent_state,
                 bool new_owner = true)
             noexcept
         {
@@ -86,7 +86,7 @@ namespace sdl {
             bool old_owner = owner;
             owner = false;
             return state_type{
-                parent_type::release(),
+                base_type::release(),
                 old_owner
             };
         }

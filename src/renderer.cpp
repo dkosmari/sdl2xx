@@ -199,7 +199,7 @@ namespace sdl {
     renderer::acquire(state_type state)
         noexcept
     {
-        parent_type::acquire(state);
+        base_type::acquire(state);
         if (raw)
             detail::update(raw, this);
     }
@@ -210,7 +210,7 @@ namespace sdl {
         noexcept
     {
         detail::remove(raw);
-        return parent_type::release();
+        return base_type::release();
     }
 
 
