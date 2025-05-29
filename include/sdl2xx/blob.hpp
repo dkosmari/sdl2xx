@@ -9,6 +9,7 @@
 #ifndef SDL2XX_BLOB_HPP
 #define SDL2XX_BLOB_HPP
 
+#include <cstddef>
 #include <span>
 
 #include <SDL_types.h>
@@ -47,6 +48,16 @@ namespace sdl {
         std::span<const Uint8>
         data()
             const noexcept;
+
+
+        std::span<std::byte>
+        bytes()
+            noexcept;
+
+        std::span<const std::byte>
+        bytes()
+            const noexcept;
+
 
     };
 

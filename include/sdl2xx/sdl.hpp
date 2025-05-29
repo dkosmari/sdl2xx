@@ -28,6 +28,7 @@
 #include "pixels.hpp"
 #include "rect.hpp"
 #include "renderer.hpp"
+#include "rwops.hpp"
 #include "sensor.hpp"
 #include "string.hpp"
 #include "surface.hpp"

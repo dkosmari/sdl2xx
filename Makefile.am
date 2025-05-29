@@ -41,6 +41,7 @@ sdl2xx_HEADERS = \
 	include/sdl2xx/pixels.hpp \
 	include/sdl2xx/rect.hpp \
 	include/sdl2xx/renderer.hpp \
+	include/sdl2xx/rwops.hpp \
 	include/sdl2xx/sdl.hpp \
 	include/sdl2xx/sensor.hpp \
 	include/sdl2xx/string.hpp \
@@ -92,6 +93,7 @@ libsdl2xx_a_SOURCES = \
 	src/pixels.cpp \
 	src/rect.cpp \
 	src/renderer.cpp \
+	src/rwops.cpp \
 	src/sensor.cpp \
 	src/surface.cpp \
 	src/texture.cpp \

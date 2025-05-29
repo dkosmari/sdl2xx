@@ -49,4 +49,21 @@ namespace sdl {
         return {ptr.get(), ptr.get_deleter().size};
     }
 
+
+
+    std::span<std::byte>
+    blob::bytes()
+        noexcept
+    {
+        return as_writable_bytes(data());
+    }
+
+
+    std::span<const std::byte>
+    blob::bytes()
+        const noexcept
+    {
+        return as_bytes(data());
+    }
+
 } // namespace sdl

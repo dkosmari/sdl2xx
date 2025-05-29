@@ -140,10 +140,10 @@ namespace sdl::sensor {
 
     struct device : basic_wrapper<SDL_Sensor*> {
 
-        using parent_type = basic_wrapper<SDL_Sensor*>;
+        using base_type = basic_wrapper<SDL_Sensor*>;
 
         // Inherit constructors.
-        using parent_type::parent_type;
+        using base_type::base_type;
 
 
         explicit
@@ -162,7 +162,8 @@ namespace sdl::sensor {
         from_id(instance_id id);
 
 
-        ~device();
+        ~device()
+            noexcept;
 
 
         /// Move assignment.

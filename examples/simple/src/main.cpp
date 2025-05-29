@@ -6,6 +6,10 @@
 using sdl::vec2;
 using namespace sdl::literals;
 
+using std::cout;
+using std::endl;
+
+
 int main(int, char* [])
 {
     try {
@@ -50,7 +54,7 @@ int main(int, char* [])
         }
     }
     catch (std::exception& e) {
-        std::cout << "Error: " << e.what() << std::endl;
+        cout << "Error: " << e.what() << endl;
         return -1;
     }
 }
