@@ -411,8 +411,9 @@ namespace sdl::ttf {
         }
 
 
-        // Solid
-
+        // ----- //
+        // Solid //
+        // ----- //
 
         [[nodiscard]]
         surface
@@ -463,7 +464,9 @@ namespace sdl::ttf {
         }
 
 
-        // Solid + Wrapped
+        // --------------- //
+        // Solid + Wrapped //
+        // --------------- //
 
         [[nodiscard]]
         surface
@@ -512,7 +515,9 @@ namespace sdl::ttf {
         }
 
 
-        // Shaded
+        // ------ //
+        // Shaded //
+        // ------ //
 
         [[nodiscard]]
         surface
@@ -569,7 +574,9 @@ namespace sdl::ttf {
         }
 
 
-        // Shaded + Wrapped
+        // ---------------- //
+        // Shaded + Wrapped //
+        // ---------------- //
 
         [[nodiscard]]
         surface
@@ -623,7 +630,9 @@ namespace sdl::ttf {
         }
 
 
-        // Blended
+        // ------- //
+        // Blended //
+        // ------- //
 
         [[nodiscard]]
         surface
@@ -674,7 +683,9 @@ namespace sdl::ttf {
         }
 
 
-        // Blended + Wrapped
+        // ----------------- //
+        // Blended + Wrapped //
+        // ----------------- //
 
         [[nodiscard]]
         surface
@@ -724,7 +735,9 @@ namespace sdl::ttf {
 
 #if SDL_TTF_VERSION_ATLEAST(2, 20, 0)
 
-        // LCD
+        // --- //
+        // LCD //
+        // --- //
 
         [[nodiscard]]
         surface
@@ -781,7 +794,9 @@ namespace sdl::ttf {
         }
 
 
-        // LCD + Wrapped
+        // ------------- //
+        // LCD + Wrapped //
+        // ------------- //
 
         [[nodiscard]]
         surface
