@@ -18,7 +18,7 @@ namespace sdl {
 
     struct init {
 
-        enum flag : Uint32 {
+        enum class flag : Uint32 {
             timer           = SDL_INIT_TIMER,
             audio           = SDL_INIT_AUDIO,
             video           = SDL_INIT_VIDEO,
@@ -33,12 +33,9 @@ namespace sdl {
 
         init(Uint32 flags);
 
-
-        template<std::same_as<flag>... Args>
-        requires(sizeof...(Args) > 0)
-        init(Args... args) :
-            init{static_cast<Uint32>((args | ...))}
-        {}
+        template<std::same_as<flag>... Flags>
+        requires(sizeof...(Flags) > 0)
+        init(Flags... flags);
 
 
         // Disallow copies.
@@ -51,18 +48,27 @@ namespace sdl {
     }; // class init
 
 
+    template<std::same_as<init::flag>... Flags>
+    requires(sizeof...(Flags) > 0)
+    [[nodiscard]]
+    constexpr
+    Uint32
+    convert(Flags... flags)
+        noexcept
+    {
+        return (static_cast<Uint32>(flags) | ...);
+    }
+
+
     struct sub_init {
 
         const Uint32 flags;
 
         sub_init(Uint32 flags);
 
-
-        template<std::same_as<init::flag>... Args>
-        requires(sizeof...(Args) > 0)
-        sub_init(Args... args) :
-            sub_init{static_cast<Uint32>((args | ...))}
-        {}
+        template<std::same_as<init::flag>... Flags>
+        requires(sizeof...(Flags) > 0)
+        sub_init(Flags... flags);
 
 
         // Disallow copies.
@@ -80,12 +86,12 @@ namespace sdl {
     initialize(Uint32 flags);
 
 
-    template<std::same_as<init::flag>... Args>
-    requires(sizeof...(Args) > 0)
+    template<std::same_as<init::flag>... Flags>
+    requires(sizeof...(Flags) > 0)
     void
-    initialize(Args... args)
+    initialize(Flags... flags)
     {
-        initialize(static_cast<Uint32>((args | ...)));
+        initialize(convert(flags...));
     }
 
 
@@ -102,15 +108,31 @@ namespace sdl {
     was_init(Uint32 flags = 0)
         noexcept;
 
-    template<std::same_as<init::flag>... Args>
-    requires(sizeof...(Args) > 0)
+    template<std::same_as<init::flag>... Flags>
+    requires(sizeof...(Flags) > 0)
     [[nodiscard]]
     Uint32
-    was_init(Args... args)
+    was_init(Flags... flags)
         noexcept
     {
-        return was_init(static_cast<Uint32>((args | ...)));
+        return was_init(convert(flags...));
     }
+
+
+    // Implementation of templated methods.
+
+    template<std::same_as<init::flag>... Flags>
+    requires(sizeof...(Flags) > 0)
+    init::init(Flags... flags) :
+        init{convert(flags...)}
+    {}
+
+
+    template<std::same_as<init::flag>... Flags>
+    requires(sizeof...(Flags) > 0)
+    sub_init::sub_init(Flags... flags) :
+        sub_init{convert(flags...)}
+    {}
 
 } // namespace sdl
 

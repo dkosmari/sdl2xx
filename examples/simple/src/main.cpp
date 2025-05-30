@@ -5,7 +5,6 @@
 
 using sdl::vec2;
 using namespace sdl::literals;
-
 using std::cout;
 using std::endl;
 
@@ -17,12 +16,12 @@ int main(int, char* [])
 
         sdl::window win{"Simple App",
                         sdl::window::pos_centered,
-                        {1280, 720},
-                        0};
+                        {1280, 720}};
 
         sdl::renderer rend{win,
                            -1,
-                           sdl::renderer::flag::accelerated | sdl::renderer::flag::present_vsync};
+                           sdl::renderer::flag::accelerated,
+                           sdl::renderer::flag::present_vsync};
 
         auto box = sdl::rect::from_corners({300, 200},
                                            win.get_size() - vec2{300, 200});

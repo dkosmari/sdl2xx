@@ -9,6 +9,7 @@
 #ifndef SDL2XX_WINDOW_HPP
 #define SDL2XX_WINDOW_HPP
 
+#include <concepts>
 #include <functional>
 #include <optional>
 #include <span>
@@ -92,28 +93,58 @@ namespace sdl {
         window(const char* title,
                int x, int y,
                int w, int h,
-               Uint32 flags);
+               Uint32 flags = 0);
 
-        inline
+        // stringy title
         window(const concepts::string auto& title,
                int x, int y,
                int w, int h,
-               Uint32 flags) :
-            window{title.data(), x, y, w, h, flags}
-        {}
+               Uint32 flags = 0);
 
+        // vec2 args
         window(const char* title,
                vec2 pos,
                vec2 size,
-               Uint32 flags);
+               Uint32 flags = 0);
 
-        inline
+        // stringy title + vec2 args
         window(const concepts::string auto& title,
                vec2 pos,
                vec2 size,
-               Uint32 flags) :
-            window{title.data(), pos, size, flags}
-        {}
+               Uint32 flags = 0);
+
+        // flag list
+        template<std::same_as<flag>... Flags>
+        requires(sizeof...(Flags) > 0)
+        window(const char* title,
+               int x, int y,
+               int w, int h,
+               Flags... flags);
+
+        // stringy title + flag list
+        template<concepts::string Str,
+                 std::same_as<flag>... Flags>
+        requires(sizeof...(Flags) > 0)
+        window(const Str& title,
+               int x, int y,
+               int w, int h,
+               Flags... flags);
+
+        // vec2 args + flag list
+        template<std::same_as<flag>... Flags>
+        requires(sizeof...(Flags) > 0)
+        window(const char* title,
+               vec2 pos,
+               vec2 size,
+               Flags... flags);
+
+        // stringy title + vec2 args + flag list
+        template<concepts::string Str,
+                 std::same_as<flag>... Flags>
+        window(const Str& title,
+               vec2 pos,
+               vec2 size,
+               Flags... flags);
 
 
         /// Move constructor.
@@ -135,32 +166,67 @@ namespace sdl {
         create(const char* title,
                int x, int y,
                int w, int h,
-               Uint32 flags);
+               Uint32 flags = 0);
 
+        // stringy title
+        inline
         void
         create(const concepts::string auto& title,
                int x, int y,
                int w, int h,
-               Uint32 flags)
-        {
-            create(title.data(), x, y, w, h, flags);
-        }
+               Uint32 flags = 0);
 
+        // vec2 args
         void
         create(const char* title,
                vec2 pos,
                vec2 size,
-               Uint32 flags);
+               Uint32 flags = 0);
 
+        // stringy title + vec2 args
         inline
         void
         create(const concepts::string auto& title,
                vec2 pos,
                vec2 size,
-               Uint32 flags)
-        {
-            create(title.data(), pos, size, flags);
-        }
+               Uint32 flags = 0);
+
+        // flag list
+        template<std::same_as<flag>... Flags>
+        requires(sizeof...(Flags) > 0)
+        void
+        create(const char* title,
+               int x, int y,
+               int w, int h,
+               Flags... flags);
+
+        // stringy title + flag list
+        template<concepts::string Str,
+                 std::same_as<flag>... Flags>
+        requires(sizeof...(Flags) > 0)
+        void
+        create(const Str& title,
+               int x, int y,
+               int w, int h,
+               Flags... flags);
+
+        // vec2 args + flag list
+        template<std::same_as<flag>... Flags>
+        requires(sizeof...(Flags) > 0)
+        void
+        create(const char* title,
+               vec2 pos,
+               vec2 size,
+               Flags... flags);
+
+        // stringy title + vec2 args + flag list
+        template<concepts::string Str,
+                 std::same_as<flag>... Flags>
+        void
+        create(const Str& title,
+               vec2 pos,
+               vec2 size,
+               Flags... flags);
 
 
         [[nodiscard]]
@@ -607,6 +673,162 @@ namespace sdl {
             noexcept;
 
     }; // class window
+
+
+    template<std::same_as<window::flag>... Flags>
+    requires(sizeof...(Flags) > 0)
+    [[nodiscard]]
+    constexpr
+    Uint32
+    convert(Flags... flags)
+        noexcept
+    {
+        return (static_cast<Uint32>(flags) | ...);
+    }
+
+
+    // Implementation of templated methods.
+
+    // stringy title
+    inline
+    window::window(const concepts::string auto& title,
+                   int x, int y,
+                   int w, int h,
+                   Uint32 flags) :
+        window{title.data(), x, y, w, h, flags}
+    {}
+
+
+    // stringy title + vec2 args
+    inline
+    window::window(const concepts::string auto& title,
+                   vec2 pos,
+                   vec2 size,
+                   Uint32 flags) :
+        window{title.data(), pos, size, flags}
+    {}
+
+
+    // flag list
+    template<std::same_as<window::flag>... Flags>
+    requires(sizeof...(Flags) > 0)
+    window::window(const char* title,
+                   int x, int y,
+                   int w, int h,
+                   Flags... flags) :
+        window{title, x, y, w, h, convert(flags...)}
+    {}
+
+
+    // stringy title + flag list
+    template<concepts::string Str,
+             std::same_as<window::flag>... Flags>
+    requires(sizeof...(Flags) > 0)
+    window::window(const Str& title,
+                   int x, int y,
+                   int w, int h,
+                   Flags... flags) :
+        window{title.data(), x, y, w, h, flags...}
+    {}
+
+
+    // vec2 args + flag list
+    template<std::same_as<window::flag>... Flags>
+    requires(sizeof...(Flags) > 0)
+    window::window(const char* title,
+                   vec2 pos,
+                   vec2 size,
+                   Flags... flags) :
+        window{title, pos, size, convert(flags...)}
+    {}
+
+
+    // stringy title + vec2 args + flag list
+    template<concepts::string Str,
+             std::same_as<window::flag>... Flags>
+    window::window(const Str& title,
+                   vec2 pos,
+                   vec2 size,
+                   Flags... flags) :
+        window{title.data(), pos, size, flags...}
+    {}
+
+
+    // stringy title
+    inline
+    void
+    window::create(const concepts::string auto& title,
+                   int x, int y,
+                   int w, int h,
+                   Uint32 flags)
+    {
+        create(title.data(), x, y, w, h, flags);
+    }
+
+
+    // stringy title + vec2 args
+    inline
+    void
+    window::create(const concepts::string auto& title,
+                   vec2 pos,
+                   vec2 size,
+                   Uint32 flags)
+    {
+        create(title.data(), pos, size, flags);
+    }
+
+
+    // flag list
+    template<std::same_as<window::flag>... Flags>
+    requires(sizeof...(Flags) > 0)
+    void
+    window::create(const char* title,
+                   int x, int y,
+                   int w, int h,
+                   Flags... flags)
+    {
+        create(title, x, y, w, h, convert(flags...));
+    }
+
+
+    // stringy title + flag list
+    template<concepts::string Str,
+             std::same_as<window::flag>... Flags>
+    requires(sizeof...(Flags) > 0)
+    void
+    window::create(const Str& title,
+                   int x, int y,
+                   int w, int h,
+                   Flags... flags)
+    {
+        create(title.data(), x, y, w, h, flags...);
+    }
+
+
+    // vec2 args + flag list
+    template<std::same_as<window::flag>... Flags>
+    requires(sizeof...(Flags) > 0)
+    void
+    window::create(const char* title,
+                   vec2 pos,
+                   vec2 size,
+                   Flags... flags)
+    {
+        create(title, pos, size, convert(flags...));
+    }
+
+
+    // stringy title + vec2 args + flag list
+    template<concepts::string Str,
+             std::same_as<window::flag>... Flags>
+    void
+    window::create(const Str& title,
+                   vec2 pos,
+                   vec2 size,
+                   Flags... flags)
+    {
+        create(title.data(), pos, size, flags...);
+    }
 
 } // namespace sdl
 

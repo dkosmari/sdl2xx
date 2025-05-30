@@ -59,7 +59,8 @@ namespace sdl::mix {
 
     struct init {
 
-        enum flag : Uint32 {
+        enum class flag : Uint32 {
+
             flac = MIX_INIT_FLAC,
             mid  = MIX_INIT_MID,
             mod  = MIX_INIT_MOD,
@@ -67,23 +68,26 @@ namespace sdl::mix {
             ogg  = MIX_INIT_OGG,
             opus = MIX_INIT_OPUS,
 
-            all = flac | mid | mod | mp3 | ogg | opus
+            all = MIX_INIT_FLAC |
+                  MIX_INIT_MID |
+                  MIX_INIT_MOD |
+                  MIX_INIT_MP3 |
+                  MIX_INIT_OGG |
+                  MIX_INIT_OPUS
+
         };
 
 
         // Disallow copies.
         init(const init&) = delete;
 
-        init(Uint32 flags = flag::all)
+        init(Uint32 flags = static_cast<Uint32>(flag::all))
             noexcept;
 
-        template<std::same_as<flag>... Args>
-        requires(sizeof...(Args) > 0)
-        init(Args... args)
-            noexcept :
-            init{static_cast<Uint32>((args | ...))}
-        {}
-
+        template<std::same_as<flag>... Flags>
+        requires(sizeof...(Flags) > 0)
+        init(Flags... flags)
+            noexcept;
 
         ~init()
             noexcept;
@@ -91,18 +95,30 @@ namespace sdl::mix {
     };
 
 
+    template<std::same_as<init::flag>... Flags>
+    requires(sizeof...(Flags) > 0)
+    [[nodiscard]]
+    constexpr
     Uint32
-    initialize(Uint32 flags = init::flag::all)
+    convert(Flags... flags)
+        noexcept
+    {
+        return (static_cast<Uint32>(flags) | ...);
+    }
+
+
+    Uint32
+    initialize(Uint32 flags = convert(init::flag::all))
         noexcept;
 
 
-    template<std::same_as<init::flag>... Args>
-    requires(sizeof...(Args) > 0)
+    template<std::same_as<init::flag>... Flags>
+    requires(sizeof...(Flags) > 0)
     Uint32
-    initialize(Args... args)
+    initialize(Flags... flags)
         noexcept
     {
-        return initialize(static_cast<Uint32>((args | ...)));
+        return initialize(convert(flags...));
     }
 
 
@@ -117,23 +133,43 @@ namespace sdl::mix {
         noexcept;
 
 
+    // Open default audio device with default parameters.
     void
     open();
 
+
+    // Open default audio device.
     void
     open(int frequency,
          format fmt,
          unsigned channels,
          int chunk_size);
 
+    // Named device.
     void
     open(int frequency,
          format fmt,
          unsigned channels,
          int chunk_size,
          const char* name,
-         Uint32 allowed_changes = audio::allow::change_any);
+         Uint32 allowed_changes = convert(audio::allow_change::any));
 
+    // Named device with list.
+    template<std::same_as<audio::allow_change>... Allow>
+    requires(sizeof...(Allow) > 0)
+    void
+    open(int frequency,
+         format fmt,
+         unsigned channels,
+         int chunk_size,
+         const char* name,
+         Allow... changes)
+    {
+        open(frequency, channels, chunk_size, name, convert(changes...));
+    }
+
+
+    // stringy name
     inline
     void
     open(int frequency,
@@ -141,9 +177,24 @@ namespace sdl::mix {
          unsigned channels,
          int chunk_size,
          const concepts::string auto& name,
-         Uint32 allowed_changes = audio::allow::change_any)
+         Uint32 allowed_changes = convert(audio::allow_change::any))
     {
         open(frequency, fmt, channels, chunk_size, name.data(), allowed_changes);
+    }
+
+
+    // stringy name + changes list
+    template<std::same_as<audio::allow_change>... Allow>
+    requires(sizeof...(Allow) > 0)
+    void
+    open(int frequency,
+         format fmt,
+         unsigned channels,
+         int chunk_size,
+         const concepts::string auto& name,
+         Allow... changes)
+    {
+        open(frequency, fmt, channels, chunk_size, name, convert(changes...));
     }
 
 
@@ -166,29 +217,51 @@ namespace sdl::mix {
         device(const device&) = delete;
 
 
+        // Default device with default parameters.
         device();
 
+        // Default device.
         device(int frequency,
                format fmt,
                unsigned channels,
                int chunk_size);
 
+        // Named device.
         device(int frequency,
                format fmt,
                unsigned channels,
                int chunk_size,
                const char* name,
-               Uint32 allowed_changes = audio::allow::change_any);
+               Uint32 allowed_changes = convert(audio::allow_change::any));
 
-        inline
+        // stringy name
         device(int frequency,
                format fmt,
                unsigned channels,
                int chunk_size,
                const concepts::string auto& name,
-               Uint32 allowed_changes = audio::allow::change_any) :
-            device{frequency, fmt, channels, chunk_size, name.data(), allowed_changes}
-        {}
+               Uint32 allowed_changes = convert(audio::allow_change::any));
+
+        // changes list.
+        template<std::same_as<audio::allow_change>... Allow>
+        requires(sizeof...(Allow) > 0)
+        device(int frequency,
+               format fmt,
+               unsigned channels,
+               int chunk_size,
+               const char* name,
+               Allow... changes);
+
+        // stringy name + changes list.
+        template<concepts::string Str,
+                 std::same_as<audio::allow_change>... Allow>
+        requires(sizeof...(Allow) > 0)
+        device(int frequency,
+               format fmt,
+               unsigned channels,
+               int chunk_size,
+               const Str& name,
+               Allow... changes);
 
 
         ~device()
@@ -210,19 +283,39 @@ namespace sdl::mix {
                unsigned channels,
                int chunk_size,
                const char* name,
-               Uint32 allowed_changes = audio::allow::change_any);
+               Uint32 allowed_changes = convert(audio::allow_change::any));
 
-        inline
+        // stringy name
         void
         reopen(int frequency,
                format fmt,
                unsigned channels,
                int chunk_size,
                const concepts::string auto& name,
-               Uint32 allowed_changes = audio::allow::change_any)
-        {
-            reopen(frequency, fmt, channels, chunk_size, name.data(), allowed_changes);
-        }
+               Uint32 allowed_changes = convert(audio::allow_change::any));
+
+        // changes list
+        template<std::same_as<audio::allow_change>... Allow>
+        requires(sizeof...(Allow) > 0)
+        void
+        reopen(int frequency,
+               format fmt,
+               unsigned channels,
+               int chunk_size,
+               const char* name,
+               Allow... changes);
+
+        // stringy name + changes list
+        template<concepts::string Str,
+                 std::same_as<audio::allow_change>... Allow>
+        requires(sizeof...(Allow) > 0)
+        void
+        reopen(int frequency,
+               format fmt,
+               unsigned channels,
+               int chunk_size,
+               const Str& name,
+               Allow... changes);
 
     }; // struct device
 
@@ -1021,6 +1114,101 @@ namespace sdl::mix {
     const char*
     get_timidity_cfg()
         noexcept;
+
+
+    // Implementation of templated methods.
+
+
+    template<std::same_as<init::flag>... Flags>
+    requires(sizeof...(Flags) > 0)
+    init::init(Flags... flags)
+        noexcept :
+        init{convert(flags...)}
+    {}
+
+
+    // stringy name
+    inline
+    device::device(int frequency,
+                   format fmt,
+                   unsigned channels,
+                   int chunk_size,
+                   const concepts::string auto& name,
+                   Uint32 allowed_changes) :
+        device{frequency, fmt, channels, chunk_size, name.data(), allowed_changes}
+    {}
+
+
+    // changes list.
+    template<std::same_as<audio::allow_change>... Allow>
+    requires(sizeof...(Allow) > 0)
+    device::device(int frequency,
+                   format fmt,
+                   unsigned channels,
+                   int chunk_size,
+                   const char* name,
+                   Allow... changes) :
+        device{frequency, fmt, channels, chunk_size, name, convert(changes...)}
+    {}
+
+
+    // stringy name + changes list.
+    template<concepts::string Str,
+             std::same_as<audio::allow_change>... Allow>
+    requires(sizeof...(Allow) > 0)
+    device::device(int frequency,
+                   format fmt,
+                   unsigned channels,
+                   int chunk_size,
+                   const Str& name,
+                   Allow... changes) :
+        device{frequency, fmt, channels, chunk_size, name, convert(changes...)}
+    {}
+
+
+    // stringy name
+    inline
+    void
+    device::reopen(int frequency,
+                   format fmt,
+                   unsigned channels,
+                   int chunk_size,
+                   const concepts::string auto& name,
+                   Uint32 allowed_changes)
+    {
+        reopen(frequency, fmt, channels, chunk_size, name.data(), allowed_changes);
+    }
+
+
+    // changes list
+    template<std::same_as<audio::allow_change>... Allow>
+    requires(sizeof...(Allow) > 0)
+    void
+    device::reopen(int frequency,
+                   format fmt,
+                   unsigned channels,
+                   int chunk_size,
+                   const char* name,
+                   Allow... changes)
+    {
+        reopen(frequency, fmt, channels, chunk_size, name, convert(changes...));
+    }
+
+
+    // stringy name + changes list
+    template<concepts::string Str,
+             std::same_as<audio::allow_change>... Allow>
+    requires(sizeof...(Allow) > 0)
+    void
+    device::reopen(int frequency,
+                   format fmt,
+                   unsigned channels,
+                   int chunk_size,
+                   const Str& name,
+                   Allow... changes)
+    {
+        reopen(frequency, fmt, channels, chunk_size, name, convert(changes...));
+    }
 
 } // namespace sdl::mix
 

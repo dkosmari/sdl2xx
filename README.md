@@ -19,6 +19,9 @@ It's licensed under the Zlib license (same as SDL2).
 
 using sdl::vec2;
 using namespace sdl::literals;
+using std::cout;
+using std::endl;
+
 
 int main(int, char* [])
 {
@@ -27,12 +30,12 @@ int main(int, char* [])
 
         sdl::window win{"Simple App",
                         sdl::window::pos_centered,
-                        {1280, 720},
-                        0};
+                        {1280, 720}};
 
         sdl::renderer rend{win,
                            -1,
-                           sdl::renderer::flag::accelerated | sdl::renderer::flag::present_vsync};
+                           sdl::renderer::flag::accelerated,
+                           sdl::renderer::flag::present_vsync};
 
         auto box = sdl::rect::from_corners({300, 200},
                                            win.get_size() - vec2{300, 200});
@@ -55,7 +58,7 @@ int main(int, char* [])
             while (auto event = sdl::events::poll()) {
                 switch (event->type) {
 
-                    case SDL_QUIT:
+                    case sdl::events::type::e_quit:
                         running = false;
                         break;
 
@@ -64,7 +67,7 @@ int main(int, char* [])
         }
     }
     catch (std::exception& e) {
-        std::cout << "Error: " << e.what() << std::endl;
+        cout << "Error: " << e.what() << endl;
         return -1;
     }
 }

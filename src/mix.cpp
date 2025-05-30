@@ -79,7 +79,8 @@ namespace sdl::mix {
     open()
     {
         auto [name, spec] = audio::get_default_info(false);
-        open(spec.freq, spec.format, spec.channels, 2048, name, audio::allow::change_any);
+        open(spec.freq, spec.format, spec.channels, 2048, name,
+             convert(audio::allow_change::any));
     }
 
 

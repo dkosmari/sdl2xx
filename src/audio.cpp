@@ -119,6 +119,33 @@ namespace sdl::audio {
     }
 
 
+    device::device(bool is_capture,
+                   const spec& desired,
+                   Uint32 allowed_changes)
+    {
+        create(is_capture, desired, allowed_changes);
+    }
+
+
+    device::device(const char* name,
+                   bool is_capture,
+                   const spec& desired,
+                   spec& obtained,
+                   Uint32 allowed_changes)
+    {
+        create(name, is_capture, desired, obtained, allowed_changes);
+    }
+
+
+    device::device(bool is_capture,
+                   const spec& desired,
+                   spec& obtained,
+                   Uint32 allowed_changes)
+    {
+        create(is_capture, desired, obtained, allowed_changes);
+    }
+
+
     device::~device()
         noexcept
     {
@@ -145,6 +172,15 @@ namespace sdl::audio {
 
 
     void
+    device::create(bool is_capture,
+                   const spec& desired,
+                   Uint32 allowed_changes)
+    {
+        create(nullptr, is_capture, desired, allowed_changes);
+    }
+
+
+    void
     device::create(const char* name,
                    bool is_capture,
                    const spec& desired,
@@ -160,6 +196,16 @@ namespace sdl::audio {
         if (!id)
             throw error{};
         acquire(id);
+    }
+
+
+    void
+    device::create(bool is_capture,
+                   const spec& desired,
+                   spec& obtained,
+                   Uint32 allowed_changes)
+    {
+        create(nullptr, is_capture, desired, obtained, allowed_changes);
     }
 
 

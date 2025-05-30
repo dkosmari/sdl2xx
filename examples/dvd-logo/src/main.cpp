@@ -183,27 +183,22 @@ struct Logo {
 
 struct App {
 
-    sdl::init sdl_init{
-        sdl::init::flag::video,
-        sdl::init::flag::game_controller,
-        sdl::init::flag::audio
-    };
+    sdl::init sdl_init{sdl::init::flag::video,
+                       sdl::init::flag::game_controller,
+                       sdl::init::flag::audio};
     sdl::img::init img_init;
     sdl::mix::init mix_init{sdl::mix::init::flag::ogg};
     sdl::ttf::init ttf_init;
 
 
-    sdl::window window{
-        "DVD Logo",
-        sdl::window::pos_centered,
-        {1280, 720},
-        0
-    };
-    sdl::renderer renderer{
-        window,
-        -1,
-        sdl::renderer::flag::accelerated | sdl::renderer::flag::present_vsync
-    };
+    sdl::window window{"DVD Logo",
+                       sdl::window::pos_centered,
+                       vec2{0, 0},
+                       sdl::window::flag::fullscreen_desktop};
+    sdl::renderer renderer{ window,
+                            -1,
+                            sdl::renderer::flag::accelerated,
+                            sdl::renderer::flag::present_vsync};
 
 
     sdl::mix::device mix_dev;
@@ -404,6 +399,10 @@ struct App {
 
             case SDLK_SPACE:
                 set_logo(current_texture + 1);
+                break;
+
+            case SDLK_ESCAPE:
+                running = false;
                 break;
 
         }

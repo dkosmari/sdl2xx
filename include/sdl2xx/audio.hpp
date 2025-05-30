@@ -9,6 +9,7 @@
 #ifndef SDL2XX_AUDIO_HPP
 #define SDL2XX_AUDIO_HPP
 
+#include <concepts>
 #include <filesystem>
 #include <utility>
 
@@ -50,14 +51,26 @@ namespace sdl::audio {
     };
 
 
-    enum allow : Uint32 {
-        change_any       = SDL_AUDIO_ALLOW_ANY_CHANGE,
-        change_channels  = SDL_AUDIO_ALLOW_CHANNELS_CHANGE,
-        change_format    = SDL_AUDIO_ALLOW_FORMAT_CHANGE,
-        change_frequency = SDL_AUDIO_ALLOW_FREQUENCY_CHANGE,
-        change_nothing   = 0,
-        change_samples   = SDL_AUDIO_ALLOW_SAMPLES_CHANGE,
+    enum class allow_change : Uint32 {
+        any       = SDL_AUDIO_ALLOW_ANY_CHANGE,
+        channels  = SDL_AUDIO_ALLOW_CHANNELS_CHANGE,
+        format    = SDL_AUDIO_ALLOW_FORMAT_CHANGE,
+        frequency = SDL_AUDIO_ALLOW_FREQUENCY_CHANGE,
+        nothing   = 0,
+        samples   = SDL_AUDIO_ALLOW_SAMPLES_CHANGE,
     };
+
+
+    template<std::same_as<allow_change>... Allow>
+    requires(sizeof...(Allow) > 0)
+    [[nodiscard]]
+    constexpr
+    Uint32
+    convert(Allow... changes)
+        noexcept
+    {
+        return (static_cast<Uint32>(changes) | ...);
+    }
 
 
     [[nodiscard]]
@@ -121,19 +134,95 @@ namespace sdl::audio {
         using base_type::base_type;
 
 
+        // TODO: add obtained overloads
+
+        // generic
         device(const char* name,
                bool is_capture,
                const spec& desired,
-               Uint32 allowed_changes = allow::change_any);
+               Uint32 allowed_changes = convert(allow_change::any));
 
-        inline
+        // nameless
+        device(bool is_capture,
+               const spec& desired,
+               Uint32 allowed_changes = convert(allow_change::any));
+
+        // stringy name
         device(const concepts::string auto& name,
                bool is_capture,
                const spec& desired,
-               Uint32 allowed_changes = allow::change_any) :
-            device{name.empty() ? nullptr : name.data(),
-                   is_capture, desired, allowed_changes}
-        {}
+               Uint32 allowed_changes = convert(allow_change::any));
+
+        // changes list
+        template<std::same_as<allow_change>... Allow>
+        requires(sizeof...(Allow) > 0)
+        device(const char* name,
+               bool is_capture,
+               const spec& desired,
+               Allow... changes);
+
+        // nameless + changes list
+        template<std::same_as<allow_change>... Allow>
+        requires(sizeof...(Allow) > 0)
+        device(bool is_capture,
+               const spec& desired,
+               Allow... changes);
+
+        // stringy name + changes list
+        template<concepts::string Str,
+                 std::same_as<allow_change>... Allow>
+        requires(sizeof...(Allow) > 0)
+        device(const Str& name,
+               bool is_capture,
+               const spec& desired,
+               Allow... changes);
+
+        // obtained
+        device(const char* name,
+               bool is_capture,
+               const spec& desired,
+               spec& obtained,
+               Uint32 allowed_changes = convert(allow_change::any));
+
+        // nameless + obtained
+        device(bool is_capture,
+               const spec& desired,
+               spec& obtained,
+               Uint32 allowed_changes = convert(allow_change::any));
+
+        // stringy name + obtained
+        device(const concepts::string auto& name,
+               bool is_capture,
+               const spec& desired,
+               spec& obtained,
+               Uint32 allowed_changes = convert(allow_change::any));
+
+        // obtained + changes list
+        template<std::same_as<allow_change>... Allow>
+        requires(sizeof...(Allow) > 0)
+        device(const char* name,
+               bool is_capture,
+               const spec& desired,
+               spec& obtained,
+               Allow... changes);
+
+        // nameless + obtained + changes list
+        template<std::same_as<allow_change>... Allow>
+        requires(sizeof...(Allow) > 0)
+        device(bool is_capture,
+               const spec& desired,
+               spec& obtained,
+               Allow... changes);
+
+        // stringy name + obtained + changes list
+        template<concepts::string Str,
+                 std::same_as<allow_change>... Allow>
+        requires(sizeof...(Allow) > 0)
+        device(const Str& name,
+               bool is_capture,
+               const spec& desired,
+               spec& obtained,
+               Allow... changes);
 
 
         /// Move constructor.
@@ -150,19 +239,106 @@ namespace sdl::audio {
         operator =(device&& other)
             noexcept = default;
 
-
+        // generic
         void
         create(const char* name,
                bool is_capture,
                const spec& desired,
-               Uint32 allowed_changes = allow::change_any);
+               Uint32 allowed_changes = convert(allow_change::any));
 
+        // nameless
+        void
+        create(bool is_capture,
+               const spec& desired,
+               Uint32 allowed_changes = convert(allow_change::any));
+
+
+        // stringy name
+        void
+        create(const concepts::string auto& name,
+               bool is_capture,
+               const spec& desired,
+               Uint32 allowed_changes = convert(allow_change::any));
+
+        // changes list
+        template<std::same_as<allow_change>... Allow>
+        requires(sizeof...(Allow) > 0)
+        void
+        create(const char* name,
+               bool is_capture,
+               const spec& desired,
+               Allow... changes);
+
+        // nameless + changes list
+        template<std::same_as<allow_change>... Allow>
+        requires(sizeof...(Allow) > 0)
+        void
+        create(bool is_capture,
+               const spec& desired,
+               Allow... changes);
+
+        // stringy name + changes list
+        template<concepts::string Str,
+                 std::same_as<allow_change>... Allow>
+        requires(sizeof...(Allow) > 0)
+        void
+        create(const Str& name,
+               bool is_capture,
+               const spec& desired,
+               Allow... changes);
+
+        // obtained
         void
         create(const char* name,
                bool is_capture,
                const spec& desired,
                spec& obtained,
-               Uint32 allowed_changes = allow::change_any);
+               Uint32 allowed_changes = convert(allow_change::any));
+
+        // nameless + obtained
+        void
+        create(bool is_capture,
+               const spec& desired,
+               spec& obtained,
+               Uint32 allowed_changes = convert(allow_change::any));
+
+        // stringy name + obtained
+        void
+        create(const concepts::string auto& name,
+               bool is_capture,
+               const spec& desired,
+               spec& obtained,
+               Uint32 allowed_changes = convert(allow_change::any));
+
+        // obtained + changes list
+        template<std::same_as<allow_change>... Allow>
+        requires(sizeof...(Allow) > 0)
+        void
+        create(const char* name,
+               bool is_capture,
+               const spec& desired,
+               spec& obtained,
+               Allow... changes);
+
+        // nameless + obtained + changes list
+        template<std::same_as<allow_change>... Allow>
+        requires(sizeof...(Allow) > 0)
+        void
+        create(bool is_capture,
+               const spec& desired,
+               spec& obtained,
+               Allow... changes);
+
+        // stringy name + obtained + changes list
+        template<concepts::string Str,
+                 std::same_as<allow_change>... Allow>
+        requires(sizeof...(Allow) > 0)
+        void
+        create(const Str& name,
+               bool is_capture,
+               const spec& desired,
+               spec& obtained,
+               Allow... changes);
 
 
         void
@@ -425,6 +601,204 @@ namespace sdl::audio {
                   src.size_bytes(),
                   volume);
     }
+
+
+    // Implementation of templated methods.
+
+
+    // stringy name
+    inline
+    device::device(const concepts::string auto& name,
+                   bool is_capture,
+                   const spec& desired,
+                   Uint32 allowed_changes) :
+        device{name.empty() ? nullptr : name.data(),
+               is_capture, desired, allowed_changes}
+    {}
+
+
+    // changes list
+    template<std::same_as<allow_change>... Allow>
+    requires(sizeof...(Allow) > 0)
+    device::device(const char* name,
+                   bool is_capture,
+                   const spec& desired,
+                   Allow... changes) :
+        device{name, is_capture, desired, convert(changes...)}
+    {}
+
+
+    // nameless + changes list
+    template<std::same_as<allow_change>... Allow>
+    requires(sizeof...(Allow) > 0)
+    device::device(bool is_capture,
+                   const spec& desired,
+                   Allow... changes) :
+        device{nullptr, desired, convert(changes...)}
+    {}
+
+
+    // stringy name + changes list
+    template<concepts::string Str,
+             std::same_as<allow_change>... Allow>
+    requires(sizeof...(Allow) > 0)
+    device::device(const Str& name,
+                   bool is_capture,
+                   const spec& desired,
+                   Allow... changes) :
+        device{name.data(), is_capture, desired, convert(changes...)}
+    {}
+
+
+    // stringy name + obtained
+    device::device(const concepts::string auto& name,
+                   bool is_capture,
+                   const spec& desired,
+                   spec& obtained,
+                   Uint32 allowed_changes) :
+        device{name.data(), is_capture, desired, obtained, allowed_changes}
+    {}
+
+
+    // obtained + changes list
+    template<std::same_as<allow_change>... Allow>
+    requires(sizeof...(Allow) > 0)
+    device::device(const char* name,
+                   bool is_capture,
+                   const spec& desired,
+                   spec& obtained,
+                   Allow... changes) :
+        device{name, is_capture, desired, obtained, convert(changes...)}
+    {}
+
+
+    // nameless + obtained + changes list
+    template<std::same_as<allow_change>... Allow>
+    requires(sizeof...(Allow) > 0)
+    device::device(bool is_capture,
+                   const spec& desired,
+                   spec& obtained,
+                   Allow... changes) :
+        device{is_capture, desired, obtained, convert(changes...)}
+    {}
+
+
+    // stringy name + obtained + changes list
+    template<concepts::string Str,
+             std::same_as<allow_change>... Allow>
+    requires(sizeof...(Allow) > 0)
+    device::device(const Str& name,
+                   bool is_capture,
+                   const spec& desired,
+                   spec& obtained,
+                   Allow... changes) :
+        device{name, is_capture, desired, obtained, convert(changes...)}
+    {}
+
+
+    // stringy name
+    void
+    device::create(const concepts::string auto& name,
+                   bool is_capture,
+                   const spec& desired,
+                   Uint32 allowed_changes)
+    {
+        create(name.data(), is_capture, desired, allowed_changes);
+    }
+
+
+    // changes list
+    template<std::same_as<allow_change>... Allow>
+    requires(sizeof...(Allow) > 0)
+    void
+    device::create(const char* name,
+                   bool is_capture,
+                   const spec& desired,
+                   Allow... changes)
+    {
+        create(name, is_capture, desired, convert(changes...));
+    }
+
+
+    // nameless + changes list
+    template<std::same_as<allow_change>... Allow>
+    requires(sizeof...(Allow) > 0)
+    void
+    device::create(bool is_capture,
+                   const spec& desired,
+                   Allow... changes)
+    {
+        create(is_capture, desired, changes...);
+    }
+
+
+    // stringy name + changes list
+    template<concepts::string Str,
+             std::same_as<allow_change>... Allow>
+    requires(sizeof...(Allow) > 0)
+    void
+    device::create(const Str& name,
+                   bool is_capture,
+                   const spec& desired,
+                   Allow... changes)
+    {
+        create(name, is_capture, desired, convert(changes...));
+    }
+
+
+    // stringy name + obtained
+    void
+    device::create(const concepts::string auto& name,
+                   bool is_capture,
+                   const spec& desired,
+                   spec& obtained,
+                   Uint32 allowed_changes)
+    {
+        create(name.data(), is_capture, desired, obtained, allowed_changes);
+    }
+
+
+    // obtained + changes list
+    template<std::same_as<allow_change>... Allow>
+    requires(sizeof...(Allow) > 0)
+    void
+    device::create(const char* name,
+                   bool is_capture,
+                   const spec& desired,
+                   spec& obtained,
+                   Allow... changes)
+    {
+        create(name, is_capture, desired, obtained, convert(changes...));
+    }
+
+
+    // nameless + obtained + changes list
+    template<std::same_as<allow_change>... Allow>
+    requires(sizeof...(Allow) > 0)
+    void
+    device::create(bool is_capture,
+                   const spec& desired,
+                   spec& obtained,
+                   Allow... changes)
+    {
+        create(is_capture, desired, obtained, convert(changes...));
+    }
+
+
+    // stringy name + obtained + changes list
+    template<concepts::string Str,
+             std::same_as<allow_change>... Allow>
+    requires(sizeof...(Allow) > 0)
+    void
+    device::create(const Str& name,
+                   bool is_capture,
+                   const spec& desired,
+                   spec& obtained,
+                   Allow... changes)
+    {
+        create(name, is_capture, desired, obtained, convert(changes...));
+    }
+
 
 } // namespace sdl::audio
 

@@ -9,6 +9,7 @@
 #ifndef SDL2XX_RENDERER_HPP
 #define SDL2XX_RENDERER_HPP
 
+#include <concepts>
 #include <optional>
 #include <span>
 #include <tuple>
@@ -32,7 +33,6 @@ namespace sdl {
     class surface;
     class texture;
 
-
     using vertex = SDL_Vertex;
 
 
@@ -41,7 +41,7 @@ namespace sdl {
         using base_type = basic_wrapper<SDL_Renderer*>;
 
 
-        enum flag : Uint32 {
+        enum class flag : Uint32 {
             software       = SDL_RENDERER_SOFTWARE,
             accelerated    = SDL_RENDERER_ACCELERATED,
             present_vsync  = SDL_RENDERER_PRESENTVSYNC,
@@ -79,7 +79,13 @@ namespace sdl {
 
         renderer(window& win,
                  int index,
-                 Uint32 flags);
+                 Uint32 flags = 0);
+
+        template<std::same_as<flag>... Flags>
+        requires(sizeof...(Flags) > 0)
+        renderer(window& win,
+                 int index,
+                 Flags... flags);
 
         explicit
         renderer(surface& surf);
@@ -103,7 +109,14 @@ namespace sdl {
         void
         create(window& win,
                int index,
-               Uint32 flags);
+               Uint32 flags = 0);
+
+        template<std::same_as<flag>... Flags>
+        requires(sizeof...(Flags) > 0)
+        void
+        create(window& win,
+               int index,
+               Flags... flags);
 
         void
         create(surface& surf);
@@ -504,6 +517,40 @@ namespace sdl {
             noexcept;
 
     }; // struct renderer
+
+
+    template<std::same_as<renderer::flag>... Flags>
+    requires(sizeof...(Flags) > 0)
+    [[nodiscard]]
+    constexpr
+    Uint32
+    convert(Flags... flags)
+        noexcept
+    {
+        return (static_cast<Uint32>(flags) | ...);
+    }
+
+
+    // Implementation of templated methods.
+
+    template<std::same_as<renderer::flag>... Flags>
+    requires(sizeof...(Flags) > 0)
+    renderer::renderer(window& win,
+                       int index,
+                       Flags... flags) :
+        renderer{win, index, convert(flags...)}
+    {}
+
+
+    template<std::same_as<renderer::flag>... Flags>
+    requires(sizeof...(Flags) > 0)
+    void
+    renderer::create(window& win,
+               int index,
+               Flags... flags)
+    {
+        create(win, index, convert(flags...));
+    }
 
 } // namespace sdl
 
