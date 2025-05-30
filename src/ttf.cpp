@@ -440,7 +440,7 @@ namespace sdl::ttf {
         const
     {
         vec2 size;
-        if (TTF_SizeText(raw,
+        if (TTF_SizeUTF8(raw,
                          text,
                          &size.x,
                          &size.y) < 0)
@@ -448,25 +448,26 @@ namespace sdl::ttf {
         return size;
     }
 
+
     vec2
     font::get_size(const char8_t* text)
         const
     {
-        vec2 size;
-        if (TTF_SizeUTF8(raw,
-                         reinterpret_cast<const char*>(text),
-                         &size.x,
-                         &size.y) < 0)
-            throw error{};
-        return size;
+        return get_size(reinterpret_cast<const char*>(text));
     }
 
 
     vec2
-    font::get_size_utf8(const char* text)
+    font::get_size_latin1(const char* text)
         const
     {
-        return get_size(reinterpret_cast<const char8_t*>(text));
+        vec2 size;
+        if (TTF_SizeText(raw,
+                         text,
+                         &size.x,
+                         &size.y) < 0)
+            throw error{};
+        return size;
     }
 
 
@@ -476,7 +477,7 @@ namespace sdl::ttf {
         const
     {
         measure result;
-        if (TTF_MeasureText(raw,
+        if (TTF_MeasureUTF8(raw,
                             text,
                             max_width,
                             &result.width,
@@ -491,99 +492,23 @@ namespace sdl::ttf {
                       int max_width)
         const
     {
+        return get_measure(reinterpret_cast<const char*>(text), max_width);
+    }
+
+
+    font::measure
+    font::get_measure_latin1(const char* text,
+                             int max_width)
+        const
+    {
         measure result;
-        if (TTF_MeasureUTF8(raw,
-                            reinterpret_cast<const char*>(text),
+        if (TTF_MeasureText(raw,
+                            text,
                             max_width,
                             &result.width,
                             &result.count) < 0)
             throw error{};
         return result;
-    }
-
-
-    font::measure
-    font::get_measure_utf8(const char* text,
-                           int max_width)
-        const
-    {
-        return get_measure(reinterpret_cast<const char8_t*>(text), max_width);
-    }
-
-
-    surface
-    font::render_solid(const char* text,
-                       color fg)
-        const
-    {
-        auto surf = TTF_RenderText_Solid(raw, text, fg);
-        if (!surf)
-            throw error{};
-        return surface{surf};
-    }
-
-
-    surface
-    font::render_solid(const char8_t* text,
-                       color fg)
-        const
-    {
-        auto surf = TTF_RenderUTF8_Solid(raw,
-                                         reinterpret_cast<const char*>(text),
-                                         fg);
-        if (!surf)
-            throw error{};
-        return surface{surf};
-    }
-
-
-    surface
-    font::render_solid_utf8(const char* text,
-                            color fg)
-        const
-    {
-        return render_solid(reinterpret_cast<const char8_t*>(text), fg);
-    }
-
-
-    surface
-    font::render_solid(const char* text,
-                               color fg,
-                               Uint32 max_width)
-        const
-    {
-        auto surf = TTF_RenderText_Solid_Wrapped(raw, text, fg, max_width);
-        if (!surf)
-            throw error{};
-        return surface{surf};
-    }
-
-
-    surface
-    font::render_solid(const char8_t* text,
-                               color fg,
-                               Uint32 max_width)
-        const
-    {
-        auto surf = TTF_RenderUTF8_Solid_Wrapped(raw,
-                                                 reinterpret_cast<const char*>(text),
-                                                 fg,
-                                                 max_width);
-        if (!surf)
-            throw error{};
-        return surface{surf};
-    }
-
-
-    surface
-    font::render_solid_utf8(const char* text,
-                            color fg,
-                            Uint32 max_width)
-        const
-    {
-        return render_solid(reinterpret_cast<const char8_t*>(text),
-                            fg,
-                            max_width);
     }
 
 
@@ -600,12 +525,11 @@ namespace sdl::ttf {
 
 
     surface
-    font::render_shaded(const char* text,
-                        color fg,
-                        color bg)
+    font::render_solid(const char* text,
+                       color fg)
         const
     {
-        auto surf = TTF_RenderText_Shaded(raw, text, fg, bg);
+        auto surf = TTF_RenderUTF8_Solid(raw, text, fg);
         if (!surf)
             throw error{};
         return surface{surf};
@@ -613,15 +537,20 @@ namespace sdl::ttf {
 
 
     surface
-    font::render_shaded(const char8_t* text,
-                        color fg,
-                        color bg)
+    font::render_solid(const char8_t* text,
+                       color fg)
         const
     {
-        auto surf = TTF_RenderUTF8_Shaded(raw,
-                                          reinterpret_cast<const char*>(text),
-                                          fg,
-                                          bg);
+        return render_solid(reinterpret_cast<const char*>(text), fg);
+    }
+
+
+    surface
+    font::render_solid_latin1(const char* text,
+                            color fg)
+        const
+    {
+        auto surf = TTF_RenderText_Solid(raw, text, fg);
         if (!surf)
             throw error{};
         return surface{surf};
@@ -629,29 +558,12 @@ namespace sdl::ttf {
 
 
     surface
-    font::render_shaded_utf8(const char* text,
-                             color fg,
-                             color bg)
+    font::render_solid(const char* text,
+                       color fg,
+                       Uint32 max_width)
         const
     {
-        return render_shaded(reinterpret_cast<const char8_t*>(text),
-                             fg,
-                             bg);
-    }
-
-
-    surface
-    font::render_shaded(const char* text,
-                        color fg,
-                        color bg,
-                        Uint32 max_width)
-        const
-    {
-        auto surf = TTF_RenderText_Shaded_Wrapped(raw,
-                                                  text,
-                                                  fg,
-                                                  bg,
-                                                  max_width);
+        auto surf = TTF_RenderUTF8_Solid_Wrapped(raw, text, fg, max_width);
         if (!surf)
             throw error{};
         return surface{surf};
@@ -659,34 +571,27 @@ namespace sdl::ttf {
 
 
     surface
-    font::render_shaded(const char8_t* text,
-                        color fg,
-                        color bg,
-                        Uint32 max_width)
+    font::render_solid(const char8_t* text,
+                               color fg,
+                               Uint32 max_width)
         const
     {
-        auto surf = TTF_RenderUTF8_Shaded_Wrapped(raw,
-                                                  reinterpret_cast<const char*>(text),
-                                                  fg,
-                                                  bg,
-                                                  max_width);
-        if (!surf)
-            throw error{};
-        return surface{surf};
+
+        return render_solid(reinterpret_cast<const char*>(text), fg, max_width);
     }
 
 
     surface
-    font::render_shaded_utf8(const char* text,
-                             color fg,
-                             color bg,
-                             Uint32 max_width)
+    font::render_solid_latin1(const char* text,
+                              color fg,
+                              Uint32 max_width)
         const
     {
-        return render_shaded(reinterpret_cast<const char8_t*>(text),
-                             fg,
-                             bg,
-                             max_width);
+        auto surf = TTF_RenderText_Solid_Wrapped(raw, text, fg, max_width);
+        if (!surf)
+            throw error{};
+        return surface{surf};
+
     }
 
 
@@ -704,11 +609,12 @@ namespace sdl::ttf {
 
 
     surface
-    font::render_blended(const char* text,
-                         color fg)
+    font::render_shaded(const char* text,
+                        color fg,
+                        color bg)
         const
     {
-        auto surf = TTF_RenderText_Blended(raw, text, fg);
+        auto surf = TTF_RenderUTF8_Shaded(raw, text, fg, bg);
         if (!surf)
             throw error{};
         return surface{surf};
@@ -716,13 +622,22 @@ namespace sdl::ttf {
 
 
     surface
-    font::render_blended(const char8_t* text,
-                         color fg)
+    font::render_shaded(const char8_t* text,
+                        color fg,
+                        color bg)
         const
     {
-        auto surf = TTF_RenderUTF8_Blended(raw,
-                                           reinterpret_cast<const char*>(text),
-                                           fg);
+        return render_shaded(reinterpret_cast<const char*>(text), fg, bg);
+    }
+
+
+    surface
+    font::render_shaded_latin1(const char* text,
+                               color fg,
+                               color bg)
+        const
+    {
+        auto surf = TTF_RenderText_Shaded(raw, text, fg, bg);
         if (!surf)
             throw error{};
         return surface{surf};
@@ -730,22 +645,13 @@ namespace sdl::ttf {
 
 
     surface
-    font::render_blended_utf8(const char* text,
-                              color fg)
+    font::render_shaded(const char* text,
+                        color fg,
+                        color bg,
+                        Uint32 max_width)
         const
     {
-        return render_blended(reinterpret_cast<const char8_t*>(text),
-                              fg);
-    }
-
-
-    surface
-    font::render_blended(const char* text,
-                         color fg,
-                         Uint32 max_width)
-        const
-    {
-        auto surf = TTF_RenderText_Blended_Wrapped(raw, text, fg, max_width);
+        auto surf = TTF_RenderUTF8_Shaded_Wrapped(raw, text, fg, bg, max_width);
         if (!surf)
             throw error{};
         return surface{surf};
@@ -753,30 +659,27 @@ namespace sdl::ttf {
 
 
     surface
-    font::render_blended(const char8_t* text,
-                         color fg,
-                         Uint32 max_width)
+    font::render_shaded(const char8_t* text,
+                        color fg,
+                        color bg,
+                        Uint32 max_width)
         const
     {
-        auto surf = TTF_RenderUTF8_Blended_Wrapped(raw,
-                                                   reinterpret_cast<const char*>(text),
-                                                   fg,
-                                                   max_width);
-        if (!surf)
-            throw error{};
-        return surface{surf};
+        return render_shaded(reinterpret_cast<const char*>(text), fg, bg, max_width);
     }
 
 
     surface
-    font::render_blended_utf8(const char* text,
-                              color fg,
-                              Uint32 max_width)
+    font::render_shaded_latin1(const char* text,
+                               color fg,
+                               color bg,
+                               Uint32 max_width)
         const
     {
-        return render_blended(reinterpret_cast<const char8_t*>(text),
-                              fg,
-                              max_width);
+        auto surf = TTF_RenderText_Shaded_Wrapped(raw, text, fg, bg, max_width);
+        if (!surf)
+            throw error{};
+        return surface{surf};
     }
 
 
@@ -792,12 +695,117 @@ namespace sdl::ttf {
     }
 
 
+    surface
+    font::render_blended(const char* text,
+                         color fg)
+        const
+    {
+        auto surf = TTF_RenderUTF8_Blended(raw, text, fg);
+        if (!surf)
+            throw error{};
+        return surface{surf};
+    }
+
+
+    surface
+    font::render_blended(const char8_t* text,
+                         color fg)
+        const
+    {
+        return render_blended(reinterpret_cast<const char*>(text), fg);
+    }
+
+
+    surface
+    font::render_blended_latin1(const char* text,
+                                color fg)
+        const
+    {
+        auto surf = TTF_RenderText_Blended(raw, text, fg);
+        if (!surf)
+            throw error{};
+        return surface{surf};
+    }
+
+
+    surface
+    font::render_blended(const char* text,
+                         color fg,
+                         Uint32 max_width)
+        const
+    {
+        auto surf = TTF_RenderUTF8_Blended_Wrapped(raw, text, fg, max_width);
+        if (!surf)
+            throw error{};
+        return surface{surf};
+    }
+
+
+    surface
+    font::render_blended(const char8_t* text,
+                         color fg,
+                         Uint32 max_width)
+        const
+    {
+        return render_blended(reinterpret_cast<const char*>(text), fg, max_width);
+    }
+
+
+    surface
+    font::render_blended_latin1(const char* text,
+                                color fg,
+                                Uint32 max_width)
+        const
+    {
+        auto surf = TTF_RenderText_Blended_Wrapped(raw, text, fg, max_width);
+        if (!surf)
+            throw error{};
+        return surface{surf};
+    }
+
+
 #if SDL_TTF_VERSION_ATLEAST(2, 20, 0)
+
+    surface
+    font::render_glyph_lcd(char32_t codepoint,
+                           color fg,
+                           color bg)
+        const
+    {
+        auto surf = TTF_RenderGlyph32_LCD(raw, codepoint, fg, bg);
+        if (!surf)
+            throw error{};
+        return surface{surf};
+    }
+
 
     surface
     font::render_lcd(const char* text,
                      color fg,
                      color bg)
+        const
+    {
+        auto surf = TTF_RenderUTF8_LCD(raw, text, fg, bg);
+        if (!surf)
+            throw error{};
+        return surface{surf};
+    }
+
+
+    surface
+    font::render_lcd(const char8_t* text,
+                     color fg,
+                     color bg)
+        const
+    {
+        return render_lcd(reinterpret_cast<const char*>(text), fg, bg);
+    }
+
+
+    surface
+    font::render_lcd_latin1(const char* text,
+                            color fg,
+                            color bg)
         const
     {
         auto surf = TTF_RenderText_LCD(raw, text, fg, bg);
@@ -808,41 +816,13 @@ namespace sdl::ttf {
 
 
     surface
-    font::render_lcd(const char8_t* text,
-                     color fg,
-                     color bg)
-        const
-    {
-        auto surf = TTF_RenderUTF8_LCD(raw,
-                                       reinterpret_cast<const char*>(text),
-                                       fg,
-                                       bg);
-        if (!surf)
-            throw error{};
-        return surface{surf};
-    }
-
-
-    surface
-    font::render_lcd_utf8(const char* text,
-                          color fg,
-                          color bg)
-        const
-    {
-        return render_lcd(reinterpret_cast<const char8_t*>(text),
-                          fg,
-                          bg);
-    }
-
-
-    surface
     font::render_lcd(const char* text,
                      color fg,
                      color bg,
                      Uint32 max_width)
         const
     {
-        auto surf = TTF_RenderText_LCD_Wrapped(raw, text, fg, bg, max_width);
+        auto surf = TTF_RenderUTF8_LCD_Wrapped(raw, text, fg, bg, max_width);
         if (!surf)
             throw error{};
         return surface{surf};
@@ -856,38 +836,18 @@ namespace sdl::ttf {
                      Uint32 max_width)
         const
     {
-        auto surf = TTF_RenderUTF8_LCD_Wrapped(raw,
-                                               reinterpret_cast<const char*>(text),
-                                               fg,
-                                               bg,
-                                               max_width);
-        if (!surf)
-            throw error{};
-        return surface{surf};
+        return render_lcd(reinterpret_cast<const char*>(text), fg, bg, max_width);
     }
 
 
     surface
-    font::render_lcd_utf8(const char* text,
-                          color fg,
-                          color bg,
-                          Uint32 max_width)
+    font::render_lcd_latin1(const char* text,
+                            color fg,
+                            color bg,
+                            Uint32 max_width)
         const
     {
-        return render_lcd(reinterpret_cast<const char8_t*>(text),
-                          fg,
-                          bg,
-                          max_width);
-    }
-
-
-    surface
-    font::render_glyph_lcd(char32_t codepoint,
-                           color fg,
-                           color bg)
-        const
-    {
-        auto surf = TTF_RenderGlyph32_LCD(raw, codepoint, fg, bg);
+        auto surf = TTF_RenderText_LCD_Wrapped(raw, text, fg, bg, max_width);
         if (!surf)
             throw error{};
         return surface{surf};
@@ -941,7 +901,7 @@ namespace sdl::ttf {
             throw error{};
     }
 
-#endif
+#endif // SDL_TTF_VERSION_ATLEAST(2, 20, 0)
 
 
 } // namespace sdl::ttf

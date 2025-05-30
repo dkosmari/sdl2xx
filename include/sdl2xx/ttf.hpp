@@ -24,6 +24,9 @@
 #include "vec2.hpp"
 
 
+// TODO: implement try_ versions with expected results.
+
+
 namespace sdl::ttf {
 
     using std::filesystem::path;
@@ -333,10 +336,6 @@ namespace sdl::ttf {
         get_size(const char8_t* text)
             const;
 
-        [[nodiscard]]
-        vec2
-        get_size_utf8(const char* text)
-            const;
 
         [[nodiscard]]
         inline
@@ -347,13 +346,20 @@ namespace sdl::ttf {
             return get_size(text.data());
         }
 
+
+        [[nodiscard]]
+        vec2
+        get_size_latin1(const char* text)
+            const;
+
+
         [[nodiscard]]
         inline
         vec2
-        get_size_utf8(const concepts::string auto& text)
+        get_size_latin1(const concepts::string auto& text)
             const
         {
-            return get_size_utf8(text.data());
+            return get_size_latin1(text.data());
         }
 
 
@@ -375,11 +381,6 @@ namespace sdl::ttf {
                     int max_width)
             const;
 
-        [[nodiscard]]
-        measure
-        get_measure_utf8(const char* text,
-                         int max_width)
-            const;
 
         [[nodiscard]]
         inline
@@ -391,18 +392,34 @@ namespace sdl::ttf {
             return get_measure(text.data(), max_width);
         }
 
+
+        [[nodiscard]]
+        measure
+        get_measure_latin1(const char* text,
+                           int max_width)
+            const;
+
+
         [[nodiscard]]
         inline
         measure
-        get_measure_utf8(const concepts::string auto& text,
-                         int max_width)
+        get_measure_latin1(const concepts::string auto& text,
+                           int max_width)
             const
         {
-            return get_measure_utf8(text.data(), max_width);
+            return get_measure_latin1(text.data(), max_width);
         }
 
 
         // Solid
+
+
+        [[nodiscard]]
+        surface
+        render_glyph_solid(char32_t codepoint,
+                           color fg)
+            const;
+
 
         [[nodiscard]]
         surface
@@ -416,11 +433,6 @@ namespace sdl::ttf {
                      color fg)
             const;
 
-        [[nodiscard]]
-        surface
-        render_solid_utf8(const char* text,
-                          color fg)
-            const;
 
         [[nodiscard]]
         inline
@@ -432,14 +444,22 @@ namespace sdl::ttf {
             return render_solid(text.data(), fg);
         }
 
+
+        [[nodiscard]]
+        surface
+        render_solid_latin1(const char* text,
+                            color fg)
+            const;
+
+
         [[nodiscard]]
         inline
         surface
-        render_solid_utf8(const concepts::string auto& text,
-                          color fg)
+        render_solid_latin1(const concepts::string auto& text,
+                            color fg)
             const
         {
-            return render_solid_utf8(text.data(), fg);
+            return render_solid_latin1(text.data(), fg);
         }
 
 
@@ -459,12 +479,6 @@ namespace sdl::ttf {
                      Uint32 max_width)
             const;
 
-        [[nodiscard]]
-        surface
-        render_solid_utf8(const char* text,
-                          color fg,
-                          Uint32 max_width)
-            const;
 
         [[nodiscard]]
         inline
@@ -477,26 +491,36 @@ namespace sdl::ttf {
             return render_solid(text.data(), fg, max_width);
         }
 
-        [[nodiscard]]
-        inline
-        surface
-        render_solid_utf8(const concepts::string auto& text,
-                          color fg,
-                          Uint32 max_width)
-            const
-        {
-            return render_solid_utf8(text.data(), fg, max_width);
-        }
-
 
         [[nodiscard]]
         surface
-        render_glyph_solid(char32_t codepoint,
-                           color fg)
+        render_solid_latin1(const char* text,
+                            color fg,
+                            Uint32 max_width)
             const;
 
 
+        [[nodiscard]]
+        inline
+        surface
+        render_solid_latin1(const concepts::string auto& text,
+                            color fg,
+                            Uint32 max_width)
+            const
+        {
+            return render_solid_latin1(text.data(), fg, max_width);
+        }
+
+
         // Shaded
+
+        [[nodiscard]]
+        surface
+        render_glyph_shaded(char32_t codepoint,
+                            color fg,
+                            color bg)
+            const;
+
 
         [[nodiscard]]
         surface
@@ -512,12 +536,6 @@ namespace sdl::ttf {
                       color bg)
             const;
 
-        [[nodiscard]]
-        surface
-        render_shaded_utf8(const char* text,
-                           color fg,
-                           color bg)
-            const;
 
         [[nodiscard]]
         inline
@@ -530,15 +548,24 @@ namespace sdl::ttf {
             return render_shaded(text.data(), fg, bg);
         }
 
+
+        [[nodiscard]]
+        surface
+        render_shaded_latin1(const char* text,
+                             color fg,
+                             color bg)
+            const;
+
+
         [[nodiscard]]
         inline
         surface
-        render_shaded_utf8(const concepts::string auto& text,
-                           color fg,
-                           color bg)
+        render_shaded_latin1(const concepts::string auto& text,
+                             color fg,
+                             color bg)
             const
         {
-            return render_shaded_utf8(text.data(), fg, bg);
+            return render_shaded_latin1(text.data(), fg, bg);
         }
 
 
@@ -560,13 +587,6 @@ namespace sdl::ttf {
                       Uint32 max_width)
             const;
 
-        [[nodiscard]]
-        surface
-        render_shaded_utf8(const char* text,
-                           color fg,
-                           color bg,
-                           Uint32 max_width)
-            const;
 
         [[nodiscard]]
         inline
@@ -580,28 +600,37 @@ namespace sdl::ttf {
             return render_shaded(text.data(), fg, bg, max_width);
         }
 
-        [[nodiscard]]
-        inline
-        surface
-        render_shaded_utf8(const concepts::string auto& text,
-                           color fg,
-                           color bg,
-                           Uint32 max_width)
-            const
-        {
-            return render_shaded_utf8(text.data(), fg, bg, max_width);
-        }
-
 
         [[nodiscard]]
         surface
-        render_glyph_shaded(char32_t codepoint,
-                            color fg,
-                            color bg)
+        render_shaded_latin1(const char* text,
+                             color fg,
+                             color bg,
+                             Uint32 max_width)
             const;
 
 
+        [[nodiscard]]
+        inline
+        surface
+        render_shaded_latin1(const concepts::string auto& text,
+                             color fg,
+                             color bg,
+                             Uint32 max_width)
+            const
+        {
+            return render_shaded_latin1(text.data(), fg, bg, max_width);
+        }
+
+
         // Blended
+
+        [[nodiscard]]
+        surface
+        render_glyph_blended(char32_t codepoint,
+                             color fg)
+            const;
+
 
         [[nodiscard]]
         surface
@@ -615,11 +644,6 @@ namespace sdl::ttf {
                        color fg)
             const;
 
-        [[nodiscard]]
-        surface
-        render_blended_utf8(const char* text,
-                            color fg)
-            const;
 
         [[nodiscard]]
         inline
@@ -631,14 +655,22 @@ namespace sdl::ttf {
             return render_blended(text.data(), fg);
         }
 
+
+        [[nodiscard]]
+        surface
+        render_blended_latin1(const char* text,
+                              color fg)
+            const;
+
+
         [[nodiscard]]
         inline
         surface
-        render_blended_utf8(const concepts::string auto& text,
-                            color fg)
+        render_blended_latin1(const concepts::string auto& text,
+                              color fg)
             const
         {
-            return render_blended_utf8(text.data(), fg);
+            return render_blended_latin1(text.data(), fg);
         }
 
 
@@ -658,12 +690,6 @@ namespace sdl::ttf {
                        Uint32 max_width)
             const;
 
-        [[nodiscard]]
-        surface
-        render_blended_utf8(const char* text,
-                            color fg,
-                            Uint32 max_width)
-            const;
 
         [[nodiscard]]
         inline
@@ -676,28 +702,37 @@ namespace sdl::ttf {
             return render_blended(text.data(), fg, max_width);
         }
 
+
+        [[nodiscard]]
+        surface
+        render_blended_latin1(const char* text,
+                              color fg,
+                              Uint32 max_width)
+            const;
+
         [[nodiscard]]
         inline
         surface
-        render_blended_utf8(const concepts::string auto& text,
-                            color fg,
-                            Uint32 max_width)
+        render_blended_latin1(const concepts::string auto& text,
+                              color fg,
+                              Uint32 max_width)
             const
         {
-            return render_blended_utf8(text.data(), fg, max_width);
+            return render_blended_latin1(text.data(), fg, max_width);
         }
-
-
-        [[nodiscard]]
-        surface
-        render_glyph_blended(char32_t codepoint,
-                             color fg)
-            const;
 
 
 #if SDL_TTF_VERSION_ATLEAST(2, 20, 0)
 
         // LCD
+
+        [[nodiscard]]
+        surface
+        render_glyph_lcd(char32_t codepoint,
+                         color fg,
+                         color bg)
+            const;
+
 
         [[nodiscard]]
         surface
@@ -713,12 +748,6 @@ namespace sdl::ttf {
                    color bg)
             const;
 
-        [[nodiscard]]
-        surface
-        render_lcd_utf8(const char* text,
-                        color fg,
-                        color bg)
-            const;
 
         [[nodiscard]]
         inline
@@ -731,15 +760,24 @@ namespace sdl::ttf {
             return render_lcd(text.data(), fg, bg);
         }
 
+
+        [[nodiscard]]
+        surface
+        render_lcd_latin1(const char* text,
+                          color fg,
+                          color bg)
+            const;
+
+
         [[nodiscard]]
         inline
         surface
-        render_lcd_utf8(const concepts::string auto& text,
-                        color fg,
-                        color bg)
+        render_lcd_latin1(const concepts::string auto& text,
+                          color fg,
+                          color bg)
             const
         {
-            return render_lcd_utf8(text.data(), fg, bg);
+            return render_lcd_latin1(text.data(), fg, bg);
         }
 
 
@@ -761,13 +799,6 @@ namespace sdl::ttf {
                    Uint32 max_width)
             const;
 
-        [[nodiscard]]
-        surface
-        render_lcd_utf8(const char* text,
-                        color fg,
-                        color bg,
-                        Uint32 max_width)
-            const;
 
         [[nodiscard]]
         inline
@@ -781,25 +812,27 @@ namespace sdl::ttf {
             return render_lcd(text.data(), fg, bg, max_width);
         }
 
+
+        [[nodiscard]]
+        surface
+        render_lcd_latin1(const char* text,
+                          color fg,
+                          color bg,
+                          Uint32 max_width)
+            const;
+
+
         [[nodiscard]]
         inline
         surface
-        render_lcd_utf8(const concepts::string auto& text,
-                        color fg,
-                        color bg,
-                        Uint32 max_width)
+        render_lcd_latin1(const concepts::string auto& text,
+                          color fg,
+                          color bg,
+                          Uint32 max_width)
             const
         {
-            return render_lcd_utf8(text.data(), fg, bg, max_width);
+            return render_lcd_latin1(text.data(), fg, bg, max_width);
         }
-
-
-        [[nodiscard]]
-        surface
-        render_glyph_lcd(char32_t codepoint,
-                         color fg,
-                         color bg)
-            const;
 
 #endif // SDL_TTF_VERSION_ATLEAST(2, 20, 0)
 
