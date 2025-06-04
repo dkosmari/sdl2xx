@@ -46,9 +46,8 @@ namespace sdl {
                                       unique_ptr<surface>>;
 
 
-        // Inherit constructors.
-        using base_type::base_type;
-
+        texture()
+            noexcept;
 
         texture(SDL_Texture* tex)
             noexcept;

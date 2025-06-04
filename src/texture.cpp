@@ -24,6 +24,10 @@ namespace sdl {
     }
 
 
+    texture::texture()
+        noexcept = default;
+
+
     texture::texture(SDL_Texture* tex)
         noexcept
     {
