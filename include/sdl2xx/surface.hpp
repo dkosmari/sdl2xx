@@ -508,6 +508,10 @@ namespace sdl {
     get_yuv_conversion_mode(int width, int height)
         noexcept;
 
+    SDL_YUV_CONVERSION_MODE
+    get_yuv_conversion_mode(vec2 size)
+        noexcept;
+
 
 } // namespace sdl
 

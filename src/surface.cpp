@@ -874,4 +874,12 @@ namespace sdl {
         return SDL_GetYUVConversionModeForResolution(width, height);
     }
 
+
+    SDL_YUV_CONVERSION_MODE
+    get_yuv_conversion_mode(vec2 size)
+        noexcept
+    {
+        return get_yuv_conversion_mode(size.x, size.y);
+    }
+
 } // namespace sdl
