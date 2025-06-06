@@ -365,7 +365,7 @@ namespace sdl {
     surface::try_lock()
         const noexcept
     {
-        return SDL_LockSurface(raw) >= 0;
+        return !SDL_LockSurface(raw);
     }
 
 
@@ -434,8 +434,6 @@ namespace sdl {
     {
         if (!is_guarded())
             return;
-        if (is_locked())
-            return;
         guarded->lock();
         locked = true;
     }
@@ -446,8 +444,6 @@ namespace sdl {
         noexcept
     {
         if (!is_guarded())
-            return false;
-        if (is_locked())
             return false;
         locked = guarded->try_lock();
         return locked;
