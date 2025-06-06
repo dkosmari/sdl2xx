@@ -436,10 +436,8 @@ namespace sdl {
             return;
         if (is_locked())
             return;
-        if (guarded->must_lock()) {
-            guarded->lock();
-            locked = true;
-        }
+        guarded->lock();
+        locked = true;
     }
 
 
