@@ -10,6 +10,7 @@
 #define SDL2XX_SENSOR_HPP
 
 #include <expected>
+#include <mutex>
 #include <span>
 #include <utility>
 
@@ -71,26 +72,33 @@ namespace sdl::sensor {
         noexcept;
 
 
-    class lock_guard {
+    class locker {
 
         bool locked = false;
 
     public:
 
-        lock_guard()
+        locker()
             noexcept;
+
+        explicit
+        locker(std::defer_lock_t defer)
+            noexcept;
+
+
+        ~locker()
+            noexcept;
+
 
         /// Move constructor.
-        lock_guard(lock_guard&& other)
-            noexcept;
-
-        ~lock_guard()
+        locker(locker&& other)
             noexcept;
 
         /// Move assignment.
-        lock_guard&
-        operator =(lock_guard&& other)
+        locker&
+        operator =(locker&& other)
             noexcept;
+
 
         void
         lock()
@@ -100,7 +108,7 @@ namespace sdl::sensor {
         unlock()
             noexcept;
 
-    }; // class lock_guard
+    }; // class locker
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 14)
 

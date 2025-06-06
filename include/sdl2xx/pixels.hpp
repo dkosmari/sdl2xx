@@ -327,10 +327,35 @@ namespace sdl::pixels {
         // TODO: accessor to all the fields
 
 
+
         [[nodiscard]]
+        constexpr
+        format_enum
+        get_enum()
+            const noexcept
+        {
+            return static_cast<format_enum>(raw->format);
+        }
+
+
+        [[nodiscard]]
+        constexpr
+        SDL_PixelFormatEnum
+        get_enum_raw()
+            const noexcept
+        {
+            return static_cast<SDL_PixelFormatEnum>(raw->format);
+        }
+
+
+        [[nodiscard]]
+        constexpr
         bool
         has_palette()
-            const noexcept;
+            const noexcept
+        {
+            return raw->palette;
+        }
 
 
         [[nodiscard]]
@@ -340,6 +365,42 @@ namespace sdl::pixels {
 
         void
         set_palette(palette& p);
+
+
+        [[nodiscard]]
+        constexpr
+        std::size_t
+        get_pixel_size_bits()
+            const noexcept
+        {
+            return raw->BitsPerPixel;
+        }
+
+
+        [[nodiscard]]
+        constexpr
+        std::size_t
+        get_pixel_size_bytes()
+            const noexcept
+        {
+            return raw->BytesPerPixel;
+        }
+
+
+        [[nodiscard]]
+        constexpr
+        masks
+        get_masks()
+            const noexcept
+        {
+            return {
+                .bpp = raw->BitsPerPixel,
+                .red = raw->Rmask,
+                .green = raw->Gmask,
+                .blue = raw->Bmask,
+                .alpha = raw->Amask,
+            };
+        }
 
 
         [[nodiscard]]

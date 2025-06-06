@@ -12,6 +12,7 @@
 #include <chrono>
 #include <expected>
 #include <iosfwd>
+#include <mutex>
 #include <optional>
 #include <span>
 
@@ -168,26 +169,33 @@ namespace sdl::joystick {
         noexcept;
 
 
-    class lock_guard {
+    class locker {
 
         bool locked = false;
 
     public:
 
-        lock_guard()
+        locker()
             noexcept;
+
+        explicit
+        locker(std::defer_lock_t defer)
+            noexcept;
+
+
+        ~locker()
+            noexcept;
+
 
         /// Move constructor.
-        lock_guard(lock_guard&& other)
-            noexcept;
-
-        ~lock_guard()
+        locker(locker&& other)
             noexcept;
 
         /// Move assignment.
-        lock_guard&
-        operator =(lock_guard&& other)
+        locker&
+        operator =(locker&& other)
             noexcept;
+
 
         void
         lock()
@@ -197,7 +205,7 @@ namespace sdl::joystick {
         unlock()
             noexcept;
 
-    }; // class lock_guard
+    }; // class locker
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 7)
 

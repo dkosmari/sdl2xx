@@ -23,6 +23,7 @@ sdl2xx_HEADERS = \
 	include/sdl2xx/allocator.hpp \
 	include/sdl2xx/audio.hpp \
 	include/sdl2xx/angle.hpp \
+	include/sdl2xx/basic_locker.hpp \
 	include/sdl2xx/basic_wrapper.hpp \
 	include/sdl2xx/blob.hpp \
 	include/sdl2xx/clipboard.hpp \

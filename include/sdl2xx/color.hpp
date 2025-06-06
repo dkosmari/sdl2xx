@@ -23,11 +23,21 @@ namespace sdl {
         float r = 0; ///< in [0, 1]
         float g = 0; ///< in [0, 1]
         float b = 0; ///< in [0, 1]
+
+        constexpr
+        bool
+        operator ==(const rgb& other)
+            const noexcept = default;
     };
 
 
     struct rgba : rgb {
         float a = 0; ///< in [0, 1]
+
+        constexpr
+        bool
+        operator ==(const rgba& other)
+            const noexcept = default;
     };
 
 
@@ -35,6 +45,11 @@ namespace sdl {
         degreesf h = 0_degf;
         float s = 0; ///< in [0, 1]
         float l = 0; ///< in [0, 1]
+
+        constexpr
+        bool
+        operator ==(const hsl& other)
+            const noexcept = default;
     };
 
 
@@ -42,6 +57,11 @@ namespace sdl {
         degreesf h = 0_degf;
         float s = 0; ///< in [0, 1]
         float v = 0; ///< in [0, 1]
+
+        constexpr
+        bool
+        operator ==(const hsv& other)
+            const noexcept = default;
     };
 
 
@@ -167,17 +187,40 @@ namespace sdl {
             const noexcept;
 
 
+        constexpr
+        bool
+        operator ==(const color& other)
+            const noexcept
+        {
+            return r == other.r
+                && g == other.g
+                && b == other.b
+                && a == other.a;
+        }
+
+
         static const color black;
         static const color white;
 
         static const color transparent;
 
-        static const color blue;
-        static const color cyan;
-        static const color green;
-        static const color magenta;
+        // Primary colors.
         static const color red;
+        static const color green;
+        static const color blue;
+
+        // Secondary colors.
+        static const color cyan;
+        static const color magenta;
         static const color yellow;
+
+        // Dark colors.
+        static const color maroon; // aka dark red
+        static const color ao;     // aka dark green
+        static const color navy;   // aka dark blue
+        static const color teal;   // aka dark cyan
+        static const color purple; // aka dark magenta
+        static const color olive;  // aka dark yellow
 
     };
 
@@ -221,6 +264,9 @@ namespace sdl {
     } // namespace literals
 
 
+    // TODO: implement arithmetic for rgb, rgba, hsl, hsv
+
+
     // serialization
 
     string
@@ -253,12 +299,23 @@ namespace sdl {
 
     inline const color color::transparent{0, 0, 0, 0};
 
-    inline const color color::blue   {0x00, 0x00, 0xff};
-    inline const color color::cyan   {0x00, 0xff, 0xff};
-    inline const color color::green  {0x00, 0xff, 0x00};
-    inline const color color::magenta{0xff, 0x00, 0xff};
-    inline const color color::red    {0xff, 0x00, 0x00};
-    inline const color color::yellow {0xff, 0xff, 0x00};
+    // Primary colors
+    inline const color color::red   = 0xff0000_rgb;
+    inline const color color::green = 0x00ff00_rgb;
+    inline const color color::blue  = 0x0000ff_rgb;
+
+    // Secondary colors
+    inline const color color::cyan    = 0x00ffff_rgb;
+    inline const color color::magenta = 0xff00ff_rgb;
+    inline const color color::yellow  = 0xffff00_rgb;
+
+    // Dark colors.
+    inline const color color::maroon = 0x800000_rgb;
+    inline const color color::ao     = 0x008000_rgb;
+    inline const color color::navy   = 0x000080_rgb;
+    inline const color color::teal   = 0x008080_rgb;
+    inline const color color::purple = 0x800080_rgb;
+    inline const color color::olive  = 0x808000_rgb;
 
 } // namespace sdl
 

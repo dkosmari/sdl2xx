@@ -35,14 +35,26 @@ namespace sdl::sensor {
     }
 
 
-    lock_guard::lock_guard()
+    locker::locker()
         noexcept
     {
         lock();
     }
 
 
-    lock_guard::lock_guard(lock_guard&& other)
+    locker::locker(std::defer_lock_t)
+        noexcept
+    {}
+
+
+    locker::~locker()
+        noexcept
+    {
+        unlock();
+    }
+
+
+    locker::locker(locker&& other)
         noexcept :
         locked{other.locked}
     {
@@ -50,16 +62,8 @@ namespace sdl::sensor {
     }
 
 
-    lock_guard::~lock_guard()
-        noexcept
-    {
-        if (locked)
-            unlock();
-    }
-
-
-    lock_guard&
-    lock_guard::operator =(lock_guard&& other)
+    locker&
+    locker::operator =(locker&& other)
         noexcept
     {
         if (this != &other) {
@@ -72,7 +76,7 @@ namespace sdl::sensor {
 
 
     void
-    lock_guard::lock()
+    locker::lock()
         noexcept
     {
         if (!locked) {
@@ -83,7 +87,7 @@ namespace sdl::sensor {
 
 
     void
-    lock_guard::unlock()
+    locker::unlock()
         noexcept
     {
         if (locked) {

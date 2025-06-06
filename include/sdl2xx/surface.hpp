@@ -10,11 +10,13 @@
 #define SDL2XX_SURFACE_HPP
 
 #include <filesystem>
+#include <mutex> // defer_lock, adopt_lock, try_lock
 #include <span>
 #include <tuple>
 
 #include <SDL_surface.h>
 
+#include "basic_locker.hpp"
 #include "owner_wrapper.hpp"
 #include "color.hpp"
 #include "pixels.hpp"
@@ -55,9 +57,9 @@ namespace sdl {
         // Inherit constructors.
         using base_type::base_type;
 
+        // TODO: add overloads for size as vec2
 
-        surface(Uint32 flags,
-                int width,
+        surface(int width,
                 int height,
                 int depth,
                 Uint32 r_mask,
@@ -65,8 +67,7 @@ namespace sdl {
                 Uint32 b_mask,
                 Uint32 a_mask);
 
-        surface(Uint32 flags,
-                int width,
+        surface(int width,
                 int height,
                 int depth,
                 pixels::format_enum fmt);
@@ -89,12 +90,10 @@ namespace sdl {
                 pixels::format_enum fmt);
 
         surface(const surface& other,
-                const pixels::format& fmt,
-                Uint32 flags);
+                const pixels::format& fmt);
 
         surface(const surface& other,
-                pixels::format_enum fmt,
-                Uint32 flags);
+                pixels::format_enum fmt);
 
         surface(SDL_Surface* surf, dont_destroy_t)
             noexcept;
@@ -122,9 +121,10 @@ namespace sdl {
             noexcept;
 
 
+        // TODO: add overloads for size as vec2
+
         void
-        create(Uint32 flags,
-               int width,
+        create(int width,
                int height,
                int depth,
                Uint32 r_mask,
@@ -133,8 +133,7 @@ namespace sdl {
                Uint32 a_mask);
 
         void
-        create(Uint32 flags,
-               int width,
+        create(int width,
                int height,
                int depth,
                pixels::format_enum fmt);
@@ -163,13 +162,11 @@ namespace sdl {
 
         void
         create(const surface& other,
-               const pixels::format& fmt,
-               Uint32 flags);
+               const pixels::format& fmt);
 
         void
         create(const surface& other,
-               pixels::format_enum fmt,
-               Uint32 flags);
+               pixels::format_enum fmt);
 
 
         void
@@ -193,11 +190,18 @@ namespace sdl {
             noexcept;
 
 
-        // accessors to the public SDL_Surface fields
+        /***********************************************
+         * Accessors to the public SDL_Surface fields. *
+         ***********************************************/
+
         [[nodiscard]]
+        constexpr
         Uint32
         get_flags()
-            const noexcept;
+            const noexcept
+        {
+            return raw->flags;
+        }
 
 
         [[nodiscard]]
@@ -207,33 +211,68 @@ namespace sdl {
 
 
         [[nodiscard]]
+        constexpr
         int
         get_width()
-            const noexcept;
+            const noexcept
+        {
+            return raw->w;
+        }
+
 
         [[nodiscard]]
+        constexpr
         int
         get_height()
-            const noexcept;
+            const noexcept
+        {
+            return raw->h;
+        }
+
 
         [[nodiscard]]
+        constexpr
         vec2
         get_size()
-            const noexcept;
+            const noexcept
+        {
+            return { raw->w, raw->h };
+        }
 
 
         [[nodiscard]]
+        constexpr
+        int
+        get_pitch()
+            const noexcept
+        {
+            return raw->pitch;
+        }
+
+
+        [[nodiscard]]
+        constexpr
         void*
         get_pixels()
-            noexcept;
+            noexcept
+        {
+            return raw->pixels;
+        }
+
 
         [[nodiscard]]
+        constexpr
         const void*
         get_pixels()
-            const noexcept;
+            const noexcept
+        {
+            return raw->pixels;
+        }
+
 
         template<typename T>
         [[nodiscard]]
+        constexpr
         T*
         get_pixels_as()
             noexcept
@@ -243,6 +282,7 @@ namespace sdl {
 
         template<typename T>
         [[nodiscard]]
+        constexpr
         const T*
         get_pixels_as()
             const noexcept
@@ -271,6 +311,18 @@ namespace sdl {
         set_palette(pixels::palette& pal);
 
 
+        [[nodiscard]]
+        constexpr
+        bool
+        is_locked()
+            const noexcept
+        {
+            return raw->locked;
+        }
+
+
+        [[nodiscard]]
+        constexpr
         bool
         must_lock()
             const noexcept
@@ -280,39 +332,78 @@ namespace sdl {
 
 
         void
-        lock();
+        lock()
+            const;
 
         bool
         try_lock()
-            noexcept;
+            const noexcept;
 
         void
         unlock()
-            noexcept;
+            const noexcept;
 
 
-        class lock_guard {
+        struct locker : basic_locker<surface> {
 
-            surface& surf;
-
-        public:
-
-            struct adopt_lock_t {};
-            static constexpr adopt_lock_t adopt_lock{};
+            using base_type = basic_locker<surface>;
 
 
-            lock_guard(surface& s);
+            // Inherit constructors.
+            using base_type::base_type;
 
-            lock_guard(surface& s,
-                       adopt_lock_t adopt)
+
+            explicit
+            locker(const surface* s);
+
+            explicit
+            locker(const surface& s);
+
+
+            locker(const surface* s,
+                   std::adopt_lock_t adopt)
                 noexcept;
 
-            lock_guard(const lock_guard& other) = delete;
-
-            ~lock_guard()
+            locker(const surface& s,
+                   std::adopt_lock_t adopt)
                 noexcept;
 
-        };
+
+            locker(const surface* s,
+                   std::try_to_lock_t attempt)
+                noexcept;
+
+            locker(const surface& s,
+                   std::try_to_lock_t attempt)
+                noexcept;
+
+
+            ~locker()
+                noexcept;
+
+
+            /// Move constructor.
+            locker(locker&& other)
+                noexcept = default;
+
+            /// Move assignment.
+            locker&
+            operator =(locker&& other)
+                noexcept = default;
+
+
+            void
+            lock();
+
+            bool
+            try_lock()
+                noexcept;
+
+            void
+            unlock()
+                noexcept override;
+
+        }; // struct locker
 
 
         [[nodiscard]]
@@ -419,6 +510,13 @@ namespace sdl {
 
 
         void
+        fill(Uint32 pixel);
+
+        void
+        fill(color c);
+
+
+        void
         fill(const rect& r,
              Uint32 pixel);
 
@@ -443,6 +541,25 @@ namespace sdl {
         void
         fill(std::span<const rect> rs,
              color c);
+
+
+        color
+        read_pixel(int x,
+                   int y)
+            const;
+
+        color
+        read_pixel(vec2 pos)
+            const;
+
+
+        void
+        write_pixel(int x, int y,
+                    color c);
+
+        void
+        write_pixel(vec2 pos,
+                    color c);
 
     }; // class surface
 

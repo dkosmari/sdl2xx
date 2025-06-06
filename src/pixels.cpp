@@ -441,14 +441,6 @@ namespace sdl::pixels {
     }
 
 
-    bool
-    format::has_palette()
-        const noexcept
-    {
-        return raw->palette;
-    }
-
-
     palette
     format::get_palette()
     {

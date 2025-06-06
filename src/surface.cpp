@@ -22,8 +22,7 @@ namespace sdl {
     }
 
 
-    surface::surface(Uint32 flags,
-                     int width,
+    surface::surface(int width,
                      int height,
                      int depth,
                      Uint32 r_mask,
@@ -31,25 +30,16 @@ namespace sdl {
                      Uint32 b_mask,
                      Uint32 a_mask)
     {
-        create(flags,
-               width,
-               height,
-               depth,
-               r_mask,
-               g_mask,
-               b_mask,
-               a_mask);
+        create(width, height, depth, r_mask, g_mask, b_mask, a_mask);
     }
 
 
-    surface::surface(Uint32 flags,
-                     int width,
+    surface::surface(int width,
                      int height,
                      int depth,
                      pixels::format_enum fmt)
     {
-        create(flags,
-               width,
+        create(width,
                height,
                depth,
                fmt);
@@ -95,18 +85,16 @@ namespace sdl {
 
 
     surface::surface(const surface& other,
-                     const pixels::format& fmt,
-                     Uint32 flags)
+                     const pixels::format& fmt)
     {
-        create(other, fmt, flags);
+        create(other, fmt);
     }
 
 
     surface::surface(const surface& other,
-                     pixels::format_enum fmt,
-                     Uint32 flags)
+                     pixels::format_enum fmt)
     {
-        create(other, fmt, flags);
+        create(other, fmt);
     }
 
 
@@ -161,8 +149,7 @@ namespace sdl {
 
 
     void
-    surface::create(Uint32 flags,
-                    int width,
+    surface::create(int width,
                     int height,
                     int depth,
                     Uint32 r_mask,
@@ -170,14 +157,10 @@ namespace sdl {
                     Uint32 b_mask,
                     Uint32 a_mask)
     {
-        auto ptr = SDL_CreateRGBSurface(flags,
-                                        width,
-                                        height,
+        auto ptr = SDL_CreateRGBSurface(0,
+                                        width, height,
                                         depth,
-                                        r_mask,
-                                        g_mask,
-                                        b_mask,
-                                        a_mask);
+                                        r_mask, g_mask, b_mask, a_mask);
         if (!ptr)
             throw error{};
         destroy();
@@ -186,15 +169,13 @@ namespace sdl {
 
 
     void
-    surface::create(Uint32 flags,
-                    int width,
+    surface::create(int width,
                     int height,
                     int depth,
                     pixels::format_enum fmt)
     {
-        auto ptr = SDL_CreateRGBSurfaceWithFormat(flags,
-                                                  width,
-                                                  height,
+        auto ptr = SDL_CreateRGBSurfaceWithFormat(0,
+                                                  width, height,
                                                   depth,
                                                   static_cast<SDL_PixelFormatEnum>(fmt));
         if (!ptr)
@@ -215,15 +196,9 @@ namespace sdl {
                     Uint32 b_mask,
                     Uint32 a_mask)
     {
-        auto ptr = SDL_CreateRGBSurfaceFrom(pixels,
-                                            width,
-                                            height,
-                                            depth,
-                                            pitch,
-                                            r_mask,
-                                            g_mask,
-                                            b_mask,
-                                            a_mask);
+        auto ptr = SDL_CreateRGBSurfaceFrom(pixels, width, height,
+                                            depth, pitch,
+                                            r_mask, g_mask, b_mask, a_mask);
         if (!ptr)
             throw error{};
         destroy();
@@ -240,10 +215,8 @@ namespace sdl {
                     pixels::format_enum fmt)
     {
         auto ptr = SDL_CreateRGBSurfaceWithFormatFrom(pixels,
-                                                      width,
-                                                      height,
-                                                      depth,
-                                                      pitch,
+                                                      width, height,
+                                                      depth, pitch,
                                                       static_cast<SDL_PixelFormatEnum>(fmt));
         if (!ptr)
             throw error{};
@@ -268,10 +241,9 @@ namespace sdl {
 
     void
     surface::create(const surface& other,
-                    const pixels::format& fmt,
-                    Uint32 flags)
+                    const pixels::format& fmt)
     {
-        auto ptr = SDL_ConvertSurface(other.raw, fmt.data(), flags);
+        auto ptr = SDL_ConvertSurface(other.raw, fmt.data(), 0);
         if (!ptr)
             throw error{};
         destroy();
@@ -281,12 +253,11 @@ namespace sdl {
 
     void
     surface::create(const surface& other,
-                    pixels::format_enum fmt,
-                    Uint32 flags)
+                    pixels::format_enum fmt)
     {
         auto ptr = SDL_ConvertSurfaceFormat(other.raw,
                                             static_cast<SDL_PixelFormatEnum>(fmt),
-                                            flags);
+                                            0);
         if (!ptr)
             throw error{};
         destroy();
@@ -339,59 +310,11 @@ namespace sdl {
     }
 
 
-    Uint32
-    surface::get_flags()
-        const noexcept
-    {
-        return raw->flags;
-    }
-
-
     pixels::format
     surface::get_format()
         const noexcept
     {
         return pixels::format::ref_up(raw->format);
-    }
-
-
-    int
-    surface::get_width()
-        const noexcept
-    {
-        return raw->w;
-    }
-
-
-    int
-    surface::get_height()
-        const noexcept
-    {
-        return raw->h;
-    }
-
-
-    vec2
-    surface::get_size()
-        const noexcept
-    {
-        return { raw->w, raw->h };
-    }
-
-
-    void*
-    surface::get_pixels()
-        noexcept
-    {
-        return raw->pixels;
-    }
-
-
-    const void*
-    surface::get_pixels()
-        const noexcept
-    {
-        return raw->pixels;
     }
 
 
@@ -431,6 +354,7 @@ namespace sdl {
 
     void
     surface::lock()
+        const
     {
         if (!try_lock())
             throw error{};
@@ -439,7 +363,7 @@ namespace sdl {
 
     bool
     surface::try_lock()
-        noexcept
+        const noexcept
     {
         return SDL_LockSurface(raw) >= 0;
     }
@@ -447,30 +371,101 @@ namespace sdl {
 
     void
     surface::unlock()
-        noexcept
+        const noexcept
     {
         SDL_UnlockSurface(raw);
     }
 
 
-    surface::lock_guard::lock_guard(surface& s) :
-        surf(s)
+    surface::locker::locker(const surface* s) :
+        base_type{s}
     {
-        surf.lock();
+        lock();
     }
 
 
-    surface::lock_guard::lock_guard(surface& s,
-                                    surface::lock_guard::adopt_lock_t)
-        noexcept :
-        surf(s)
+    surface::locker::locker(const surface& s) :
+        locker{&s}
     {}
 
 
-    surface::lock_guard::~lock_guard()
+    surface::locker::locker(const surface* s,
+                            std::adopt_lock_t)
+        noexcept :
+        base_type{s}
+    {
+        if (is_guarded() && guarded->is_locked())
+            locked = true;
+    }
+
+
+    surface::locker::locker(const surface& s,
+                            std::adopt_lock_t adopt)
+        noexcept :
+        locker{&s, adopt}
+    {}
+
+
+    surface::locker::locker(const surface* s,
+                            std::try_to_lock_t)
+        noexcept :
+        base_type{s}
+    {
+        try_lock();
+    }
+
+
+    surface::locker::locker(const surface& s,
+                            std::try_to_lock_t attempt)
+        noexcept :
+        locker{&s, attempt}
+    {}
+
+
+    surface::locker::~locker()
         noexcept
     {
-        surf.unlock();
+        unlock();
+    }
+
+
+    void
+    surface::locker::lock()
+    {
+        if (!is_guarded())
+            return;
+        if (is_locked())
+            return;
+        if (guarded->must_lock()) {
+            guarded->lock();
+            locked = true;
+        }
+    }
+
+
+    bool
+    surface::locker::try_lock()
+        noexcept
+    {
+        if (!is_guarded())
+            return false;
+        if (is_locked())
+            return false;
+        locked = guarded->try_lock();
+        return locked;
+    }
+
+
+    void
+    surface::locker::unlock()
+        noexcept
+    {
+        if (!is_guarded())
+            return;
+        if (!is_locked())
+            return;
+        guarded->unlock();
+        locked = false;
     }
 
 
@@ -678,6 +673,23 @@ namespace sdl {
 
 
     void
+    surface::fill(Uint32 pixel)
+    {
+        if (SDL_FillRect(raw, nullptr, pixel) < 0)
+            throw error{};
+    }
+
+
+    void
+    surface::fill(color c)
+    {
+        auto fmt = get_format();
+        Uint32 pixel = fmt.map_rgba(c);
+        fill(pixel);
+    }
+
+
+    void
     surface::fill(const rect& r,
                   Uint32 pixel)
     {
@@ -732,6 +744,74 @@ namespace sdl {
         auto fmt = get_format();
         Uint32 pixel = fmt.map_rgba(c);
         fill(rs, pixel);
+    }
+
+
+    color
+    surface::read_pixel(int x, int y)
+        const
+    {
+        color result;
+        if (x < 0 || x >= get_width())
+            throw error{"invalid argument: x"};
+        if (y < 0 || y >= get_height())
+            throw error{"invalid argument: y"};
+
+        auto fmt = get_format();
+        Uint8 pixel_size = fmt.get_pixel_size_bytes();
+
+        locker guard{this, std::defer_lock};
+        if (must_lock())
+            guard.lock();
+
+        auto ptr = get_pixels_as<Uint8>() + y * get_pitch() + x * pixel_size;
+
+        if (!SDL_ISPIXELFORMAT_FOURCC(fmt.get_enum_raw())) {
+
+            // Note: all pixel formats in SDL2 are 4 bytes or less.
+            // Note: SDL2 doesn't handle pixel formats that don't fall on pixel boundaries
+            // very well, so we don't try to handle it here either.
+            Uint32 pixel;
+            SDL_memcpy(&pixel, ptr, pixel_size);
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+            // SDL expects pixel bits to be the lower bits, so we need to shift it down
+            // on big endian systems.
+            pixel >>= 8 * (sizeof pixel) - fmt.get_pixel_size_bits();
+#endif
+            return fmt.get_rgba(pixel);
+
+        } else {
+
+            // Slow version: convert to argb_8888
+            surface converted{*this, pixels::format_enum::argb_8888};
+            return converted.read_pixel(x, y);
+
+        }
+    }
+
+
+    color
+    surface::read_pixel(vec2 pos)
+        const
+    {
+        return read_pixel(pos.x, pos.y);
+    }
+
+
+    void
+    surface::write_pixel(int x, int y,
+                         color c)
+    {
+        rect r{x, y, 1, 1};
+        fill(r, c);
+    }
+
+
+    void
+    surface::write_pixel(vec2 pos,
+                         color c)
+    {
+        write_pixel(pos.x, pos.y, c);
     }
 
 

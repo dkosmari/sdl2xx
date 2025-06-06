@@ -286,7 +286,7 @@ namespace sdl::audio {
 
     void
     device::lock()
-        noexcept
+        const noexcept
     {
         SDL_LockAudioDevice(raw);
     }
@@ -294,30 +294,51 @@ namespace sdl::audio {
 
     void
     device::unlock()
-        noexcept
+        const noexcept
     {
         SDL_UnlockAudioDevice(raw);
     }
 
 
-    device::lock_guard::lock_guard(device& d) :
-        dev(d)
+    device::locker::locker(const device* d) :
+        base_type{d}
     {
-        dev.lock();
+        lock();
     }
 
 
-    device::lock_guard::lock_guard(device& d,
-                                   device::lock_guard::adopt_lock_t)
-        noexcept :
-        dev(d)
-    {}
+    device::locker::locker(const device& d) :
+        base_type{d}
+    {
+        lock();
+    }
 
 
-    device::lock_guard::~lock_guard()
+    device::locker::~locker()
         noexcept
     {
-        dev.unlock();
+        unlock();
+    }
+
+
+    void
+    device::locker::lock()
+    {
+        if (is_guarded() && !is_locked()) {
+            guarded->lock();
+            locked = true;
+        }
+    }
+
+
+    void
+    device::locker::unlock()
+        noexcept
+    {
+        if (is_guarded() && is_locked()) {
+            guarded->unlock();
+            locked = false;
+        }
     }
 
 

@@ -17,6 +17,7 @@
 
 #include <SDL_audio.h>
 
+#include "basic_locker.hpp"
 #include "basic_wrapper.hpp"
 #include "blob.hpp"
 #include "rwops.hpp"
@@ -409,37 +410,55 @@ namespace sdl::audio {
 
         void
         lock()
-            noexcept;
+            const noexcept;
 
 
         void
         unlock()
-            noexcept;
+            const noexcept;
 
 
-        class lock_guard {
+        struct locker : basic_locker<device> {
 
-            device& dev;
-
-        public:
-
-            struct adopt_lock_t {};
-            static constexpr adopt_lock_t adopt_lock{};
+            using base_type = basic_locker<device>;
 
 
-            lock_guard(device& d);
+            // Inherit constructors.
+            using base_type::base_type;
 
-            lock_guard(device& d,
-                       adopt_lock_t adopt)
+
+            explicit
+            locker(const device* d);
+
+            explicit
+            locker(const device& d);
+
+
+            ~locker()
                 noexcept;
 
-            ~lock_guard()
-                noexcept;
 
-            // Disallow copying.
-            lock_guard(const lock_guard& other) = delete;
+            /// Move constructor.
+            locker(locker&& other)
+                noexcept = default;
 
-        }; // class lock_guard
+
+            /// Move assignment.
+            locker&
+            operator =(locker&& other)
+                noexcept = default;
+
+
+            void
+            lock();
+
+
+            void
+            unlock()
+                noexcept override;
+
+
+        }; // struct locker
 
 
     }; // struct device
