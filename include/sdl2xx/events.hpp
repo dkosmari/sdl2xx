@@ -138,7 +138,6 @@ namespace sdl::events {
     using mouse_motion        = SDL_MouseMotionEvent;
     using mouse_wheel         = SDL_MouseWheelEvent;
     using multi_gesture       = SDL_MultiGestureEvent;
-    using os                  = SDL_OSEvent;
     using quit                = SDL_QuitEvent;
     using sensor              = SDL_SensorEvent;
     using sys_wm              = SDL_SysWMEvent;
