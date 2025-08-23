@@ -52,10 +52,10 @@ namespace sdl {
 
 
         rwops(void* mem,
-              int size);
+              std::size_t size);
 
         rwops(const void* mem,
-              int size);
+              std::size_t size);
 
 
         template<typename T,
@@ -112,11 +112,11 @@ namespace sdl {
 
         void
         create(void* mem,
-               int size);
+               std::size_t size);
 
         void
         create(const void* mem,
-               int size);
+               std::size_t size);
 
 
         template<typename T,

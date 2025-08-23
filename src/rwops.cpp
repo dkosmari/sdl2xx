@@ -147,14 +147,14 @@ namespace sdl {
 
 
     rwops::rwops(void* mem,
-                 int size)
+                 std::size_t size)
     {
         create(mem, size);
     }
 
 
     rwops::rwops(const void* mem,
-                 int size)
+                 std::size_t size)
     {
         create(mem, size);
     }
@@ -205,9 +205,9 @@ namespace sdl {
 
     void
     rwops::create(void* mem,
-                  int size)
+                  std::size_t size)
     {
-        auto new_raw = SDL_RWFromMem(mem, size);
+        auto new_raw = SDL_RWFromMem(mem, static_cast<int>(size));
         if (!new_raw)
             throw error{};
         destroy();
@@ -217,9 +217,9 @@ namespace sdl {
 
     void
     rwops::create(const void* mem,
-                  int size)
+                  std::size_t size)
     {
-        auto new_raw = SDL_RWFromConstMem(mem, size);
+        auto new_raw = SDL_RWFromConstMem(mem, static_cast<int>(size));
         if (!new_raw)
             throw error{};
         destroy();
