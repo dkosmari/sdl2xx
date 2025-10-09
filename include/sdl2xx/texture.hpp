@@ -59,6 +59,11 @@ namespace sdl {
                 int height);
 
         texture(renderer& ren,
+                pixels::format_enum fmt,
+                SDL_TextureAccess access,
+                vec2 size);
+
+        texture(renderer& ren,
                 surface& surf);
 
         /// Move constructor.
@@ -82,6 +87,12 @@ namespace sdl {
                SDL_TextureAccess access,
                int width,
                int height);
+
+        void
+        create(renderer& ren,
+               pixels::format_enum format,
+               SDL_TextureAccess access,
+               vec2 size);
 
         void
         create(renderer& ren,
@@ -112,8 +123,7 @@ namespace sdl {
         struct info_t {
             pixels::format_enum format;
             SDL_TextureAccess access;
-            int width;
-            int height;
+            vec2 size;
         };
 
         [[nodiscard]]

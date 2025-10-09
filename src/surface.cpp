@@ -34,15 +34,31 @@ namespace sdl {
     }
 
 
+    surface::surface(vec2 size,
+                     int depth,
+                     Uint32 r_mask,
+                     Uint32 g_mask,
+                     Uint32 b_mask,
+                     Uint32 a_mask)
+    {
+        create(size, depth, r_mask, g_mask, b_mask, a_mask);
+    }
+
+
     surface::surface(int width,
                      int height,
                      int depth,
                      pixels::format_enum fmt)
     {
-        create(width,
-               height,
-               depth,
-               fmt);
+        create(width, height, depth, fmt);
+    }
+
+
+    surface::surface(vec2 size,
+                     int depth,
+                     pixels::format_enum fmt)
+    {
+        create(size, depth, fmt);
     }
 
 
@@ -56,15 +72,20 @@ namespace sdl {
                      Uint32 b_mask,
                      Uint32 a_mask)
     {
-        create(pixels,
-               width,
-               height,
-               depth,
-               pitch,
-               r_mask,
-               g_mask,
-               b_mask,
-               a_mask);
+        create(pixels, width, height, depth, pitch, r_mask, g_mask, b_mask, a_mask);
+    }
+
+
+    surface::surface(void* pixels,
+                     vec2 size,
+                     int depth,
+                     int pitch,
+                     Uint32 r_mask,
+                     Uint32 g_mask,
+                     Uint32 b_mask,
+                     Uint32 a_mask)
+    {
+        create(pixels, size, depth, pitch, r_mask, g_mask, b_mask, a_mask);
     }
 
 
@@ -75,12 +96,17 @@ namespace sdl {
                      int pitch,
                      pixels::format_enum fmt)
     {
-        create(pixels,
-               width,
-               height,
-               depth,
-               pitch,
-               fmt);
+        create(pixels, width, height, depth, pitch, fmt);
+    }
+
+
+    surface::surface(void* pixels,
+                     vec2 size,
+                     int depth,
+                     int pitch,
+                     pixels::format_enum fmt)
+    {
+        create(pixels, size, depth, pitch, fmt);
     }
 
 
@@ -169,6 +195,18 @@ namespace sdl {
 
 
     void
+    surface::create(vec2 size,
+                    int depth,
+                    Uint32 r_mask,
+                    Uint32 g_mask,
+                    Uint32 b_mask,
+                    Uint32 a_mask)
+    {
+        create(size.x, size.y, depth, r_mask, g_mask, b_mask, a_mask);
+    }
+
+
+    void
     surface::create(int width,
                     int height,
                     int depth,
@@ -182,6 +220,15 @@ namespace sdl {
             throw error{};
         destroy();
         acquire(ptr);
+    }
+
+
+    void
+    surface::create(vec2 size,
+                    int depth,
+                    pixels::format_enum fmt)
+    {
+        create(size.x, size.y, depth, fmt);
     }
 
 
@@ -208,6 +255,20 @@ namespace sdl {
 
     void
     surface::create(void* pixels,
+                    vec2 size,
+                    int depth,
+                    int pitch,
+                    Uint32 r_mask,
+                    Uint32 g_mask,
+                    Uint32 b_mask,
+                    Uint32 a_mask)
+    {
+        create(pixels, size.x, size.y, depth, pitch, r_mask, g_mask, b_mask, a_mask);
+    }
+
+
+    void
+    surface::create(void* pixels,
                     int width,
                     int height,
                     int depth,
@@ -222,6 +283,17 @@ namespace sdl {
             throw error{};
         destroy();
         acquire(ptr);
+    }
+
+
+    void
+    surface::create(void* pixels,
+                    vec2 size,
+                    int depth,
+                    int pitch,
+                    pixels::format_enum fmt)
+    {
+        create(pixels, size.x, size.y, depth, pitch, fmt);
     }
 
 
@@ -315,6 +387,14 @@ namespace sdl {
         const noexcept
     {
         return pixels::format::ref_up(raw->format);
+    }
+
+
+    pixels::format_enum
+    surface::get_format_enum()
+        const noexcept
+    {
+        return static_cast<pixels::format_enum>(raw->format->format);
     }
 
 

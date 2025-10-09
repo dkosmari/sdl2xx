@@ -45,6 +45,14 @@ namespace sdl {
     }
 
 
+    texture::texture(renderer& ren,
+                     pixels::format_enum fmt,
+                     SDL_TextureAccess access,
+                     vec2 size)
+    {
+        create(ren, fmt, access, size);
+    }
+
 
     texture::texture(renderer& ren,
                      surface& surf)
@@ -95,6 +103,16 @@ namespace sdl {
             throw error{};
         destroy();
         acquire(ptr);
+    }
+
+
+    void
+    texture::create(renderer& ren,
+                    pixels::format_enum format,
+                    SDL_TextureAccess access,
+                    vec2 size)
+    {
+        create(ren, format, access, size.x, size.y);
     }
 
 
@@ -167,8 +185,7 @@ namespace sdl {
         return info_t{
             .format = static_cast<pixels::format_enum>(format),
             .access = static_cast<SDL_TextureAccess>(access),
-            .width = width,
-            .height = height
+            .size = {width, height}
         };
     }
 

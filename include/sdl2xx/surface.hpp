@@ -57,8 +57,6 @@ namespace sdl {
         // Inherit constructors.
         using base_type::base_type;
 
-        // TODO: add overloads for size as vec2
-
         surface(int width,
                 int height,
                 int depth,
@@ -67,8 +65,19 @@ namespace sdl {
                 Uint32 b_mask,
                 Uint32 a_mask);
 
+        surface(vec2 size,
+                int depth,
+                Uint32 r_mask,
+                Uint32 g_mask,
+                Uint32 b_mask,
+                Uint32 a_mask);
+
         surface(int width,
                 int height,
+                int depth,
+                pixels::format_enum fmt);
+
+        surface(vec2 size,
                 int depth,
                 pixels::format_enum fmt);
 
@@ -83,15 +92,32 @@ namespace sdl {
                 Uint32 a_mask);
 
         surface(void* pixels,
+                vec2 size,
+                int depth,
+                int pitch,
+                Uint32 r_mask,
+                Uint32 g_mask,
+                Uint32 b_mask,
+                Uint32 a_mask);
+
+        surface(void* pixels,
                 int width,
                 int height,
                 int depth,
                 int pitch,
                 pixels::format_enum fmt);
 
+        surface(void* pixels,
+                vec2 size,
+                int depth,
+                int pitch,
+                pixels::format_enum fmt);
+
+        /// Copy a surface using specific format.
         surface(const surface& other,
                 const pixels::format& fmt);
 
+        /// Copy a surface using specific format.
         surface(const surface& other,
                 pixels::format_enum fmt);
 
@@ -121,8 +147,6 @@ namespace sdl {
             noexcept;
 
 
-        // TODO: add overloads for size as vec2
-
         void
         create(int width,
                int height,
@@ -133,8 +157,21 @@ namespace sdl {
                Uint32 a_mask);
 
         void
+        create(vec2 size,
+               int depth,
+               Uint32 r_mask,
+               Uint32 g_mask,
+               Uint32 b_mask,
+               Uint32 a_mask);
+
+        void
         create(int width,
                int height,
+               int depth,
+               pixels::format_enum fmt);
+
+        void
+        create(vec2 size,
                int depth,
                pixels::format_enum fmt);
 
@@ -151,19 +188,39 @@ namespace sdl {
 
         void
         create(void* pixels,
+               vec2 size,
+               int depth,
+               int pitch,
+               Uint32 r_mask,
+               Uint32 g_mask,
+               Uint32 b_mask,
+               Uint32 a_mask);
+
+        void
+        create(void* pixels,
                int width,
                int height,
                int depth,
                int pitch,
                pixels::format_enum fmt);
 
+        void
+        create(void* pixels,
+               vec2 size,
+               int depth,
+               int pitch,
+               pixels::format_enum fmt);
+
+        /// Duplicate surface.
         void
         create(const surface& other);
 
+        /// Copy surface in a different format.
         void
         create(const surface& other,
                const pixels::format& fmt);
 
+        /// Copy surface in a different format.
         void
         create(const surface& other,
                pixels::format_enum fmt);
@@ -207,6 +264,12 @@ namespace sdl {
         [[nodiscard]]
         pixels::format
         get_format()
+            const noexcept;
+
+
+        [[nodiscard]]
+        pixels::format_enum
+        get_format_enum()
             const noexcept;
 
 
