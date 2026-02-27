@@ -20,70 +20,69 @@
 namespace sdl::events {
 
 
-    enum type : Uint32 {
-        e_audio_device_added         = SDL_AUDIODEVICEADDED,
-        e_audio_device_removed       = SDL_AUDIODEVICEREMOVED,
-        e_clipboard                  = SDL_CLIPBOARDUPDATE,
-        e_controller_axis            = SDL_CONTROLLERAXISMOTION,
-        e_controller_device_added    = SDL_CONTROLLERDEVICEADDED,
-        e_controller_device_remapped = SDL_CONTROLLERDEVICEREMAPPED,
-        e_controller_device_removed  = SDL_CONTROLLERDEVICEREMOVED,
-        e_controller_down            = SDL_CONTROLLERBUTTONDOWN,
-        e_controller_sensor          = SDL_CONTROLLERSENSORUPDATE,
-        e_controller_touch_down      = SDL_CONTROLLERTOUCHPADDOWN,
-        e_controller_touch_motion    = SDL_CONTROLLERTOUCHPADMOTION,
-        e_controller_touch_up        = SDL_CONTROLLERTOUCHPADUP,
-        e_controller_up              = SDL_CONTROLLERBUTTONUP,
-        e_did_enter_background       = SDL_APP_DIDENTERBACKGROUND,
-        e_did_enter_foreground       = SDL_APP_DIDENTERFOREGROUND,
-        e_display                    = SDL_DISPLAYEVENT,
-        e_dollar_gesture             = SDL_DOLLARGESTURE,
-        e_dollar_record              = SDL_DOLLARRECORD,
-        e_drop_begin                 = SDL_DROPBEGIN,
-        e_drop_complete              = SDL_DROPCOMPLETE,
-        e_drop_file                  = SDL_DROPFILE,
-        e_drop_text                  = SDL_DROPTEXT,
-        e_finger_down                = SDL_FINGERDOWN,
-        e_finger_motion              = SDL_FINGERMOTION,
-        e_finger_up                  = SDL_FINGERUP,
-        e_first                      = SDL_FIRSTEVENT,
-        e_joy_axis                   = SDL_JOYAXISMOTION,
-        e_joy_ball                   = SDL_JOYBALLMOTION,
-        e_joy_battery                = SDL_JOYBATTERYUPDATED,
-        e_joy_device_added           = SDL_JOYDEVICEADDED,
-        e_joy_device_removed         = SDL_JOYDEVICEREMOVED,
-        e_joy_down                   = SDL_JOYBUTTONDOWN,
-        e_joy_hat                    = SDL_JOYHATMOTION,
-        e_joy_up                     = SDL_JOYBUTTONUP,
-        e_key_down                   = SDL_KEYDOWN,
-        e_key_up                     = SDL_KEYUP,
-        e_keymap_changed             = SDL_KEYMAPCHANGED,
-        e_last                       = SDL_LASTEVENT,
-        e_locale_changed             = SDL_LOCALECHANGED,
-        e_low_memory                 = SDL_APP_LOWMEMORY,
-        e_mouse_down                 = SDL_MOUSEBUTTONDOWN,
-        e_mouse_motion               = SDL_MOUSEMOTION,
-        e_mouse_up                   = SDL_MOUSEBUTTONUP,
-        e_mouse_wheel                = SDL_MOUSEWHEEL,
-        e_multi_gesture              = SDL_MULTIGESTURE,
-        e_poll_sentinel              = SDL_POLLSENTINEL,
-        e_quit                       = SDL_QUIT,
-        e_render_device_reset        = SDL_RENDER_DEVICE_RESET,
-        e_render_targets_reset       = SDL_RENDER_TARGETS_RESET,
-        e_sensor                     = SDL_SENSORUPDATE,
-        e_sys_wm                     = SDL_SYSWMEVENT,
-        e_terminating                = SDL_APP_TERMINATING,
-        e_text_editing               = SDL_TEXTEDITING,
-        e_text_editing_ext           = SDL_TEXTEDITING_EXT,
-        e_text_input                 = SDL_TEXTINPUT,
-        e_user                       = SDL_USEREVENT,
-        e_will_enter_background      = SDL_APP_WILLENTERBACKGROUND,
-        e_will_enter_foreground      = SDL_APP_WILLENTERFOREGROUND,
-        e_window                     = SDL_WINDOWEVENT,
+    enum class type : Uint32 {
+        audio_device_added         = SDL_AUDIODEVICEADDED,
+        audio_device_removed       = SDL_AUDIODEVICEREMOVED,
+        clipboard                  = SDL_CLIPBOARDUPDATE,
+        controller_axis            = SDL_CONTROLLERAXISMOTION,
+        controller_device_added    = SDL_CONTROLLERDEVICEADDED,
+        controller_device_remapped = SDL_CONTROLLERDEVICEREMAPPED,
+        controller_device_removed  = SDL_CONTROLLERDEVICEREMOVED,
+        controller_down            = SDL_CONTROLLERBUTTONDOWN,
+        controller_sensor          = SDL_CONTROLLERSENSORUPDATE,
+        controller_touch_down      = SDL_CONTROLLERTOUCHPADDOWN,
+        controller_touch_motion    = SDL_CONTROLLERTOUCHPADMOTION,
+        controller_touch_up        = SDL_CONTROLLERTOUCHPADUP,
+        controller_up              = SDL_CONTROLLERBUTTONUP,
+        did_enter_background       = SDL_APP_DIDENTERBACKGROUND,
+        did_enter_foreground       = SDL_APP_DIDENTERFOREGROUND,
+        display                    = SDL_DISPLAYEVENT,
+        dollar_gesture             = SDL_DOLLARGESTURE,
+        dollar_record              = SDL_DOLLARRECORD,
+        drop_begin                 = SDL_DROPBEGIN,
+        drop_complete              = SDL_DROPCOMPLETE,
+        drop_file                  = SDL_DROPFILE,
+        drop_text                  = SDL_DROPTEXT,
+        finger_down                = SDL_FINGERDOWN,
+        finger_motion              = SDL_FINGERMOTION,
+        finger_up                  = SDL_FINGERUP,
+        first                      = SDL_FIRSTEVENT,
+        joy_axis                   = SDL_JOYAXISMOTION,
+        joy_ball                   = SDL_JOYBALLMOTION,
+        joy_battery                = SDL_JOYBATTERYUPDATED,
+        joy_device_added           = SDL_JOYDEVICEADDED,
+        joy_device_removed         = SDL_JOYDEVICEREMOVED,
+        joy_down                   = SDL_JOYBUTTONDOWN,
+        joy_hat                    = SDL_JOYHATMOTION,
+        joy_up                     = SDL_JOYBUTTONUP,
+        key_down                   = SDL_KEYDOWN,
+        key_up                     = SDL_KEYUP,
+        keymap_changed             = SDL_KEYMAPCHANGED,
+        last                       = SDL_LASTEVENT,
+        locale_changed             = SDL_LOCALECHANGED,
+        low_memory                 = SDL_APP_LOWMEMORY,
+        mouse_down                 = SDL_MOUSEBUTTONDOWN,
+        mouse_motion               = SDL_MOUSEMOTION,
+        mouse_up                   = SDL_MOUSEBUTTONUP,
+        mouse_wheel                = SDL_MOUSEWHEEL,
+        multi_gesture              = SDL_MULTIGESTURE,
+        poll_sentinel              = SDL_POLLSENTINEL,
+        quit                       = SDL_QUIT,
+        render_device_reset        = SDL_RENDER_DEVICE_RESET,
+        render_targets_reset       = SDL_RENDER_TARGETS_RESET,
+        sensor                     = SDL_SENSORUPDATE,
+        sys_wm                     = SDL_SYSWMEVENT,
+        terminating                = SDL_APP_TERMINATING,
+        text_editing               = SDL_TEXTEDITING,
+        text_editing_ext           = SDL_TEXTEDITING_EXT,
+        text_input                 = SDL_TEXTINPUT,
+        user                       = SDL_USEREVENT,
+        will_enter_background      = SDL_APP_WILLENTERBACKGROUND,
+        will_enter_foreground      = SDL_APP_WILLENTERFOREGROUND,
+        window                     = SDL_WINDOWEVENT,
     };
 
 
-#if 0
     [[nodiscard]]
     constexpr
     Uint32
@@ -94,6 +93,7 @@ namespace sdl::events {
     }
 
 
+#if 0
     [[nodiscard]]
     constexpr
     bool
@@ -113,6 +113,7 @@ namespace sdl::events {
         return a == convert(b);
     }
 #endif
+
 
     // TODO: to_string(type t)
 

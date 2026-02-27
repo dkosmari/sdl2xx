@@ -21,6 +21,7 @@ libtool
 Makefile
 Makefile.in
 stamp-h1
+TAGS
 
 examples/dvd-logo/dvd-logo{,.exe}
 examples/simple/simple{,.exe}

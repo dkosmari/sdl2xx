@@ -42,12 +42,12 @@ int main(int, char* [])
 
             // Process events.
             while (auto event = sdl::events::poll()) {
-                switch (event->type) {
-
-                    case sdl::events::type::e_quit:
+                switch (sdl::events::type{event->type}) {
+                    case sdl::events::type::quit:
                         running = false;
                         break;
-
+                    default:
+                        ;
                 }
             }
         }

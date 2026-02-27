@@ -35,13 +35,15 @@ using sdl::vec2f;
 const std::filesystem::path assets_path = "assets/";
 
 
-std::mt19937_64 rand_eng;
+std::default_random_engine rand_eng;
+
 
 void
 seed_random_engine()
 {
     std::random_device dev;
-    rand_eng.seed(dev());
+    std::seed_seq seeder{dev()};
+    rand_eng.seed(seeder);
 }
 
 
@@ -168,9 +170,9 @@ struct Logo {
     {
         ren.set_color(color);
 
-#if 0
-        ren.draw_box(box);
-#endif
+
+        // Uncomment this to render a bounding box for the logo.
+        // ren.draw_box(box);
 
         if (texture)
             ren.copy(*texture, {}, box);
@@ -380,14 +382,17 @@ struct App {
     {
         using sdl::events::type;
 
-        switch (e.type) {
-            case type::e_quit:
+        switch (type{e.type}) {
+            case type::quit:
                 running = false;
                 break;
 
-            case type::e_key_down:
+            case type::key_down:
                 handle_key_down(e.key);
                 break;
+
+            default:
+                ;
         }
     }
 
@@ -405,6 +410,9 @@ struct App {
                 running = false;
                 break;
 
+            default:
+                ;
+
         }
     }
 
@@ -414,9 +422,8 @@ struct App {
 int
 main()
 {
+    seed_random_engine();
     try {
-        seed_random_engine();
-
         App app;
         app.run();
     }
@@ -424,5 +431,4 @@ main()
         cout << "Error: " << e.what() << endl;
         return -1;
     }
-
 }
