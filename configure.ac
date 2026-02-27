@@ -12,12 +12,12 @@ AC_CANONICAL_HOST
 
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 
+LT_INIT
+
 # Checks for programs.
 AC_PROG_CXX
 AX_APPEND_COMPILE_FLAGS([-std=c++23], [CXX])
 AC_LANG([C++])
-
-AC_PROG_RANLIB
 
 
 AS_VAR_SET([sdl_libs], [sdl2])

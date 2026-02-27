@@ -17,7 +17,7 @@ simple_SOURCES = \
 
 
 simple_LDADD = \
-	$(top_builddir)/lib/libsdl2xx.a \
+	$(top_builddir)/lib/libsdl2xx.la \
 	$(SDL2_LIBS)
 
 endif ENABLE_EXAMPLES
