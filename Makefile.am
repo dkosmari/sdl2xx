@@ -71,9 +71,9 @@ endif ENABLE_TTF
 sdl2xxdir = $(includedir)/sdl2xx
 
 
-lib_LIBRARIES = libsdl2xx.a
+lib_LIBRARIES = lib/libsdl2xx.a
 
-libsdl2xx_a_SOURCES = \
+lib_libsdl2xx_a_SOURCES = \
 	src/allocator.cpp \
 	src/audio.cpp \
 	src/angle.cpp \
@@ -104,18 +104,18 @@ libsdl2xx_a_SOURCES = \
 
 
 if ENABLE_IMAGE
-lib_LIBRARIES += libsdl2xx_image.a
-libsdl2xx_image_a_SOURCES = src/img.cpp
+lib_LIBRARIES += lib/libsdl2xx_image.a
+lib_libsdl2xx_image_a_SOURCES = src/img.cpp
 endif ENABLE_IMAGE
 
 if ENABLE_MIXER
-lib_LIBRARIES += libsdl2xx_mixer.a
-libsdl2xx_mixer_a_SOURCES = src/mix.cpp
+lib_LIBRARIES += lib/libsdl2xx_mixer.a
+lib_libsdl2xx_mixer_a_SOURCES = src/mix.cpp
 endif ENABLE_MIXER
 
 if ENABLE_TTF
-lib_LIBRARIES += libsdl2xx_ttf.a
-libsdl2xx_ttf_a_SOURCES = src/ttf.cpp
+lib_LIBRARIES += lib/libsdl2xx_ttf.a
+lib_libsdl2xx_ttf_a_SOURCES = src/ttf.cpp
 endif ENABLE_TTF
 
 

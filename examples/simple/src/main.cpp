@@ -23,8 +23,8 @@ int main(int, char* [])
                            sdl::renderer::flag::accelerated,
                            sdl::renderer::flag::present_vsync};
 
-        auto box = sdl::rect::from_corners({300, 200},
-                                           win.get_size() - vec2{300, 200});
+        vec2 padding = {300, 200};
+        auto box = sdl::rect::from_corners(padding, win.get_size() - padding);
 
         bool running = true;
 
