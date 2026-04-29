@@ -1,7 +1,7 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
@@ -11,6 +11,7 @@
 
 #include <concepts>
 #include <functional>
+#include <expected>
 #include <optional>
 #include <span>
 #include <tuple>
@@ -20,6 +21,7 @@
 #include "basic_wrapper.hpp"
 #include "blob.hpp"
 #include "display.hpp"
+#include "error.hpp"
 #include "string.hpp"
 #include "rect.hpp"
 #include "vec2.hpp"
@@ -235,6 +237,13 @@ namespace sdl {
         create_from(const void* data);
 
 
+        [[nodiscard]]
+        static
+        std::expected<window, error>
+        try_create_from(const void* data)
+            noexcept;
+
+
         void
         destroy()
             noexcept;
@@ -260,15 +269,29 @@ namespace sdl {
         get_display_index()
             const;
 
+        [[nodiscard]]
+        std::expected<unsigned, error>
+        try_get_display_index()
+            const noexcept;
+
 
         void
         set_display_mode(const display::mode& mode);
+
+        std::expected<void, error>
+        try_set_display_mode(const display::mode& mode)
+            noexcept;
 
 
         [[nodiscard]]
         display::mode
         get_display_mode()
             const;
+
+        [[nodiscard]]
+        std::expected<display::mode, error>
+        try_get_display_mode()
+            const noexcept;
 
 
         [[nodiscard]]

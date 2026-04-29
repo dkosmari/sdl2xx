@@ -1,16 +1,16 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
 
 #include <ostream>
 
-#include "pixels.hpp"
+#include "sdl2xx/pixels.hpp"
 
-#include "error.hpp"
+#include "sdl2xx/error.hpp"
 
 
 namespace sdl::pixels {

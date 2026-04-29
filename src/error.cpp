@@ -1,14 +1,14 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
 
 #include <SDL2/SDL_error.h>
 
-#include "error.hpp"
+#include "sdl2xx/error.hpp"
 
 
 using namespace std::string_literals;
@@ -26,6 +26,11 @@ namespace sdl {
 
 
     error::error(const char* msg) :
+        runtime_error{msg}
+    {}
+
+
+    error::error(const std::string& msg) :
         runtime_error{msg}
     {}
 

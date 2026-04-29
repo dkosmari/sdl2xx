@@ -1,14 +1,14 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
 
 #include <utility>
 
-#include "ttf.hpp"
+#include "sdl2xx/ttf.hpp"
 
 
 using std::expected;

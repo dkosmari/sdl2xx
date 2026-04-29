@@ -1,17 +1,17 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
 
 #include <stdexcept>
 
-#include "events.hpp"
+#include "sdl2xx/events.hpp"
 
-#include "error.hpp"
-#include "unique_ptr.hpp"
+#include "sdl2xx/error.hpp"
+#include "sdl2xx/unique_ptr.hpp"
 
 
 namespace sdl::events {

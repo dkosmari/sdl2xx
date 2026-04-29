@@ -1,7 +1,7 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
@@ -11,14 +11,18 @@
 #include <SDL_keyboard.h>
 #include <SDL_mouse.h>
 
-#include "window.hpp"
+#include "sdl2xx/window.hpp"
 
-#include "error.hpp"
-#include "renderer.hpp"
-#include "surface.hpp"
+#include "impl/value_or_throw.hpp"
+#include "sdl2xx/error.hpp"
+#include "sdl2xx/renderer.hpp"
+#include "sdl2xx/surface.hpp"
 
 
 namespace sdl {
+
+    using impl::value_or_throw;
+
 
     static const char* wrapper_key = "wrapper";
 
@@ -110,7 +114,18 @@ namespace sdl {
     window
     window::create_from(const void* data)
     {
-        return window{SDL_CreateWindowFrom(data)};
+        return value_or_throw(try_create_from(data));
+    }
+
+
+    std::expected<window, error>
+    window::try_create_from(const void* data)
+        noexcept
+    {
+        auto new_raw = SDL_CreateWindowFrom(data);
+        if (!new_raw)
+            return std::unexpected{error{}};
+        return window{new_raw};
     }
 
 
@@ -159,9 +174,17 @@ namespace sdl {
     window::get_display_index()
         const
     {
+        return value_or_throw(try_get_display_index());
+    }
+
+
+    std::expected<unsigned, error>
+    window::try_get_display_index()
+        const noexcept
+    {
         int result = SDL_GetWindowDisplayIndex(raw);
         if (result < 0)
-            throw error{};
+            return std::unexpected{error{}};
         return result;
     }
 
@@ -169,8 +192,17 @@ namespace sdl {
     void
     window::set_display_mode(const display::mode& mode)
     {
+        return value_or_throw(try_set_display_mode(mode));
+    }
+
+
+    std::expected<void, error>
+    window::try_set_display_mode(const display::mode& mode)
+        noexcept
+    {
         if (SDL_SetWindowDisplayMode(raw, &mode) < 0)
-            throw error{};
+            return std::unexpected{error{}};
+        return {};
     }
 
 
@@ -178,9 +210,17 @@ namespace sdl {
     window::get_display_mode()
         const
     {
+        return value_or_throw(try_get_display_mode());
+    }
+
+
+    std::expected<display::mode, error>
+    window::try_get_display_mode()
+        const noexcept
+    {
         display::mode result;
         if (SDL_GetWindowDisplayMode(raw, &result) < 0)
-            throw error{};
+            return std::unexpected{error{}};
         return result;
     }
 

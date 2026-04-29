@@ -1,17 +1,17 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
 
-#include "renderer.hpp"
+#include "sdl2xx/renderer.hpp"
 
-#include "error.hpp"
-#include "surface.hpp"
-#include "texture.hpp"
-#include "window.hpp"
+#include "sdl2xx/error.hpp"
+#include "sdl2xx/surface.hpp"
+#include "sdl2xx/texture.hpp"
+#include "sdl2xx/window.hpp"
 
 
 namespace sdl {

@@ -1,22 +1,21 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
 
 #include <cmath>
-#include <limits>
 
-#include "utils.hpp"
+#include "remap.hpp"
 
 
-namespace sdl::impl::utils {
+namespace sdl::impl::remap {
 
     unsigned
-    map_to_uint(float x,
-                unsigned max)
+    to_uint(float x,
+            unsigned max)
         noexcept
     {
         if (x <= 0)
@@ -29,27 +28,25 @@ namespace sdl::impl::utils {
 
 
     Uint8
-    map_to_uint8(float x)
+    to_uint8(float x)
         noexcept
     {
-        return map_to_uint(x,
-                           std::numeric_limits<Uint8>::max());
+        return to_uint(x, std::numeric_limits<Uint8>::max());
     }
 
 
     Uint16
-    map_to_uint16(float x)
+    to_uint16(float x)
         noexcept
     {
-        return map_to_uint(x,
-                           std::numeric_limits<Uint16>::max());
+        return to_uint(x, std::numeric_limits<Uint16>::max());
     }
 
 
     int
-    map_to_int(double x,
-               int min,
-               int max)
+    to_int(double x,
+           int min,
+           int max)
         noexcept
     {
         double sx = x * (x < 0 ? min - 1 : max + 1);
@@ -67,9 +64,9 @@ namespace sdl::impl::utils {
 
 
     double
-    map_to_double(int x,
-                  int min,
-                  int max)
+    to_norm(int x,
+            int min,
+            int max)
         noexcept
     {
         if (x < 0)
@@ -78,14 +75,4 @@ namespace sdl::impl::utils {
             return x / static_cast<double>(max);
     }
 
-
-    double
-    map_to_double(Sint16 x)
-        noexcept
-    {
-        return map_to_double(x,
-                             std::numeric_limits<Sint16>::min(),
-                             std::numeric_limits<Sint16>::max());
-    }
-
-} // namespace sdl::impl::utils
+} // namespace sdl::impl::remap

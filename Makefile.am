@@ -12,7 +12,7 @@ SUBDIRS = \
 
 
 AM_CPPFLAGS = $(SDL2_CFLAGS) \
-	-I$(srcdir)/include/sdl2xx
+	-I$(srcdir)/include
 
 AM_CXXFLAGS = -Wall -Wextra -Werror
 
@@ -75,8 +75,8 @@ lib_LTLIBRARIES = lib/libsdl2xx.la
 
 lib_libsdl2xx_la_SOURCES = \
 	src/allocator.cpp \
-	src/audio.cpp \
 	src/angle.cpp \
+	src/audio.cpp \
 	src/blob.cpp \
 	src/clipboard.cpp \
 	src/color.cpp \
@@ -86,9 +86,10 @@ lib_libsdl2xx_la_SOURCES = \
 	src/game_controller.cpp \
 	src/gl.cpp \
 	src/guid.cpp \
+	src/impl/remap.cpp \
+	src/impl/remap.hpp \
+	src/impl/value_or_throw.hpp \
 	src/init.cpp \
-	src/impl/utils.cpp \
-	src/impl/utils.hpp \
 	src/joystick.cpp \
 	src/mouse.cpp \
 	src/pixels.cpp \

@@ -1,7 +1,7 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
@@ -9,23 +9,23 @@
 #include <algorithm>
 #include <cmath>
 
-#include "mix.hpp"
+#include "sdl2xx/mix.hpp"
 
-#include "error.hpp"
-#include "impl/utils.hpp"
+#include "sdl2xx/error.hpp"
+#include "impl/remap.hpp"
 
 
 namespace sdl::mix {
 
-    using impl::utils::map_to_uint8;
+    using impl::remap::to_uint8;
 
 
     namespace {
 
         unsigned
-        map_to_volume(float v)
+        remap_to_volume(float v)
         {
-            return impl::utils::map_to_uint(v, max_volume);
+            return impl::remap::to_uint(v, max_volume);
         }
 
     } // namespace
@@ -440,7 +440,7 @@ namespace sdl::mix {
     chunk::set_volume(float new_volume)
         const noexcept
     {
-        int result = Mix_VolumeChunk(raw, map_to_volume(new_volume));
+        int result = Mix_VolumeChunk(raw, remap_to_volume(new_volume));
         return result / float(max_volume);
     }
 
@@ -713,7 +713,7 @@ namespace sdl::mix {
     music::set_volume(float new_volume)
         noexcept
     {
-        int result = Mix_VolumeMusic(map_to_volume(new_volume));
+        int result = Mix_VolumeMusic(remap_to_volume(new_volume));
         return result / float(max_volume);
     }
 
@@ -981,8 +981,8 @@ namespace sdl::mix {
                 float right)
     {
         if (!Mix_SetPanning(channel,
-                            map_to_uint8(left),
-                            map_to_uint8(right)))
+                            to_uint8(left),
+                            to_uint8(right)))
             throw error{};
     }
 
@@ -1001,7 +1001,7 @@ namespace sdl::mix {
     {
         if (!Mix_SetPosition(channel,
                              static_cast<Sint16>(angle.value()),
-                             map_to_uint8(distance)))
+                             to_uint8(distance)))
             throw error{};
     }
 
@@ -1018,7 +1018,7 @@ namespace sdl::mix {
     set_distance(unsigned channel,
                  float distance)
     {
-        if (!Mix_SetDistance(channel, map_to_uint8(distance)))
+        if (!Mix_SetDistance(channel, to_uint8(distance)))
             throw error{};
     }
 
@@ -1139,7 +1139,7 @@ namespace sdl::mix {
                float new_volume)
         noexcept
     {
-        int result = Mix_Volume(channel, map_to_volume(new_volume));
+        int result = Mix_Volume(channel, remap_to_volume(new_volume));
         return result / float(max_volume);
     }
 
@@ -1148,7 +1148,7 @@ namespace sdl::mix {
     set_volume(float new_volume)
         noexcept
     {
-        int result = Mix_Volume(-1, map_to_volume(new_volume));
+        int result = Mix_Volume(-1, remap_to_volume(new_volume));
         return result / float(max_volume);
     }
 
@@ -1166,7 +1166,7 @@ namespace sdl::mix {
     set_master_volume(float new_volume)
         noexcept
     {
-        int result = Mix_MasterVolume(map_to_volume(new_volume));
+        int result = Mix_MasterVolume(remap_to_volume(new_volume));
         return result / float(max_volume);
     }
 

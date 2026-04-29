@@ -12,14 +12,14 @@
 
 #include <SDL2/SDL_stdinc.h>
 
-#include "color.hpp"
+#include "sdl2xx/color.hpp"
 
-#include "impl/utils.hpp"
+#include "impl/remap.hpp"
 
 
 namespace sdl {
 
-    using impl::utils::map_to_uint8;
+    using impl::remap::to_uint8;
 
 
     color
@@ -29,9 +29,9 @@ namespace sdl {
         noexcept
     {
         return {
-            map_to_uint8(r),
-            map_to_uint8(g),
-            map_to_uint8(b),
+            to_uint8(r),
+            to_uint8(g),
+            to_uint8(b),
             0xff
         };
     }
@@ -45,10 +45,10 @@ namespace sdl {
         noexcept
     {
         return {
-            map_to_uint8(r),
-            map_to_uint8(g),
-            map_to_uint8(b),
-            map_to_uint8(a)
+            to_uint8(r),
+            to_uint8(g),
+            to_uint8(b),
+            to_uint8(a)
         };
     }
 

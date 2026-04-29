@@ -1,7 +1,7 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
@@ -9,7 +9,7 @@
 #include <cstdio>
 #include <ostream>
 
-#include "angle.hpp"
+#include "sdl2xx/angle.hpp"
 
 
 namespace sdl {

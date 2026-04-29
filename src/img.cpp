@@ -1,7 +1,7 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
@@ -9,9 +9,9 @@
 #include <stdexcept>
 #include <utility>
 
-#include "img.hpp"
+#include "sdl2xx/img.hpp"
 
-#include "renderer.hpp"
+#include "sdl2xx/renderer.hpp"
 
 
 using std::expected;

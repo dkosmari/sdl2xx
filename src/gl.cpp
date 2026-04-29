@@ -1,7 +1,7 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
@@ -9,11 +9,11 @@
 #include <utility>
 #include <ranges>
 
-#include "gl.hpp"
+#include "sdl2xx/gl.hpp"
 
-#include "error.hpp"
-#include "vector.hpp"
-#include "window.hpp"
+#include "sdl2xx/error.hpp"
+#include "sdl2xx/vector.hpp"
+#include "sdl2xx/window.hpp"
 
 
 namespace sdl::gl {

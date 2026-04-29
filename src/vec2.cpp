@@ -1,7 +1,7 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
@@ -11,7 +11,7 @@
 
 #include <SDL_stdinc.h>
 
-#include "vec2.hpp"
+#include "sdl2xx/vec2.hpp"
 
 
 namespace sdl {

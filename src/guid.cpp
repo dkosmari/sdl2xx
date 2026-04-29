@@ -1,7 +1,7 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
@@ -10,7 +10,7 @@
 #include <istream>
 #include <ostream>
 
-#include "guid.hpp"
+#include "sdl2xx/guid.hpp"
 
 
 namespace sdl {
@@ -18,9 +18,7 @@ namespace sdl {
     guid::guid(const char* str)
         noexcept :
         SDL_GUID{SDL_GUIDFromString(str)}
-    {
-
-    }
+    {}
 
 
     guid::operator bool()

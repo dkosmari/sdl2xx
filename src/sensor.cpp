@@ -1,12 +1,12 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
 
-#include "sensor.hpp"
+#include "sdl2xx/sensor.hpp"
 
 
 #if SDL_VERSION_ATLEAST(2, 0, 9)

@@ -1,17 +1,17 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
 
 #include <SDL_events.h>         // SDL_ENABLE, SDL_DISABLE
 
-#include "mouse.hpp"
+#include "sdl2xx/mouse.hpp"
 
-#include "surface.hpp"
-#include "window.hpp"
+#include "sdl2xx/surface.hpp"
+#include "sdl2xx/window.hpp"
 
 
 using std::expected;

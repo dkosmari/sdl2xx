@@ -1,7 +1,7 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
@@ -10,6 +10,8 @@
 #define SDL2XX_ERROR_HPP
 
 #include <stdexcept>
+#include <string>
+
 
 namespace sdl {
 
@@ -19,10 +21,12 @@ namespace sdl {
 
         error(const char* msg);
 
+        error(const std::string& msg);
+
         explicit
         error(const std::exception& e);
 
-    };
+    }; // struct error
 
 } // namespace sdl
 

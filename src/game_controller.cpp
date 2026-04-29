@@ -1,7 +1,7 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
@@ -13,9 +13,9 @@
 #include <SDL_assert.h>
 #include <SDL_events.h>         // SDL_QUERY
 
-#include "game_controller.hpp"
-#include "unique_ptr.hpp"
-#include "impl/utils.hpp"
+#include "sdl2xx/game_controller.hpp"
+#include "sdl2xx/unique_ptr.hpp"
+#include "impl/remap.hpp"
 
 
 using std::expected;
@@ -24,7 +24,7 @@ using std::unexpected;
 
 namespace sdl::game_controller {
 
-    using impl::utils::map_to_uint16;
+    using impl::remap::to_uint16;
 
 
     string
@@ -646,9 +646,9 @@ namespace sdl::game_controller {
     device::get_axis(axis a)
         const noexcept
     {
-        return impl::utils::map_to_double(SDL_GameControllerGetAxis(raw, convert(a)),
-                                          SDL_JOYSTICK_AXIS_MIN,
-                                          SDL_JOYSTICK_AXIS_MAX);
+        return impl::remap::to_norm(SDL_GameControllerGetAxis(raw, convert(a)),
+                                    SDL_JOYSTICK_AXIS_MIN,
+                                    SDL_JOYSTICK_AXIS_MAX);
     }
 
 
@@ -844,8 +844,8 @@ namespace sdl::game_controller {
         noexcept
     {
         return !SDL_GameControllerRumble(raw,
-                                         map_to_uint16(low),
-                                         map_to_uint16(high),
+                                         to_uint16(low),
+                                         to_uint16(high),
                                          duration.count());
     }
 
@@ -861,8 +861,8 @@ namespace sdl::game_controller {
         noexcept
     {
         return !SDL_GameControllerRumbleTriggers(raw,
-                                                 map_to_uint16(left),
-                                                 map_to_uint16(right),
+                                                 to_uint16(left),
+                                                 to_uint16(right),
                                                  duration.count());
     }
 

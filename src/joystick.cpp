@@ -1,7 +1,7 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
@@ -10,9 +10,9 @@
 
 #include <SDL_events.h>         // SDL_QUERY
 
-#include "joystick.hpp"
+#include "sdl2xx/joystick.hpp"
 
-#include "impl/utils.hpp"
+#include "impl/remap.hpp"
 
 
 using std::expected;
@@ -21,7 +21,9 @@ using std::unexpected;
 
 namespace sdl::joystick {
 
-    using impl::utils::map_to_uint16;
+    using impl::remap::to_norm;
+    using impl::remap::to_int;
+    using impl::remap::to_uint16;
 
 
 #if SDL_VERSION_ATLEAST(2, 0, 6)
@@ -415,9 +417,9 @@ namespace sdl::joystick {
                              double value)
     {
         if (SDL_JoystickSetVirtualAxis(raw,
-                                       impl::utils::map_to_int(axis,
-                                                               SDL_JOYSTICK_AXIS_MIN,
-                                                               SDL_JOYSTICK_AXIS_MAX),
+                                       to_int(axis,
+                                              SDL_JOYSTICK_AXIS_MIN,
+                                              SDL_JOYSTICK_AXIS_MAX),
                                        value))
             throw error{};
     }
@@ -668,9 +670,9 @@ namespace sdl::joystick {
     device::get_axis(unsigned axis)
         const noexcept
     {
-        return impl::utils::map_to_double(SDL_JoystickGetAxis(raw, axis),
-                                          SDL_JOYSTICK_AXIS_MIN,
-                                          SDL_JOYSTICK_AXIS_MAX);
+        return to_norm(SDL_JoystickGetAxis(raw, axis),
+                       SDL_JOYSTICK_AXIS_MIN,
+                       SDL_JOYSTICK_AXIS_MAX);
     }
 
 
@@ -683,9 +685,9 @@ namespace sdl::joystick {
         Sint16 state;
         if (!SDL_JoystickGetAxisInitialState(raw, axis, &state))
             return {};
-        return impl::utils::map_to_double(state,
-                                          SDL_JOYSTICK_AXIS_MIN,
-                                          SDL_JOYSTICK_AXIS_MAX);
+        return to_norm(state,
+                       SDL_JOYSTICK_AXIS_MIN,
+                       SDL_JOYSTICK_AXIS_MAX);
     }
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 6)
@@ -727,8 +729,8 @@ namespace sdl::joystick {
         noexcept
     {
         return !SDL_JoystickRumble(raw,
-                                   map_to_uint16(low),
-                                   map_to_uint16(high),
+                                   to_uint16(low),
+                                   to_uint16(high),
                                    duration.count());
     }
 
@@ -744,8 +746,8 @@ namespace sdl::joystick {
         noexcept
     {
         return !SDL_JoystickRumbleTriggers(raw,
-                                           map_to_uint16(left),
-                                           map_to_uint16(right),
+                                           to_uint16(left),
+                                           to_uint16(right),
                                            duration.count());
     }
 
