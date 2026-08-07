@@ -1,7 +1,7 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
@@ -34,6 +34,7 @@ namespace sdl {
     struct rgba : rgb {
         float a = 0; ///< in [0, 1]
 
+        [[nodiscard]]
         constexpr
         bool
         operator ==(const rgba& other)
@@ -46,6 +47,7 @@ namespace sdl {
         float s = 0; ///< in [0, 1]
         float l = 0; ///< in [0, 1]
 
+        [[nodiscard]]
         constexpr
         bool
         operator ==(const hsl& other)
@@ -58,6 +60,7 @@ namespace sdl {
         float s = 0; ///< in [0, 1]
         float v = 0; ///< in [0, 1]
 
+        [[nodiscard]]
         constexpr
         bool
         operator ==(const hsv& other)
@@ -67,6 +70,7 @@ namespace sdl {
 
     struct color : SDL_Color {
 
+        inline
         constexpr
         color()
             noexcept :
@@ -74,6 +78,7 @@ namespace sdl {
         {}
 
 
+        inline
         constexpr
         color(Uint8 r_,
               Uint8 g_,
@@ -150,6 +155,7 @@ namespace sdl {
         }
 
 
+        inline
         constexpr
         rgb
         to_rgb()
@@ -163,6 +169,7 @@ namespace sdl {
         }
 
 
+        inline
         constexpr
         rgba
         to_rgba()
@@ -187,6 +194,7 @@ namespace sdl {
             const noexcept;
 
 
+        inline
         constexpr
         bool
         operator ==(const color& other)
@@ -233,6 +241,7 @@ namespace sdl {
         inline
         namespace color_literals {
 
+            inline
             constexpr
             color
             operator ""_rgb(unsigned long long rgb)
@@ -246,6 +255,7 @@ namespace sdl {
                 };
             }
 
+            inline
             constexpr
             color
             operator ""_rgba(unsigned long long rgba)

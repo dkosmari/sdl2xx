@@ -1,7 +1,7 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
@@ -24,6 +24,7 @@ namespace sdl {
 
     struct rect : SDL_Rect {
 
+        inline
         constexpr
         rect()
             noexcept :
@@ -31,6 +32,7 @@ namespace sdl {
         {}
 
 
+        inline
         constexpr
         rect(const SDL_Rect& r)
             noexcept :
@@ -38,6 +40,7 @@ namespace sdl {
         {}
 
 
+        inline
         constexpr
         rect(int x, int y,
              int w, int h)
@@ -102,13 +105,22 @@ namespace sdl {
         }
 
 
+        [[nodiscard]]
+        inline
         constexpr
         bool
         operator ==(const rect& other)
-            const noexcept = default;
+            const noexcept
+        {
+            return x == other.x
+                && y == other.y
+                && w == other.w
+                && h == other.h;
+        }
 
 
         [[nodiscard]]
+        inline
         constexpr
         bool
         empty()
@@ -118,6 +130,7 @@ namespace sdl {
         }
 
 
+        inline
         constexpr
         void
         clear()
@@ -129,6 +142,7 @@ namespace sdl {
 
 
         [[nodiscard]]
+        inline
         constexpr
         bool
         contains(vec2 p)
@@ -153,6 +167,7 @@ namespace sdl {
             const noexcept;
 
 
+        inline
         constexpr
         void
         set_min_corner(vec2 corner)
@@ -165,6 +180,7 @@ namespace sdl {
         }
 
 
+        inline
         constexpr
         void
         set_max_corner(vec2 corner)
@@ -175,6 +191,7 @@ namespace sdl {
         }
 
 
+        inline
         constexpr
         void
         set_corners(vec2 a,
@@ -190,6 +207,7 @@ namespace sdl {
         }
 
 
+        inline
         constexpr
         void
         set_center(int cx,
@@ -201,6 +219,7 @@ namespace sdl {
         }
 
 
+        inline
         constexpr
         void
         set_center(vec2 center)
@@ -210,6 +229,7 @@ namespace sdl {
         }
 
 
+        inline
         constexpr
         void
         set_size(vec2 size)
@@ -220,6 +240,7 @@ namespace sdl {
         }
 
 
+        inline
         constexpr
         void
         set_size(int new_w,
@@ -232,6 +253,7 @@ namespace sdl {
 
 
         [[nodiscard]]
+        inline
         constexpr
         std::pair<vec2, vec2>
         get_corners()
@@ -245,6 +267,7 @@ namespace sdl {
 
 
         [[nodiscard]]
+        inline
         constexpr
         vec2
         get_min_corner()
@@ -255,6 +278,7 @@ namespace sdl {
 
 
         [[nodiscard]]
+        inline
         constexpr
         vec2
         get_max_corner()
@@ -265,6 +289,7 @@ namespace sdl {
 
 
         [[nodiscard]]
+        inline
         constexpr
         vec2
         get_center()
@@ -278,6 +303,7 @@ namespace sdl {
 
 
         [[nodiscard]]
+        inline
         constexpr
         vec2
         get_size()
@@ -347,6 +373,7 @@ namespace sdl {
 
     struct rectf : SDL_FRect {
 
+        inline
         constexpr
         rectf()
             noexcept :
@@ -354,6 +381,7 @@ namespace sdl {
         {}
 
 
+        inline
         constexpr
         rectf(const SDL_FRect& r)
             noexcept :
@@ -361,6 +389,7 @@ namespace sdl {
         {}
 
 
+        inline
         constexpr
         rectf(float x, float y,
               float w, float h)
@@ -424,13 +453,21 @@ namespace sdl {
         }
 
 
+        inline
         constexpr
         bool
         operator ==(const rectf& other)
-            const noexcept = default;
+            const noexcept
+        {
+            return x == other.x
+                && y == other.y
+                && w == other.w
+                && h == other.h;
+        }
 
 
         [[nodiscard]]
+        inline
         constexpr
         bool
         empty()
@@ -440,6 +477,7 @@ namespace sdl {
         }
 
 
+        inline
         constexpr
         void
         clear()
@@ -451,6 +489,7 @@ namespace sdl {
 
 
         [[nodiscard]]
+        inline
         constexpr
         bool
         contains(vec2f p)
@@ -475,6 +514,7 @@ namespace sdl {
             const noexcept;
 
 
+        inline
         constexpr
         void
         set_min_corner(vec2f corner)
@@ -485,6 +525,7 @@ namespace sdl {
         }
 
 
+        inline
         constexpr
         void
         set_max_corner(vec2f corner)
@@ -495,6 +536,7 @@ namespace sdl {
         }
 
 
+        inline
         constexpr
         void
         set_corners(vec2f a,
@@ -510,6 +552,7 @@ namespace sdl {
         }
 
 
+        inline
         constexpr
         void
         set_center(float cx,
@@ -521,6 +564,7 @@ namespace sdl {
         }
 
 
+        inline
         constexpr
         void
         set_center(vec2f center)
@@ -530,6 +574,7 @@ namespace sdl {
         }
 
 
+        inline
         constexpr
         void
         set_size(float new_w,
@@ -541,6 +586,7 @@ namespace sdl {
         }
 
 
+        inline
         constexpr
         void
         set_size(vec2f size)
@@ -552,6 +598,7 @@ namespace sdl {
 
 
         [[nodiscard]]
+        inline
         constexpr
         std::pair<vec2f, vec2f>
         get_corners()
@@ -565,6 +612,7 @@ namespace sdl {
 
 
         [[nodiscard]]
+        inline
         constexpr
         vec2f
         get_min_corner()
@@ -575,6 +623,7 @@ namespace sdl {
 
 
         [[nodiscard]]
+        inline
         constexpr
         vec2f
         get_max_corner()
@@ -585,6 +634,7 @@ namespace sdl {
 
 
         [[nodiscard]]
+        inline
         constexpr
         vec2f
         get_center()
@@ -598,6 +648,7 @@ namespace sdl {
 
 
         [[nodiscard]]
+        inline
         constexpr
         vec2f
         get_size()

@@ -1,7 +1,7 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
@@ -24,6 +24,7 @@ namespace sdl {
 
     struct vec2 : SDL_Point {
 
+        inline
         constexpr
         vec2()
             noexcept :
@@ -31,6 +32,7 @@ namespace sdl {
         {}
 
 
+        inline
         constexpr
         vec2(const SDL_Point& pt)
             noexcept :
@@ -38,6 +40,7 @@ namespace sdl {
         {}
 
 
+        inline
         constexpr
         vec2(int x, int y)
             noexcept :
@@ -46,18 +49,23 @@ namespace sdl {
 
 
         explicit
+        inline
         constexpr
         vec2(const vec2f& other)
             noexcept;
 
 
         [[nodiscard]]
+        inline
         constexpr
         bool
         operator ==(const vec2& other)
-            const noexcept = default;
+            const noexcept
+        {
+            return x == other.x && y == other.y;
+        }
 
-    };
+    }; // struct vec2
 
     static_assert(sizeof(vec2) == sizeof(SDL_Point));
 
@@ -131,6 +139,7 @@ namespace sdl {
 
     // component-wise multiplication
     [[nodiscard]]
+    inline
     constexpr
     vec2
     scaled(vec2 a,
@@ -304,6 +313,7 @@ namespace sdl {
 
     struct vec2f : SDL_FPoint {
 
+        inline
         constexpr
         vec2f()
             noexcept :
@@ -311,6 +321,7 @@ namespace sdl {
         {}
 
 
+        inline
         constexpr
         vec2f(const SDL_FPoint& pt)
             noexcept :
@@ -318,6 +329,7 @@ namespace sdl {
         {}
 
 
+        inline
         constexpr
         vec2f(float x, float y)
             noexcept :
@@ -326,18 +338,23 @@ namespace sdl {
 
 
         explicit
+        inline
         constexpr
         vec2f(const vec2& other)
             noexcept;
 
 
         [[nodiscard]]
+        inline
         constexpr
         bool
         operator ==(const vec2f& other)
-            const noexcept = default;
+            const noexcept
+        {
+            return x == other.x && y == other.y;
+        }
 
-    };
+    }; // struct vec2f
 
     static_assert(sizeof(vec2f) == sizeof(SDL_FPoint));
 
