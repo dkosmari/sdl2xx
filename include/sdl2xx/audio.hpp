@@ -1,7 +1,7 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
@@ -50,6 +50,10 @@ namespace sdl::audio {
         playing = SDL_AUDIO_PLAYING,
         stopped = SDL_AUDIO_STOPPED,
     };
+
+
+    string
+    to_string(status s);
 
 
     enum class allow_change : Uint32 {
@@ -399,7 +403,7 @@ namespace sdl::audio {
 
         [[nodiscard]]
         std::size_t
-        get_size()
+        get_queued_size()
             const noexcept;
 
 

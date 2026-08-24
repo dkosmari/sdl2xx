@@ -13,6 +13,23 @@
 
 namespace sdl::audio {
 
+    string
+    to_string(status s)
+    {
+        switch (s) {
+            using enum status;
+            case paused:
+                return "paused";
+            case playing:
+                return "playing";
+            case stopped:
+                return "stopped";
+            default:
+                return "error";
+        }
+    }
+
+
     unsigned
     get_num_drivers()
     {
@@ -269,7 +286,7 @@ namespace sdl::audio {
 
 
     std::size_t
-    device::get_size()
+    device::get_queued_size()
         const noexcept
     {
         return SDL_GetQueuedAudioSize(raw);
