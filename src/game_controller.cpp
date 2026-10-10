@@ -18,10 +18,6 @@
 #include "impl/remap.hpp"
 
 
-using std::expected;
-using std::unexpected;
-
-
 namespace sdl::game_controller {
 
     using impl::remap::to_uint16;
@@ -171,19 +167,19 @@ namespace sdl::game_controller {
     }
 
 
-    expected<unsigned, error>
+    std::expected<unsigned, error>
     try_add_mappings(SDL_RWops* src,
                      bool close_src)
         noexcept
     {
         int r = SDL_GameControllerAddMappingsFromRW(src, close_src);
         if (r < 0)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return r;
     }
 
 
-    expected<unsigned, error>
+    std::expected<unsigned, error>
     try_add_mappings(rwops& src)
         noexcept
     {
@@ -191,13 +187,13 @@ namespace sdl::game_controller {
     }
 
 
-    expected<unsigned, error>
+    std::expected<unsigned, error>
     try_add_mappings(const path& filename)
         noexcept
     {
         int r = SDL_GameControllerAddMappingsFromFile(filename.c_str());
         if (r < 0)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return r;
     }
 
@@ -214,13 +210,13 @@ namespace sdl::game_controller {
     }
 
 
-    expected<bool, error>
+    std::expected<bool, error>
     try_add_mapping(const char* str)
         noexcept
     {
         int r = SDL_GameControllerAddMapping(str);
         if (r < 0)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return r;
     }
 
@@ -245,18 +241,18 @@ namespace sdl::game_controller {
     }
 
 
-    expected<string, error>
+    std::expected<string, error>
     try_get_mapping(unsigned index)
         noexcept
     {
         unique_ptr<char> str{SDL_GameControllerMappingForIndex(index)};
         if (!str)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         try {
-            return string(str.get());
+            return string{str.get()};
         }
         catch (std::exception& e) {
-            return unexpected{error{e}};
+            return std::unexpected{error{e}};
         }
     }
 
@@ -273,18 +269,18 @@ namespace sdl::game_controller {
     }
 
 
-    expected<string, error>
+    std::expected<string, error>
     try_get_mapping(const guid& id)
         noexcept
     {
         unique_ptr<char> str{SDL_GameControllerMappingForGUID(id)};
         if (!str)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         try {
-            return string(str.get());
+            return string{str.get()};
         }
         catch (std::exception& e) {
-            return unexpected{error{e}};
+            return std::unexpected{error{e}};
         }
     }
 
@@ -328,13 +324,13 @@ namespace sdl::game_controller {
     }
 
 
-    expected<const char*, error>
+    std::expected<const char*, error>
     try_get_name(unsigned index)
         noexcept
     {
         const char* name = SDL_GameControllerNameForIndex(index);
         if (!name)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return name;
     }
 
@@ -351,13 +347,13 @@ namespace sdl::game_controller {
     }
 
 
-    expected<const char*, error>
+    std::expected<const char*, error>
     try_get_path(unsigned index)
         noexcept
     {
         const char* p = SDL_GameControllerPathForIndex(index);
         if (!p)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return p;
     }
 
@@ -448,18 +444,18 @@ namespace sdl::game_controller {
     }
 
 
-    expected<string, error>
+    std::expected<string, error>
     device::try_get_mapping()
         const
     {
         unique_ptr<char> str{SDL_GameControllerMapping(raw)};
         if(!str)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         try {
             return string(str.get());
         }
         catch (std::exception& e) {
-            return unexpected{error{e}};
+            return std::unexpected{error{e}};
         }
     }
 
@@ -475,13 +471,13 @@ namespace sdl::game_controller {
     }
 
 
-    expected<const char*, error>
+    std::expected<const char*, error>
     device::try_get_name()
         const noexcept
     {
         const char* name = SDL_GameControllerName(raw);
         if (!name)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return name;
     }
 
@@ -499,13 +495,13 @@ namespace sdl::game_controller {
     }
 
 
-    expected<const char*, error>
+    std::expected<const char*, error>
     device::try_get_path()
         const noexcept
     {
         const char* p = SDL_GameControllerPath(raw);
         if (!p)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return p;
     }
 
@@ -601,13 +597,13 @@ namespace sdl::game_controller {
     }
 
 
-    expected<const char*, error>
+    std::expected<const char*, error>
     device::try_get_serial()
         const noexcept
     {
         const char* serial = SDL_GameControllerGetSerial(raw);
         if (!serial)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return serial;
     }
 

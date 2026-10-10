@@ -10,7 +10,7 @@
 #include <cmath>
 #include <ostream>
 
-#include <SDL2/SDL_stdinc.h>
+#include <SDL_stdinc.h>
 
 #include "sdl2xx/color.hpp"
 

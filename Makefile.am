@@ -32,6 +32,7 @@ sdl2xx_HEADERS = \
 	include/sdl2xx/endian.hpp \
 	include/sdl2xx/error.hpp \
 	include/sdl2xx/events.hpp \
+	include/sdl2xx/filesystem.hpp \
 	include/sdl2xx/game_controller.hpp \
 	include/sdl2xx/gl.hpp \
 	include/sdl2xx/guid.hpp \
@@ -83,6 +84,7 @@ lib_libsdl2xx_la_SOURCES = \
 	src/display.cpp \
 	src/error.cpp \
 	src/events.cpp \
+	src/filesystem.cpp \
 	src/game_controller.cpp \
 	src/gl.cpp \
 	src/guid.cpp \
