@@ -631,7 +631,7 @@ namespace sdl::audio {
         std::span<T>
         get(std::span<T, E> buf)
         {
-            auto result = get(buf.dat(), buf.size_bytes());
+            auto result = get(buf.data(), buf.size_bytes());
             return buf.subspan(0, result / sizeof(T));
         }
 
@@ -641,7 +641,7 @@ namespace sdl::audio {
         std::expected<std::span<T>, error>
         try_get(std::span<T, E> buf)
         {
-            auto result = try_get(buf.dat(), buf.size_bytes());
+            auto result = try_get(buf.data(), buf.size_bytes());
             if (!result)
                 return std::unexpected{std::move(result.error())};
             return buf.subspan(0, *result / sizeof(T));

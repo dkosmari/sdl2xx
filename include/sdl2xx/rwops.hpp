@@ -209,7 +209,7 @@ namespace sdl {
         read(std::span<T, E> buf)
         {
             auto r = read(buf.data(), sizeof(T), buf.size());
-            return buf.subspan(0, r);
+            return buf.subspan(0, r / sizeof(T));
         }
 
 
@@ -231,7 +231,7 @@ namespace sdl {
             auto r = try_read(buf.data(), sizeof(T), buf.size());
             if (!r)
                 return std::unexpected{std::move(r.error())};
-            return buf.subspan(0, *r);
+            return buf.subspan(0, *r / sizeof(T));
         }
 
 
@@ -249,7 +249,7 @@ namespace sdl {
         write(std::span<T, E> buf)
         {
             auto w = write(buf.data(), sizeof(T), buf.size());
-            return buf.subspan(0, w);
+            return buf.subspan(0, w / sizeof(T));
         }
 
 
@@ -270,7 +270,7 @@ namespace sdl {
             auto w = try_write(buf.data(), sizeof(T), buf.size());
             if (!w)
                 return std::unexpected{std::move(w.error())};
-            return buf.subspan(0, *w);
+            return buf.subspan(0, *w / sizeof(T));
         }
 
 
