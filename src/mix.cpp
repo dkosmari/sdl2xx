@@ -213,7 +213,7 @@ namespace sdl::mix {
     }
 
 
-    chunk::chunk(const path& filename)
+    chunk::chunk(const std::filesystem::path& filename)
     {
         create(filename);
     }
@@ -252,7 +252,7 @@ namespace sdl::mix {
 
 
     void
-    chunk::create(const path& filename)
+    chunk::create(const std::filesystem::path& filename)
     {
         auto ptr = Mix_LoadWAV(filename.c_str());
         if (!ptr)
@@ -468,7 +468,7 @@ namespace sdl::mix {
     }
 
 
-    music::music(const path& filename)
+    music::music(const std::filesystem::path& filename)
     {
         create(filename);
     }
@@ -510,7 +510,7 @@ namespace sdl::mix {
 
 
     void
-    music::create(const path& filename)
+    music::create(const std::filesystem::path& filename)
     {
         auto ptr = Mix_LoadMUS(filename.c_str());
         if (!ptr)
@@ -1360,7 +1360,7 @@ namespace sdl::mix {
 
 
     void
-    set_timidity_cfg(const path& cfg_filename)
+    set_timidity_cfg(const std::filesystem::path& cfg_filename)
     {
         if (!Mix_SetTimidityCfg(cfg_filename.c_str()))
             throw error{};

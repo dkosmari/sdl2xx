@@ -215,7 +215,7 @@ namespace sdl {
     /* Public functions */
     /*------------------*/
 
-    rwops::rwops(const path& filename,
+    rwops::rwops(const std::filesystem::path& filename,
                  const char* mode)
     {
         create(filename, mode);
@@ -261,7 +261,7 @@ namespace sdl {
 
 
     void
-    rwops::create(const path& filename,
+    rwops::create(const std::filesystem::path& filename,
                   const char* mode)
     {
         auto new_raw = SDL_RWFromFile(filename.c_str(), mode);
@@ -844,14 +844,14 @@ namespace sdl {
 
 
     blob
-    load_file(const path& filename)
+    load_file(const std::filesystem::path& filename)
     {
         return value_or_throw(try_load_file(filename));
     }
 
 
     std::expected<blob, error>
-    try_load_file(const path& filename)
+    try_load_file(const std::filesystem::path& filename)
         noexcept
     {
         std::size_t sz;

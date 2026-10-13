@@ -10,12 +10,12 @@
 
 #include "sdl2xx/mouse.hpp"
 
+#include "impl/value_or_throw.hpp"
 #include "sdl2xx/surface.hpp"
 #include "sdl2xx/window.hpp"
 
 
-using std::expected;
-using std::unexpected;
+using sdl::impl::value_or_throw;
 
 
 namespace sdl::mouse {
@@ -85,31 +85,29 @@ namespace sdl::mouse {
     warp_global(int x,
                 int y)
     {
-        auto result = try_warp_global(x, y);
-        if (!result)
-            throw error{};
+        return value_or_throw(try_warp_global(x, y));
     }
 
 
     void
     warp_global(vec2 pos)
     {
-        warp_global(pos.x, pos.y);
+        return value_or_throw(try_warp_global(pos));
     }
 
 
-    expected<void, error>
+    std::expected<void, error>
     try_warp_global(int x,
                     int y)
         noexcept
     {
         if (SDL_WarpMouseGlobal(x, y) < 0)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return {};
     }
 
 
-    expected<void, error>
+    std::expected<void, error>
     try_warp_global(vec2 pos)
         noexcept
     {
@@ -122,18 +120,16 @@ namespace sdl::mouse {
     void
     set_relative_mode(bool enabled)
     {
-        auto result = try_set_relative_mode(enabled);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_relative_mode(enabled));
     }
 
 
-    expected<void, error>
+    std::expected<void, error>
     try_set_relative_mode(bool enabled)
         noexcept
     {
         if (SDL_SetRelativeMouseMode(enabled ? SDL_TRUE : SDL_FALSE) < 0)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return {};
     }
 
@@ -151,18 +147,16 @@ namespace sdl::mouse {
     void
     capture_mouse(bool enabled)
     {
-        auto result = try_capture_mouse(enabled);
-        if (!result)
-            throw error();
+        return value_or_throw(try_capture_mouse(enabled));
     }
 
 
-    expected<void, error>
+    std::expected<void, error>
     try_capture_mouse(bool enabled)
         noexcept
     {
         if (SDL_CaptureMouse(enabled ? SDL_TRUE : SDL_FALSE) < 0)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return {};
     }
 
@@ -208,6 +202,14 @@ namespace sdl::mouse {
     cursor::cursor(system_cursor c)
     {
         create(c);
+    }
+
+
+    cursor::cursor(raw_type new_raw,
+                   dont_destroy_t)
+        noexcept
+    {
+        acquire(new_raw, false);
     }
 
 
@@ -282,8 +284,11 @@ namespace sdl::mouse {
     cursor::destroy()
         noexcept
     {
-        if (is_valid())
-            SDL_FreeCursor(release());
+        if (is_valid()) {
+            auto [old_raw, old_owner] = release();
+            if (old_owner)
+                SDL_FreeCursor(old_raw);
+        }
     }
 
 
@@ -292,6 +297,22 @@ namespace sdl::mouse {
         noexcept
     {
         SDL_SetCursor(raw);
+    }
+
+
+    cursor
+    cursor::get_current()
+        noexcept
+    {
+        return cursor{SDL_GetCursor(), dont_destroy};
+    }
+
+
+    cursor
+    cursor::get_default()
+        noexcept
+    {
+        return cursor{SDL_GetDefaultCursor(), dont_destroy};
     }
 
 
@@ -306,20 +327,17 @@ namespace sdl::mouse {
     bool
     show(bool enable)
     {
-        auto result = try_show(enable);
-        if (!result)
-            throw result.error();
-        return *result;
+        return value_or_throw(try_show(enable));
     }
 
 
-    expected<bool, error>
+    std::expected<bool, error>
     try_show(bool enable)
         noexcept
     {
         int result = SDL_ShowCursor(enable ? SDL_ENABLE : SDL_DISABLE);
         if (result < 0)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return result == SDL_ENABLE;
     }
 
@@ -327,20 +345,17 @@ namespace sdl::mouse {
     bool
     is_shown()
     {
-        auto result = try_is_shown();
-        if (!result)
-            throw result.error();
-        return *result;
+        return value_or_throw(try_is_shown());
     }
 
 
-    expected<bool, error>
+    std::expected<bool, error>
     try_is_shown()
         noexcept
     {
         int result = SDL_ShowCursor(SDL_QUERY);
         if (result < 0)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return result == SDL_ENABLE;
     }
 

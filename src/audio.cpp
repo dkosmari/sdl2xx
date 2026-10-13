@@ -8,7 +8,11 @@
 
 #include "sdl2xx/audio.hpp"
 
+#include "impl/value_or_throw.hpp"
 #include "sdl2xx/error.hpp"
+
+
+using sdl::impl::value_or_throw;
 
 
 namespace sdl::audio {
@@ -286,17 +290,38 @@ namespace sdl::audio {
     device::play(const void* samples,
                 std::size_t size)
     {
+        return value_or_throw(try_play(samples, size));
+    }
+
+
+    std::expected<void, error>
+    device::try_play(const void* samples,
+                 std::size_t size)
+        noexcept
+    {
         if (SDL_QueueAudio(raw, samples, size) < 0)
-            throw error{};
+            return std::unexpected{error{}};
+        return {};
     }
 
 
     std::size_t
     device::capture(void* buf,
                     std::size_t size)
+    {
+        return value_or_throw(try_capture(buf, size));
+    }
+
+
+    std::expected<std::size_t, error>
+    device::try_capture(void* buf,
+                        std::size_t size)
         noexcept
     {
-        return SDL_DequeueAudio(raw, buf, size);
+        auto r = SDL_DequeueAudio(raw, buf, size);
+        if (SDL_GetError()[0])
+            return std::unexpected{error{}};
+        return r;
     }
 
 
@@ -481,20 +506,41 @@ namespace sdl::audio {
 
 
     void
-    stream::put(std::span<const std::byte> samples)
+    stream::put(const void* samples,
+                std::size_t size)
     {
-        if (SDL_AudioStreamPut(raw, samples.data(), samples.size()) < 0)
-            throw error{};
+        return value_or_throw(try_put(samples, size));
     }
 
 
-    std::span<std::byte>
-    stream::get(std::span<std::byte> dst)
+    std::expected<void, error>
+    stream::try_put(const void* samples,
+                    std::size_t size)
+        noexcept
     {
-        int result = SDL_AudioStreamGet(raw, dst.data(), dst.size());
+        if (SDL_AudioStreamPut(raw, samples, size) < 0)
+            return std::unexpected{error{}};
+        return {};
+    }
+
+
+    std::size_t
+    stream::get(void* buf,
+                std::size_t size)
+    {
+        return value_or_throw(try_get(buf, size));
+    }
+
+
+    std::expected<std::size_t, error>
+    stream::try_get(void* buf,
+                    std::size_t size)
+        noexcept
+    {
+        int result = SDL_AudioStreamGet(raw, buf, size);
         if (result < 0)
-            throw error{};
-        return dst.subspan(0, result);
+            return std::unexpected{error{}};
+        return result;
     }
 
 

@@ -13,18 +13,16 @@
 #include "sdl2xx/joystick.hpp"
 
 #include "impl/remap.hpp"
+#include "impl/value_or_throw.hpp"
 
 
-using std::expected;
-using std::unexpected;
+using sdl::impl::remap::to_int;
+using sdl::impl::remap::to_norm;
+using sdl::impl::remap::to_uint16;
+using sdl::impl::value_or_throw;
 
 
 namespace sdl::joystick {
-
-    using impl::remap::to_norm;
-    using impl::remap::to_int;
-    using impl::remap::to_uint16;
-
 
 #if SDL_VERSION_ATLEAST(2, 0, 6)
 
@@ -224,53 +222,55 @@ namespace sdl::joystick {
     unsigned
     get_num_devices()
     {
+        return value_or_throw(try_get_num_devices());
+    }
+
+
+    std::expected<unsigned, error>
+    try_get_num_devices()
+        noexcept
+    {
         int result = SDL_NumJoysticks();
         if (result < 0)
-            throw error{};
-        return result;
+            return std::unexpected{error{}};
+        return static_cast<unsigned>(result);
     }
 
 
-    const char*
+    std::string_view
     get_name(unsigned index)
     {
-        auto result = try_get_name(index);
-        if (!result)
-            throw result.error();
-        return *result;
+        return value_or_throw(try_get_name(index));
     }
 
 
-    expected<const char*, error>
+    std::expected<std::string_view, error>
     try_get_name(unsigned index)
         noexcept
     {
         const char* name = SDL_JoystickNameForIndex(index);
         if (!name)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return name;
     }
 
 
 #if SDL_VERSION_ATLEAST(2, 24, 0)
 
-    const char*
+    std::string_view
     get_path(unsigned index)
     {
-        auto result = try_get_path(index);
-        if (!result)
-            throw result.error();
-        return *result;
+        return value_or_throw(try_get_path(index));
     }
 
 
-    expected<const char*, error>
+    std::expected<std::string_view, error>
     try_get_path(unsigned index)
         noexcept
     {
         const char* p = SDL_JoystickPathForIndex(index);
         if (!p)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return p;
     }
 
@@ -334,9 +334,17 @@ namespace sdl::joystick {
     instance_id
     get_id(unsigned index)
     {
+        return value_or_throw(try_get_id(index));
+    }
+
+
+    std::expected<instance_id, error>
+    try_get_id(unsigned index)
+        noexcept
+    {
         auto id = SDL_JoystickGetDeviceInstanceID(index);
         if (id == -1)
-            throw error{};
+            return std::unexpected{error{}};
         return id;
     }
 
@@ -344,14 +352,11 @@ namespace sdl::joystick {
     unsigned
     get_index(instance_id id)
     {
-        auto result = try_get_index(id);
-        if (!result)
-            throw result.error();
-        return *result;
+        return value_or_throw(try_get_index(id));
     }
 
 
-    expected<unsigned, error>
+    std::expected<unsigned, error>
     try_get_index(instance_id id)
         noexcept
     {
@@ -359,7 +364,7 @@ namespace sdl::joystick {
         for (unsigned i = 0; i < n; ++i)
             if (id == get_id(i))
                 return i;
-        return unexpected{error{"id not found"}};
+        return std::unexpected{error{"id not found"}};
     }
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 6)
@@ -377,20 +382,36 @@ namespace sdl::joystick {
     device
     device::from_id(instance_id id)
     {
+        return value_or_throw(try_from_id(id));
+    }
+
+
+    std::expected<device, error>
+    device::try_from_id(instance_id id)
+        noexcept
+    {
         for (unsigned i = 0; i < get_num_devices(); ++i)
             if (id == joystick::get_id(i))
                 return device{i};
-        throw error{"invalid instance id"};
+        return std::unexpected{error{"invalid instance id"}};
     }
 
 
     device
     device::from_player(int player)
     {
+        return value_or_throw(try_from_player(player));
+    }
+
+
+    std::expected<device, error>
+    device::try_from_player(int player)
+        noexcept
+    {
         for (unsigned i = 0; i < get_num_devices(); ++i)
             if (player == joystick::get_player(i))
                 return device{i};
-        throw error{"invalid player index"};
+        return std::unexpected{error{"invalid player index"}};
     }
 
 
@@ -416,12 +437,19 @@ namespace sdl::joystick {
     device::set_virtual_axis(unsigned axis,
                              double value)
     {
-        if (SDL_JoystickSetVirtualAxis(raw,
-                                       to_int(axis,
-                                              SDL_JOYSTICK_AXIS_MIN,
-                                              SDL_JOYSTICK_AXIS_MAX),
-                                       value))
-            throw error{};
+        return value_or_throw(try_set_virtual_axis(axis, value));
+    }
+
+
+    std::expected<void, error>
+    device::try_set_virtual_axis(unsigned axis,
+                                 double value)
+        noexcept
+    {
+        auto ivalue = to_int(value, SDL_JOYSTICK_AXIS_MIN, SDL_JOYSTICK_AXIS_MAX);
+        if (SDL_JoystickSetVirtualAxis(raw, axis, ivalue))
+            return std::unexpected{error{}};
+        return {};
     }
 
 
@@ -445,48 +473,42 @@ namespace sdl::joystick {
 #endif // SDL_VERSION_ATLEAST(2, 0, 14)
 
 
-    const char*
+    std::string_view
     device::get_name()
         const
     {
-        auto result = try_get_name();
-        if (!result)
-            throw result.error();
-        return *result;
+        return value_or_throw(try_get_name());
     }
 
 
-    expected<const char*, error>
+    std::expected<std::string_view, error>
     device::try_get_name()
         const noexcept
     {
         auto name = SDL_JoystickName(raw);
         if (!name)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return name;
     }
 
 
 #if SDL_VERSION_ATLEAST(2, 24, 0)
 
-    const char*
+    std::string_view
     device::get_path()
         const
     {
-        auto result = try_get_path();
-        if (!result)
-            throw result.error();
-        return *result;
+        return value_or_throw(try_get_path());
     }
 
 
-    expected<const char*, error>
+    std::expected<std::string_view, error>
     device::try_get_path()
         const noexcept
     {
         auto result = SDL_JoystickPath(raw);
         if (!result)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return result;
     }
 
@@ -567,7 +589,7 @@ namespace sdl::joystick {
 
 #if SDL_VERSION_ATLEAST(2, 0, 14)
 
-    const char*
+    std::string_view
     device::get_serial()
         const
     {
@@ -578,13 +600,13 @@ namespace sdl::joystick {
     }
 
 
-    expected<const char*, error>
+    std::expected<std::string_view, error>
     device::try_get_serial()
         const noexcept
     {
         auto serial = SDL_JoystickGetSerial(raw);
         if (!serial)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return serial;
     }
 
@@ -615,9 +637,17 @@ namespace sdl::joystick {
     device::get_id()
         const
     {
+        return value_or_throw(try_get_id());
+    }
+
+
+    std::expected<instance_id, error>
+    device::try_get_id()
+        const noexcept
+    {
         int result = SDL_JoystickInstanceID(raw);
         if (result < 0)
-            throw error{};
+            return std::unexpected{error{}};
         return result;
     }
 
@@ -626,9 +656,17 @@ namespace sdl::joystick {
     device::get_num_axes()
         const
     {
+        return value_or_throw(try_get_num_axes());
+    }
+
+
+    std::expected<unsigned, error>
+    device::try_get_num_axes()
+        const noexcept
+    {
         int axes = SDL_JoystickNumAxes(raw);
         if (axes < 0)
-            throw error{};
+            return std::unexpected{error{}};
         return axes;
     }
 
@@ -637,9 +675,17 @@ namespace sdl::joystick {
     device::get_num_balls()
         const
     {
+        return value_or_throw(try_get_num_balls());
+    }
+
+
+    std::expected<unsigned, error>
+    device::try_get_num_balls()
+        const noexcept
+    {
         int balls = SDL_JoystickNumBalls(raw);
         if (balls < 0)
-            throw error{};
+            return std::unexpected{error{}};
         return balls;
     }
 
@@ -648,9 +694,17 @@ namespace sdl::joystick {
     device::get_num_hats()
         const
     {
+        return value_or_throw(try_get_num_hats());
+    }
+
+
+    std::expected<unsigned, error>
+    device::try_get_num_hats()
+        const noexcept
+    {
         int hats = SDL_JoystickNumHats(raw);
         if (hats < 0)
-            throw error{};
+            return std::unexpected{error{}};
         return hats;
     }
 
@@ -659,9 +713,17 @@ namespace sdl::joystick {
     device::get_num_buttons()
         const
     {
+        return value_or_throw(try_get_num_buttons());
+    }
+
+
+    std::expected<unsigned, error>
+    device::try_get_num_buttons()
+        const noexcept
+    {
         int buttons = SDL_JoystickNumButtons(raw);
         if (buttons < 0)
-            throw error{};
+            return std::unexpected{error{}};
         return buttons;
     }
 
@@ -705,9 +767,17 @@ namespace sdl::joystick {
     device::get_ball(unsigned ball)
         const
     {
+        return value_or_throw(try_get_ball(ball));
+    }
+
+
+    std::expected<vec2, error>
+    device::try_get_ball(unsigned ball)
+        const noexcept
+    {
         vec2 result;
         if (SDL_JoystickGetBall(raw, ball, &result.x, &result.y) < 0)
-            throw error{};
+            return std::unexpected{error{}};
         return result;
     }
 
@@ -833,12 +903,23 @@ namespace sdl::joystick {
                    unsigned buttons,
                    unsigned hats)
     {
+        return value_or_throw(try_attach_virtual(t, axes, buttons, hats));
+    }
+
+
+    std::expected<unsigned, error>
+    try_attach_virtual(type t,
+                       unsigned axes,
+                       unsigned buttons,
+                       unsigned hats)
+        noexcept
+    {
         int idx = SDL_JoystickAttachVirtual(convert(t),
                                             axes,
                                             buttons,
                                             hats);
         if (idx < 0)
-            throw error{};
+            return std::unexpected{error{}};
         return idx;
     }
 
@@ -846,13 +927,23 @@ namespace sdl::joystick {
     void
     detach_virtual(unsigned index)
     {
+        return value_or_throw(try_detach_virtual(index));
+    }
+
+
+    std::expected<void, error>
+    try_detach_virtual(unsigned index)
+        noexcept
+    {
         if (SDL_JoystickDetachVirtual(index))
-            throw error{};
+            return std::unexpected{error{}};
+        return {};
     }
 
 
     bool
     is_virtual(unsigned index)
+        noexcept
     {
         return SDL_JoystickIsVirtual(index);
     }
@@ -865,9 +956,17 @@ namespace sdl::joystick {
     unsigned
     attach_virtual(const virtual_descriptor& desc)
     {
+        return value_or_throw(try_attach_virtual(desc));
+    }
+
+
+    std::expected<unsigned, error>
+    try_attach_virtual(const virtual_descriptor& desc)
+        noexcept
+    {
         int idx = SDL_JoystickAttachVirtualEx(&desc);
         if (idx < 0)
-            throw error{};
+            return std::unexpected{error{}};
         return idx;
     }
 
@@ -902,9 +1001,17 @@ namespace sdl::joystick {
     bool
     get_event_polling()
     {
+        return value_or_throw(try_get_event_polling());
+    }
+
+
+    std::expected<bool, error>
+    try_get_event_polling()
+        noexcept
+    {
         int result = SDL_JoystickEventState(SDL_QUERY);
         if (result < 0)
-            throw error{};
+            return std::unexpected{error{}};
         return result;
     }
 
@@ -912,8 +1019,17 @@ namespace sdl::joystick {
     void
     set_event_polling(bool enabled)
     {
+        return value_or_throw(try_set_event_polling(enabled));
+    }
+
+
+    std::expected<void, error>
+    try_set_event_polling(bool enabled)
+        noexcept
+    {
         if (SDL_JoystickEventState(enabled ? SDL_ENABLE : SDL_DISABLE) < 0)
-            throw error{};
+            return std::unexpected{error{}};
+        return {};
     }
 
 } // namespace sdl::joystick

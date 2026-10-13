@@ -12,6 +12,7 @@
 #include <expected>
 #include <mutex>
 #include <span>
+#include <string_view>
 #include <utility>
 
 #include <SDL_sensor.h>
@@ -120,11 +121,11 @@ namespace sdl::sensor {
 
 
     [[nodiscard]]
-    const char*
+    std::string_view
     get_name(unsigned index);
 
     [[nodiscard]]
-    std::expected<const char*, error>
+    std::expected<std::string_view, error>
     try_get_name(unsigned index)
         noexcept;
 
@@ -190,7 +191,7 @@ namespace sdl::sensor {
 
 
         [[nodiscard]]
-        const char*
+        std::string_view
         get_name()
             const noexcept;
 

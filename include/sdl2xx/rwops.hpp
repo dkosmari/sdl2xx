@@ -29,9 +29,6 @@
 
 namespace sdl {
 
-    using std::filesystem::path;
-
-
     struct rwops : basic_wrapper<SDL_RWops*> {
 
         using base_type = basic_wrapper<SDL_RWops*>;
@@ -40,11 +37,11 @@ namespace sdl {
         using base_type::base_type;
 
 
-        rwops(const path& filename,
+        rwops(const std::filesystem::path& filename,
               const char* mode);
 
         inline
-        rwops(const path& filename,
+        rwops(const std::filesystem::path& filename,
               const concepts::string auto& mode) :
             rwops{filename, mode.data()}
         {}
@@ -101,12 +98,12 @@ namespace sdl {
 
 
         void
-        create(const path& filename,
+        create(const std::filesystem::path& filename,
                const char* mode);
 
         inline
         void
-        create(const path& filename,
+        create(const std::filesystem::path& filename,
                const concepts::string auto& mode)
         {
             create(filename, mode.data());
@@ -377,12 +374,12 @@ namespace sdl {
 
     [[nodiscard]]
     blob
-    load_file(const path& filename);
+    load_file(const std::filesystem::path& filename);
 
 
     [[nodiscard]]
     std::expected<blob, error>
-    try_load_file(const path& filename)
+    try_load_file(const std::filesystem::path& filename)
         noexcept;
 
 } // namespace sdl

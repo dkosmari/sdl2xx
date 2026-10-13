@@ -8,12 +8,12 @@
 
 #include "sdl2xx/sensor.hpp"
 
+#include "impl/value_or_throw.hpp"
+
+using sdl::impl::value_or_throw;
+
 
 #if SDL_VERSION_ATLEAST(2, 0, 9)
-
-using std::expected;
-using std::unexpected;
-
 
 namespace sdl::sensor {
 
@@ -107,23 +107,20 @@ namespace sdl::sensor {
     }
 
 
-    const char*
+    std::string_view
     get_name(unsigned index)
     {
-        auto result = try_get_name(index);
-        if (!result)
-            throw result.error();
-        return *result;
+        return value_or_throw(try_get_name(index));
     }
 
 
-    expected<const char*, error>
+    std::expected<std::string_view, error>
     try_get_name(unsigned index)
         noexcept
     {
         const char* name = SDL_SensorGetDeviceName(index);
         if (!name)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return name;
     }
 
@@ -200,7 +197,7 @@ namespace sdl::sensor {
     }
 
 
-    const char*
+    std::string_view
     device::get_name()
         const noexcept
     {

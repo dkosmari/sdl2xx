@@ -378,6 +378,12 @@ namespace sdl::audio {
         play(const void* samples,
              std::size_t size);
 
+        std::expected<void, error>
+        try_play(const void* samples,
+                 std::size_t size)
+            noexcept;
+
+
         template<typename T,
                  std::size_t E>
         void
@@ -386,22 +392,48 @@ namespace sdl::audio {
             play(samples.data(), samples.size_bytes());
         }
 
+        template<typename T,
+                 std::size_t E>
+        std::expected<void, error>
+        try_play(std::span<const T, E> samples)
+            noexcept
+        {
+            return try_play(samples.data(), samples.size_bytes());
+        }
+
 
         [[nodiscard]]
         std::size_t
         capture(void* buf,
-            std::size_t size)
+            std::size_t size);
+
+        std::expected<std::size_t, error>
+        try_capture(void* buf,
+                    std::size_t size)
             noexcept;
+
 
         template<typename T,
                  std::size_t E>
         [[nodiscard]]
         std::span<T>
         capture(std::span<T, E> buf)
-            noexcept
         {
             std::size_t result = capture(buf.size(), buf.size_bytes());
-            return {buf.data(), result};
+            return buf.subspan(0, result / sizeof(T));
+        }
+
+        template<typename T,
+                 std::size_t E>
+        [[nodiscard]]
+        std::expected<std::span<T>, error>
+        try_capture(std::span<T, E> buf)
+            noexcept
+        {
+            auto result = try_capture(buf.size(), buf.size_bytes());
+            if (!result)
+                return std::unexpected{std::move(result.error())};
+            return buf.subspan(0, *result / sizeof(T));
         }
 
 
@@ -540,7 +572,6 @@ namespace sdl::audio {
             noexcept = default;
 
 
-
         void
         create(format src_format,
                Uint8 src_channels,
@@ -556,22 +587,65 @@ namespace sdl::audio {
 
 
         void
-        put(std::span<const std::byte> samples);
+        put(const void* samples,
+            std::size_t size);
+
+        std::expected<void, error>
+        try_put(const void* samples,
+                std::size_t size)
+            noexcept;
 
 
         template<typename T,
                  std::size_t E>
-        requires (!std::same_as<std::remove_cv_t<T>, std::byte>)
         void
-        put(std::span<const T, E> samples)
+        put(std::span<T, E> samples)
         {
-            put(as_bytes(samples));
+            put(samples.data(), samples.size_bytes());
+        }
+
+        template<typename T,
+                 std::size_t E>
+        std::expected<void, error>
+        try_put(std::span<T, E> samples)
+            noexcept
+        {
+            return try_put(samples.data(), samples.size_bytes());
         }
 
 
         [[nodiscard]]
-        std::span<std::byte>
-        get(std::span<std::byte> dst);
+        std::size_t
+        get(void* buf,
+            std::size_t size);
+
+        std::expected<std::size_t, error>
+        try_get(void* buf,
+                std::size_t size)
+            noexcept;
+
+
+        template<typename T,
+                 std::size_t E>
+        [[nodiscard]]
+        std::span<T>
+        get(std::span<T, E> buf)
+        {
+            auto result = get(buf.dat(), buf.size_bytes());
+            return buf.subspan(0, result / sizeof(T));
+        }
+
+
+        template<typename T,
+                 std::size_t E>
+        std::expected<std::span<T>, error>
+        try_get(std::span<T, E> buf)
+        {
+            auto result = try_get(buf.dat(), buf.size_bytes());
+            if (!result)
+                return std::unexpected{std::move(result.error())};
+            return buf.subspan(0, *result / sizeof(T));
+        }
 
 
         [[nodiscard]]

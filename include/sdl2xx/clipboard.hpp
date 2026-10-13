@@ -72,6 +72,7 @@ namespace sdl::clipboard {
         set_primary_text(text.data());
     }
 
+
     std::expected<void, error>
     try_set_primary_selection(const char* text)
         noexcept;
@@ -89,6 +90,7 @@ namespace sdl::clipboard {
     string
     get_primary_selection();
 
+
     std::expected<string, error>
     try_get_primary_selection()
         noexcept;
@@ -99,10 +101,7 @@ namespace sdl::clipboard {
     has_primary_selection()
         noexcept;
 
-
 #endif // SDL_VERSION_ATLEAST(2, 26, 0)
-
-
 
 } // namespace sdl::clipboard
 

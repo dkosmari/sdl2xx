@@ -9,11 +9,12 @@
 #include <utility>
 
 #include "sdl2xx/clipboard.hpp"
+
+#include "impl/value_or_throw.hpp"
 #include "sdl2xx/unique_ptr.hpp"
 
 
-using std::expected;
-using std::unexpected;
+using sdl::impl::value_or_throw;
 
 
 namespace sdl::clipboard {
@@ -21,18 +22,16 @@ namespace sdl::clipboard {
     void
     set_text(const char* text)
     {
-        auto result = try_set_text(text);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_text(text));
     }
 
 
-    expected<void, error>
+    std::expected<void, error>
     try_set_text(const char* text)
         noexcept
     {
         if (SDL_SetClipboardText(text) < 0)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return {};
     }
 
@@ -40,28 +39,25 @@ namespace sdl::clipboard {
     string
     get_text()
     {
-        auto result = try_get_text();
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_get_text());
     }
 
 
-    expected<string, error>
+    std::expected<string, error>
     try_get_text()
         noexcept
     {
         try {
             unique_ptr<char> text{SDL_GetClipboardText()};
             if (!text)
-                return unexpected{error{}};
+                return std::unexpected{error{}};
             string result = text.get();
             if (result.empty())
-                return unexpected{error{}};
+                return std::unexpected{error{}};
             return result;
         }
         catch (std::exception& e) {
-            return unexpected{error{e}};
+            return std::unexpected{error{e}};
         }
     }
 
@@ -79,18 +75,16 @@ namespace sdl::clipboard {
     void
     set_primary_selection(const char* text)
     {
-        auto result = try_set_primary_selection(text);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_primary_selection(text));
     }
 
 
-    expected<void, error>
+    std::expected<void, error>
     try_set_primary_selection(const char* text)
         noexcept
     {
         if (SDL_SetPrimarySelectionText(text) < 0)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return {};
     }
 
@@ -98,28 +92,25 @@ namespace sdl::clipboard {
     string
     get_primary_selection()
     {
-        auto result = try_get_primary_selection();
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_get_primary_selection());
     }
 
 
-    expected<string, error>
+    std::expected<string, error>
     try_get_primary_selection()
         noexcept
     {
         try {
             unique_ptr<char> text{SDL_GetPrimarySelectionText()};
             if (!text)
-                return unexpected{error{}};
+                return std::unexpected{error{}};
             string result = text.get();
             if (result.empty())
-                return unexpected{error{}};
+                return std::unexpected{error{}};
             return result;
         }
         catch (std::exception& e){
-            return unexpected{error{e}};
+            return std::unexpected{error{e}};
         }
     }
 

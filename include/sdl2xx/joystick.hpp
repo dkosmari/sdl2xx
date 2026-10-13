@@ -15,6 +15,7 @@
 #include <mutex>
 #include <optional>
 #include <span>
+#include <string_view>
 
 #include <SDL_joystick.h>
 #include <SDL_version.h>
@@ -213,12 +214,16 @@ namespace sdl::joystick {
     get_num_devices();
 
 
-    [[nodiscard]]
-    const char*
-    get_name(unsigned index);
+    std::expected<unsigned, error>
+    try_get_num_devices()
+        noexcept;
+
 
     [[nodiscard]]
-    std::expected<const char*, error>
+    std::string_view
+    get_name(unsigned index);
+
+    std::expected<std::string_view, error>
     try_get_name(unsigned index)
         noexcept;
 
@@ -226,11 +231,10 @@ namespace sdl::joystick {
 #if SDL_VERSION_ATLEAST(2, 24, 0)
 
     [[nodiscard]]
-    const char*
+    std::string_view
     get_path(unsigned index);
 
-    [[nodiscard]]
-    std::expected<const char*, error>
+    std::expected<std::string_view, error>
     try_get_path(unsigned index)
         noexcept;
 
@@ -283,6 +287,10 @@ namespace sdl::joystick {
     instance_id
     get_id(unsigned index);
 
+    std::expected<instance_id, error>
+    try_get_id(unsigned index)
+        noexcept;
+
 
     // Convenience: get index from id.
     [[nodiscard]]
@@ -291,7 +299,6 @@ namespace sdl::joystick {
 
 
     // Convenience: get index from id.
-    [[nodiscard]]
     std::expected<unsigned, error>
     try_get_index(instance_id id)
         noexcept;
@@ -322,12 +329,22 @@ namespace sdl::joystick {
         device
         from_id(instance_id id);
 
+        static
+        std::expected<device, error>
+        try_from_id(instance_id id)
+            noexcept;
+
 
         // Named constructor: from player index.
         [[nodiscard]]
         static
         device
         from_player(int player);
+
+        static
+        std::expected<device, error>
+        try_from_player(int player)
+            noexcept;
 
 
         ~device()
@@ -351,6 +368,11 @@ namespace sdl::joystick {
         set_virtual_axis(unsigned axis,
                          double value);
 
+        std::expected<void, error>
+        try_set_virtual_axis(unsigned axis,
+                             double value)
+            noexcept;
+
 
         void
         set_virtual_button(unsigned button,
@@ -365,12 +387,11 @@ namespace sdl::joystick {
 
 
         [[nodiscard]]
-        const char*
+        std::string_view
         get_name()
             const;
 
-        [[nodiscard]]
-        std::expected<const char*, error>
+        std::expected<std::string_view, error>
         try_get_name()
             const noexcept;
 
@@ -378,12 +399,11 @@ namespace sdl::joystick {
 #if SDL_VERSION_ATLEAST(2, 24, 0)
 
         [[nodiscard]]
-        const char*
+        std::string_view
         get_path()
             const;
 
-        [[nodiscard]]
-        std::expected<const char*, error>
+        std::expected<std::string_view, error>
         try_get_path()
             const noexcept;
 
@@ -450,12 +470,11 @@ namespace sdl::joystick {
 #if SDL_VERSION_ATLEAST(2, 0, 14)
 
         [[nodiscard]]
-        const char*
+        std::string_view
         get_serial()
             const;
 
-        [[nodiscard]]
-        std::expected<const char*, error>
+        std::expected<std::string_view, error>
         try_get_serial()
             const noexcept;
 
@@ -483,11 +502,19 @@ namespace sdl::joystick {
         get_id()
             const;
 
+        std::expected<instance_id, error>
+        try_get_id()
+            const noexcept;
+
 
         [[nodiscard]]
         unsigned
         get_num_axes()
             const;
+
+        std::expected<unsigned, error>
+        try_get_num_axes()
+            const noexcept;
 
 
         [[nodiscard]]
@@ -495,17 +522,29 @@ namespace sdl::joystick {
         get_num_balls()
             const;
 
+        std::expected<unsigned, error>
+        try_get_num_balls()
+            const noexcept;
+
 
         [[nodiscard]]
         unsigned
         get_num_hats()
             const;
 
+        std::expected<unsigned, error>
+        try_get_num_hats()
+            const noexcept;
+
 
         [[nodiscard]]
         unsigned
         get_num_buttons()
             const;
+
+        std::expected<unsigned, error>
+        try_get_num_buttons()
+            const noexcept;
 
 
         [[nodiscard]]
@@ -534,6 +573,10 @@ namespace sdl::joystick {
         vec2
         get_ball(unsigned ball)
             const;
+
+        std::expected<vec2, error>
+        try_get_ball(unsigned ball)
+            const noexcept;
 
 
         [[nodiscard]]
@@ -638,14 +681,26 @@ namespace sdl::joystick {
                    unsigned buttons,
                    unsigned hats);
 
+    std::expected<unsigned, error>
+    try_attach_virtual(type t,
+                       unsigned axes,
+                       unsigned buttons,
+                       unsigned hats)
+        noexcept;
+
 
     void
     detach_virtual(unsigned index);
 
+    std::expected<void, error>
+    try_detach_virtual(unsigned index)
+        noexcept;
+
 
     [[nodiscard]]
     bool
-    is_virtual(unsigned index);
+    is_virtual(unsigned index)
+        noexcept;
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 14)
 
@@ -668,6 +723,10 @@ namespace sdl::joystick {
     [[nodiscard]]
     unsigned
     attach_virtual(const virtual_descriptor& desc);
+
+    std::expected<unsigned, error>
+    try_attach_virtual(const virtual_descriptor& desc)
+        noexcept;
 
 #endif // SDL_VERSION_ATLEAST(2, 24, 0)
 
@@ -699,12 +758,20 @@ namespace sdl::joystick {
     bool
     get_event_polling();
 
+    std::expected<bool, error>
+    try_get_event_polling()
+        noexcept;
+
 
     void
     set_event_polling(bool enabled);
 
+    std::expected<void, error>
+    try_set_event_polling(bool enabled)
+        noexcept;
 
-    static constexpr double axis_dead_zone = 0.25;
+
+    static inline constexpr double axis_dead_zone = 0.25;
 
 } // namespace sdk::joystick
 

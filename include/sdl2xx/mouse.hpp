@@ -14,8 +14,8 @@
 #include <SDL_mouse.h>
 #include <SDL_version.h>
 
-#include "basic_wrapper.hpp"
 #include "error.hpp"
+#include "owner_wrapper.hpp"
 #include "vec2.hpp"
 
 
@@ -240,9 +240,13 @@ namespace sdl::mouse {
 #endif // SDL_VERSION_ATLEAST(2, 0, 4)
 
 
-    struct cursor : basic_wrapper<SDL_Cursor*> {
+    struct cursor : owner_wrapper<SDL_Cursor*> {
 
-        using base_type = basic_wrapper<SDL_Cursor*>;
+        using base_type = owner_wrapper<SDL_Cursor*>;
+
+
+        struct dont_destroy_t{};
+        static constexpr dont_destroy_t dont_destroy{};
 
 
         // Inherit constructors.
@@ -271,6 +275,11 @@ namespace sdl::mouse {
 
 
         cursor(system_cursor c);
+
+
+        cursor(raw_type new_raw,
+               dont_destroy_t)
+            noexcept;
 
 
         /// Move constructor.
@@ -326,17 +335,23 @@ namespace sdl::mouse {
             noexcept;
 
 
+        static
+        cursor
+        get_current()
+            noexcept;
+
+
+        static
+        cursor
+        get_default()
+            noexcept;
+
     }; // struct cursor
 
 
     void
     redraw()
         noexcept;
-
-
-    // TODO: wrap SDL_GetCursor()
-
-    // TODO: wrap SDL_GetDefaultCursor()
 
 
     bool
