@@ -27,9 +27,6 @@
 
 namespace sdl::ttf {
 
-    using std::filesystem::path;
-
-
     [[nodiscard]]
     SDL_version
     linked_version()
@@ -107,10 +104,10 @@ namespace sdl::ttf {
         using base_type::base_type;
 
 
-        font(const path& filename,
+        font(const std::filesystem::path& filename,
              int pt_size);
 
-        font(const path& filename,
+        font(const std::filesystem::path& filename,
              int pt_size,
              const options& opt);
 
@@ -147,11 +144,11 @@ namespace sdl::ttf {
 
 
         void
-        create(const path& filename,
+        create(const std::filesystem::path& filename,
                int pt_size);
 
         void
-        create(const path& filename,
+        create(const std::filesystem::path& filename,
                int pt_size,
                const options& opt);
 

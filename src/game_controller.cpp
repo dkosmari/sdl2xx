@@ -14,14 +14,17 @@
 #include <SDL_events.h>         // SDL_QUERY
 
 #include "sdl2xx/game_controller.hpp"
+
 #include "sdl2xx/unique_ptr.hpp"
 #include "impl/remap.hpp"
+#include "impl/value_or_throw.hpp"
+
+
+using sdl::impl::remap::to_uint16;
+using sdl::impl::value_or_throw;
 
 
 namespace sdl::game_controller {
-
-    using impl::remap::to_uint16;
-
 
     string
     to_string(type t)
@@ -158,7 +161,7 @@ namespace sdl::game_controller {
 
 
     unsigned
-    add_mappings(const path& filename)
+    add_mappings(const std::filesystem::path& filename)
     {
         auto result = try_add_mappings(filename);
         if (!result)
@@ -188,7 +191,7 @@ namespace sdl::game_controller {
 
 
     std::expected<unsigned, error>
-    try_add_mappings(const path& filename)
+    try_add_mappings(const std::filesystem::path& filename)
         noexcept
     {
         int r = SDL_GameControllerAddMappingsFromFile(filename.c_str());
@@ -314,17 +317,14 @@ namespace sdl::game_controller {
     }
 
 
-    const char*
+    std::string_view
     get_name(unsigned index)
     {
-        auto result = try_get_name(index);
-        if (!result)
-            throw result.error();
-        return *result;
+        return value_or_throw(try_get_name(index));
     }
 
 
-    std::expected<const char*, error>
+    std::expected<std::string_view, error>
     try_get_name(unsigned index)
         noexcept
     {
@@ -337,17 +337,14 @@ namespace sdl::game_controller {
 
 #if SDL_VERSION_ATLEAST(2, 24, 0)
 
-    const char*
+    std::string_view
     get_path(unsigned index)
     {
-        auto result = try_get_path(index);
-        if (!result)
-            throw result.error();
-        return *result;
+        return value_or_throw(try_get_path(index));
     }
 
 
-    std::expected<const char*, error>
+    std::expected<std::string_view, error>
     try_get_path(unsigned index)
         noexcept
     {
@@ -460,18 +457,15 @@ namespace sdl::game_controller {
     }
 
 
-    const char*
+    std::string_view
     device::get_name()
         const
     {
-        auto result = try_get_name();
-        if (!result)
-            throw result.error();
-        return *result;
+        return value_or_throw(try_get_name());
     }
 
 
-    std::expected<const char*, error>
+    std::expected<std::string_view, error>
     device::try_get_name()
         const noexcept
     {
@@ -484,18 +478,15 @@ namespace sdl::game_controller {
 
 #if SDL_VERSION_ATLEAST(2, 24, 0)
 
-    const char*
+    std::string_view
     device::get_path()
         const
     {
-        auto result = try_get_path();
-        if (!result)
-            throw result.error();
-        return *result;
+        return value_or_throw(try_get_path());
     }
 
 
-    std::expected<const char*, error>
+    std::expected<std::string_view, error>
     device::try_get_path()
         const noexcept
     {
@@ -586,18 +577,15 @@ namespace sdl::game_controller {
 
 #if SDL_VERSION_ATLEAST(2, 0, 14)
 
-    const char*
+    std::string_view
     device::get_serial()
         const
     {
-        auto result = try_get_serial();
-        if (!result)
-            throw result.error();
-        return *result;
+        return value_or_throw(try_get_serial());
     }
 
 
-    std::expected<const char*, error>
+    std::expected<std::string_view, error>
     device::try_get_serial()
         const noexcept
     {
@@ -836,7 +824,7 @@ namespace sdl::game_controller {
     bool
     device::rumble(float low,
                    float high,
-                   milliseconds duration)
+                   std::chrono::milliseconds duration)
         noexcept
     {
         return !SDL_GameControllerRumble(raw,
@@ -853,7 +841,7 @@ namespace sdl::game_controller {
     bool
     device::rumble_triggers(float left,
                             float right,
-                            milliseconds duration)
+                            std::chrono::milliseconds duration)
         noexcept
     {
         return !SDL_GameControllerRumbleTriggers(raw,

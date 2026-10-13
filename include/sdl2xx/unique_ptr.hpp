@@ -1,7 +1,7 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
@@ -40,9 +40,9 @@ namespace sdl {
         std::size_t size = 0;
 
         constexpr
-        deleter(std::size_t size)
+        deleter(std::size_t size_ = 0)
             noexcept :
-            size{size}
+            size{size_}
         {}
 
 

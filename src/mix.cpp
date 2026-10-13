@@ -28,6 +28,18 @@ namespace sdl::mix {
             return impl::remap::to_uint(v, max_volume);
         }
 
+
+        int
+        sound_font_function_helper(const char* arg,
+                                   void* ctx)
+        {
+            auto func = reinterpret_cast<const sound_font_function*>(ctx);
+            if (*func)
+                return (*func)(arg);
+            else
+                return 1;
+        }
+
     } // namespace
 
 
@@ -353,7 +365,7 @@ namespace sdl::mix {
 
     unsigned
     chunk::play_on(unsigned channel,
-                   milliseconds max_duration,
+                   std::chrono::milliseconds max_duration,
                    int loops)
         noexcept
     {
@@ -362,7 +374,7 @@ namespace sdl::mix {
 
 
     std::optional<unsigned>
-    chunk::play(milliseconds max_duration,
+    chunk::play(std::chrono::milliseconds max_duration,
                 int loops)
         noexcept
     {
@@ -375,7 +387,7 @@ namespace sdl::mix {
 
     unsigned
     chunk::fade_in_on(unsigned channel,
-               milliseconds max_duration,
+               std::chrono::milliseconds max_duration,
                int loops)
         noexcept
     {
@@ -384,7 +396,7 @@ namespace sdl::mix {
 
 
     std::optional<unsigned>
-    chunk::fade_in(milliseconds max_duration,
+    chunk::fade_in(std::chrono::milliseconds max_duration,
             int loops)
         noexcept
     {
@@ -397,8 +409,8 @@ namespace sdl::mix {
 
     unsigned
     chunk::fade_in_on(unsigned channel,
-                      milliseconds fade_duration,
-                      milliseconds max_duration,
+                      std::chrono::milliseconds fade_duration,
+                      std::chrono::milliseconds max_duration,
                       int loops)
         noexcept
     {
@@ -411,8 +423,8 @@ namespace sdl::mix {
 
 
     std::optional<unsigned>
-    chunk::fade_in(milliseconds fade_duration,
-                   milliseconds max_duration,
+    chunk::fade_in(std::chrono::milliseconds fade_duration,
+                   std::chrono::milliseconds max_duration,
                    int loops)
         noexcept
     {
@@ -682,7 +694,7 @@ namespace sdl::mix {
 
 
     void
-    music::fade_in(milliseconds duration,
+    music::fade_in(std::chrono::milliseconds duration,
                    int loops)
     {
         if (Mix_FadeInMusic(raw, loops, duration.count()) < 0)
@@ -691,7 +703,7 @@ namespace sdl::mix {
 
 
     void
-    music::fade_in(milliseconds duration,
+    music::fade_in(std::chrono::milliseconds duration,
                    dbl_seconds position,
                    int loops)
     {
@@ -727,7 +739,7 @@ namespace sdl::mix {
 
 
     bool
-    music::fade_out(milliseconds fade_duration)
+    music::fade_out(std::chrono::milliseconds fade_duration)
         noexcept
     {
         return Mix_FadeOutMusic(fade_duration.count());
@@ -1198,7 +1210,7 @@ namespace sdl::mix {
 
     unsigned
     expire(unsigned channel,
-           milliseconds duration)
+           std::chrono::milliseconds duration)
         noexcept
     {
         return Mix_ExpireChannel(channel, duration.count());
@@ -1206,7 +1218,7 @@ namespace sdl::mix {
 
 
     unsigned
-    expire(milliseconds duration)
+    expire(std::chrono::milliseconds duration)
         noexcept
     {
         return Mix_ExpireChannel(-1, duration.count());
@@ -1231,7 +1243,7 @@ namespace sdl::mix {
 
     void
     fade_out(unsigned channel,
-             milliseconds fade_duration)
+             std::chrono::milliseconds fade_duration)
     {
         if (!Mix_FadeOutChannel(channel, fade_duration.count()))
             throw error{};
@@ -1240,7 +1252,7 @@ namespace sdl::mix {
 
     unsigned
     fade_out_group(int tag,
-                   milliseconds fade_duration)
+                   std::chrono::milliseconds fade_duration)
         noexcept
     {
         return Mix_FadeOutGroup(tag, fade_duration.count());
@@ -1327,22 +1339,23 @@ namespace sdl::mix {
     }
 
 
-    const char*
+    std::string_view
     get_sound_fonts()
+        noexcept
     {
         const char* result = Mix_GetSoundFonts();
         if (!result)
-            throw error{}; // TODO: check if there's any error to report
+            return {};
         return result;
     }
 
 
     bool
-    for_eac_sound_font(sound_font_function func,
-                       void* ctx)
+    for_each_sound_font(const sound_font_function& func)
         noexcept
     {
-        return Mix_EachSoundFont(func, ctx);
+        return Mix_EachSoundFont(sound_font_function_helper,
+                                 const_cast<void*>(static_cast<const void*>(&func)));
     }
 
 

@@ -1,7 +1,7 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
@@ -15,6 +15,7 @@
 #include <iosfwd>
 #include <optional>
 #include <span>
+#include <string_view>
 #include <utility>
 
 #include <SDL_gamecontroller.h>
@@ -29,10 +30,6 @@
 
 
 namespace sdl::game_controller {
-
-    using std::chrono::milliseconds;
-
-    using std::filesystem::path;
 
     using joystick::instance_id;
     using joystick::guid;
@@ -245,7 +242,7 @@ namespace sdl::game_controller {
     add_mappings(rwops& src);
 
     unsigned
-    add_mappings(const path& filename);
+    add_mappings(const std::filesystem::path& filename);
 
     std::expected<unsigned, error>
     try_add_mappings(SDL_RWops* src,
@@ -257,7 +254,7 @@ namespace sdl::game_controller {
         noexcept;
 
     std::expected<unsigned, error>
-    try_add_mappings(const path& filename)
+    try_add_mappings(const std::filesystem::path& filename)
         noexcept;
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 2)
@@ -336,12 +333,12 @@ namespace sdl::game_controller {
 
 
     [[nodiscard]]
-    const char*
+    std::string_view
     get_name(unsigned index);
 
 
     [[nodiscard]]
-    std::expected<const char*, error>
+    std::expected<std::string_view, error>
     try_get_name(unsigned index)
         noexcept;
 
@@ -349,11 +346,11 @@ namespace sdl::game_controller {
 #if SDL_VERSION_ATLEAST(2, 24, 0)
 
     [[nodiscard]]
-    const char*
+    std::string_view
     get_path(unsigned index);
 
     [[nodiscard]]
-    std::expected<const char*, error>
+    std::expected<std::string_view, error>
     try_get_path(unsigned index)
         noexcept;
 
@@ -464,12 +461,12 @@ namespace sdl::game_controller {
 
 
         [[nodiscard]]
-        const char*
+        std::string_view
         get_name()
             const;
 
         [[nodiscard]]
-        std::expected<const char*, error>
+        std::expected<std::string_view, error>
         try_get_name()
             const noexcept;
 
@@ -477,13 +474,13 @@ namespace sdl::game_controller {
 #if SDL_VERSION_ATLEAST(2, 24, 0)
 
         [[nodiscard]]
-        const char*
+        std::string_view
         get_path()
             const;
 
 
         [[nodiscard]]
-        std::expected<const char*, error>
+        std::expected<std::string_view, error>
         try_get_path()
             const noexcept;
 
@@ -554,12 +551,12 @@ namespace sdl::game_controller {
 #if SDL_VERSION_ATLEAST(2, 0, 14)
 
         [[nodiscard]]
-        const char*
+        std::string_view
         get_serial()
             const;
 
         [[nodiscard]]
-        std::expected<const char*, error>
+        std::expected<std::string_view, error>
         try_get_serial()
             const noexcept;
 
@@ -723,7 +720,7 @@ namespace sdl::game_controller {
         bool
         rumble(float low,
                float high,
-               milliseconds duration)
+               std::chrono::milliseconds duration)
             noexcept;
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 9)
@@ -734,7 +731,7 @@ namespace sdl::game_controller {
         bool
         rumble_triggers(float left,
                         float right,
-                        milliseconds duration)
+                        std::chrono::milliseconds duration)
             noexcept;
 
 

@@ -13,6 +13,21 @@
 
 namespace sdl::audio {
 
+    spec::spec(int freq_,
+               sdl::audio::format fmt_,
+               Uint16 samples_,
+               SDL_AudioCallback callback_,
+               void* userdata_)
+        noexcept
+    {
+        freq = freq_;
+        format = fmt_;
+        samples = samples_;
+        callback = callback_;
+        userdata = userdata_;
+    }
+
+
     string
     to_string(status s)
     {
@@ -41,7 +56,7 @@ namespace sdl::audio {
 
 
     [[nodiscard]]
-    const char*
+    std::string_view
     get_driver(unsigned index)
     {
         const char* driver = SDL_GetAudioDriver(index);
@@ -67,7 +82,7 @@ namespace sdl::audio {
     }
 
 
-    const char*
+    std::string_view
     get_current_driver()
     {
         const char* driver = SDL_GetCurrentAudioDriver();
@@ -84,7 +99,7 @@ namespace sdl::audio {
     }
 
 
-    const char*
+    std::string_view
     get_name(unsigned index,
              bool is_capture)
     {
@@ -368,8 +383,9 @@ namespace sdl::audio {
         Uint32 size;
         if (!SDL_LoadWAV_RW(src, close_src, &sp, &buf, &size))
             throw error{};
-        // Note: SDL_FreeWAV() is just SDL_free()
-        return {blob{buf, size}, std::move(sp)};
+        // Note: SDL_FreeWAV() is just SDL_free(), so we manage the memory with sdl::blob.
+        std::span<std::byte> audio_samples{reinterpret_cast<std::byte*>(buf), size};
+        return {blob{audio_samples}, std::move(sp)};
     }
 
 
@@ -381,7 +397,7 @@ namespace sdl::audio {
 
 
     std::pair<blob, spec>
-    load_wav(const path& filename)
+    load_wav(const std::filesystem::path& filename)
     {
         rwops src{filename, "rb"};
         return load_wav(src);
@@ -465,39 +481,20 @@ namespace sdl::audio {
 
 
     void
-    stream::put(const void* buf,
-                std::size_t size)
+    stream::put(std::span<const std::byte> samples)
     {
-        if (SDL_AudioStreamPut(raw, buf, size) < 0)
+        if (SDL_AudioStreamPut(raw, samples.data(), samples.size()) < 0)
             throw error{};
     }
 
 
-    void
-    stream::put(const blob& samples)
+    std::span<std::byte>
+    stream::get(std::span<std::byte> dst)
     {
-        put(samples.data());
-    }
-
-
-    std::size_t
-    stream::get(void* buf,
-                std::size_t size)
-    {
-        int result = SDL_AudioStreamGet(raw, buf, size);
+        int result = SDL_AudioStreamGet(raw, dst.data(), dst.size());
         if (result < 0)
             throw error{};
-        return result;
-    }
-
-
-    vector<Uint8>
-    stream::get(std::size_t size)
-    {
-        vector<Uint8> result(size);
-        std::size_t rs = get(std::span(result));
-        result.resize(rs);
-        return result;
+        return dst.subspan(0, result);
     }
 
 

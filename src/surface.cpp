@@ -562,7 +562,7 @@ namespace sdl {
 
 
     surface
-    surface::load_bmp(const path& filename)
+    surface::load_bmp(const std::filesystem::path& filename)
     {
         SDL_Surface* surf = SDL_LoadBMP(filename.c_str());
         if (!surf)
@@ -588,7 +588,7 @@ namespace sdl {
 
 
     void
-    surface::save_bmp(const path& filename)
+    surface::save_bmp(const std::filesystem::path& filename)
     {
         if (SDL_SaveBMP(raw, filename.c_str()) < 0)
             throw error{};

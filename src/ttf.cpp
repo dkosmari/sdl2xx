@@ -10,9 +10,10 @@
 
 #include "sdl2xx/ttf.hpp"
 
+#include "impl/value_or_throw.hpp"
 
-using std::expected;
-using std::unexpected;
+
+using sdl::impl::value_or_throw;
 
 
 namespace sdl::ttf {
@@ -74,14 +75,14 @@ namespace sdl::ttf {
 
 
 
-    font::font(const path& filename,
+    font::font(const std::filesystem::path& filename,
                int pt_size)
     {
         create(filename, pt_size);
     }
 
 
-    font::font(const path& filename,
+    font::font(const std::filesystem::path& filename,
                int pt_size,
                const options& opt)
     {
@@ -128,7 +129,7 @@ namespace sdl::ttf {
 
 
     void
-    font::create(const path& filename,
+    font::create(const std::filesystem::path& filename,
                  int pt_size)
     {
         auto ptr = TTF_OpenFont(filename.c_str(), pt_size);
@@ -140,7 +141,7 @@ namespace sdl::ttf {
 
 
     void
-    font::create(const path& filename,
+    font::create(const std::filesystem::path& filename,
                  int pt_size,
                  const options& opt)
     {
@@ -425,14 +426,11 @@ namespace sdl::ttf {
     font::get_metrics(char32_t codepoint)
         const
     {
-        auto result = try_get_metrics(codepoint);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_get_metrics(codepoint));
     }
 
 
-    expected<font::metrics, error>
+    std::expected<font::metrics, error>
     font::try_get_metrics(char32_t codepoint)
         const noexcept
     {
@@ -445,7 +443,7 @@ namespace sdl::ttf {
                                &result.min.y,
                                &result.max.y,
                                &result.advance) < 0)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return result;
     }
 
@@ -461,13 +459,13 @@ namespace sdl::ttf {
     }
 
 
-    expected<vec2, error>
+    std::expected<vec2, error>
     font::try_get_size(const char* text)
         const noexcept
     {
         vec2 size;
         if (TTF_SizeUTF8(raw, text, &size.x, &size.y) < 0)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return size;
     }
 
@@ -481,7 +479,7 @@ namespace sdl::ttf {
     }
 
 
-    expected<vec2, error>
+    std::expected<vec2, error>
     font::try_get_size(const char8_t* text)
         const noexcept
     {
@@ -493,20 +491,17 @@ namespace sdl::ttf {
     font::get_size_latin1(const char* text)
         const
     {
-        auto result = try_get_size_latin1(text);
-        if (!result)
-            throw result.error();
-        return *result;
+        return value_or_throw(try_get_size_latin1(text));
     }
 
 
-    expected<vec2, error>
+    std::expected<vec2, error>
     font::try_get_size_latin1(const char* text)
         const noexcept
     {
         vec2 size;
         if (TTF_SizeText(raw, text, &size.x, &size.y) < 0)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return size;
     }
 
@@ -516,21 +511,18 @@ namespace sdl::ttf {
                       int max_width)
         const
     {
-        auto result = try_get_measure(text, max_width);
-        if (!result)
-            throw result.error();
-        return *result;
+        return value_or_throw(try_get_measure(text, max_width));
     }
 
 
-    expected<font::measure, error>
+    std::expected<font::measure, error>
     font::try_get_measure(const char* text,
                           int max_width)
         const noexcept
     {
         measure result;
         if (TTF_MeasureUTF8(raw, text, max_width, &result.width, &result.count) < 0)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return result;
     }
 
@@ -540,11 +532,11 @@ namespace sdl::ttf {
                       int max_width)
         const
     {
-        return get_measure(reinterpret_cast<const char*>(text), max_width);
+        return value_or_throw(try_get_measure(text, max_width));
     }
 
 
-    expected<font::measure, error>
+    std::expected<font::measure, error>
     font::try_get_measure(const char8_t* text,
                           int max_width)
         const noexcept
@@ -558,21 +550,18 @@ namespace sdl::ttf {
                              int max_width)
         const
     {
-        auto result = try_get_measure_latin1(text, max_width);
-        if (!result)
-            throw result.error();
-        return *result;
+        return value_or_throw(try_get_measure_latin1(text, max_width));
     }
 
 
-    expected<font::measure, error>
+    std::expected<font::measure, error>
     font::try_get_measure_latin1(const char* text,
                                  int max_width)
         const noexcept
     {
         measure result;
         if (TTF_MeasureText(raw, text, max_width, &result.width, &result.count) < 0)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return result;
     }
 
@@ -582,21 +571,18 @@ namespace sdl::ttf {
                              color fg)
         const
     {
-        auto result = try_render_glyph_solid(codepoint, fg);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_render_glyph_solid(codepoint, fg));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_glyph_solid(char32_t codepoint,
                                  color fg)
         const noexcept
     {
         auto surf = TTF_RenderGlyph32_Solid(raw, codepoint, fg);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
@@ -606,21 +592,18 @@ namespace sdl::ttf {
                        color fg)
         const
     {
-        auto result = try_render_solid(text, fg);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_render_solid(text, fg));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_solid(const char* text,
                            color fg)
         const noexcept
     {
         auto surf = TTF_RenderUTF8_Solid(raw, text, fg);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
@@ -630,11 +613,11 @@ namespace sdl::ttf {
                        color fg)
         const
     {
-        return render_solid(reinterpret_cast<const char*>(text), fg);
+        return value_or_throw(try_render_solid(text, fg));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_solid(const char8_t* text,
                            color fg)
         const noexcept
@@ -648,21 +631,18 @@ namespace sdl::ttf {
                             color fg)
         const
     {
-        auto result = try_render_solid_latin1(text, fg);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_render_solid_latin1(text, fg));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_solid_latin1(const char* text,
                                   color fg)
         const noexcept
     {
         auto surf = TTF_RenderText_Solid(raw, text, fg);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
@@ -673,14 +653,11 @@ namespace sdl::ttf {
                        Uint32 max_width)
         const
     {
-        auto result = try_render_solid(text, fg, max_width);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_render_solid(text, fg, max_width));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_solid(const char* text,
                            color fg,
                            Uint32 max_width)
@@ -688,7 +665,7 @@ namespace sdl::ttf {
     {
         auto surf = TTF_RenderUTF8_Solid_Wrapped(raw, text, fg, max_width);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
@@ -699,11 +676,11 @@ namespace sdl::ttf {
                        Uint32 max_width)
         const
     {
-        return render_solid(reinterpret_cast<const char*>(text), fg, max_width);
+        return value_or_throw(try_render_solid(text, fg, max_width));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_solid(const char8_t* text,
                          color fg,
                          Uint32 max_width)
@@ -719,14 +696,11 @@ namespace sdl::ttf {
                               Uint32 max_width)
         const
     {
-        auto result = try_render_solid_latin1(text, fg, max_width);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_render_solid_latin1(text, fg, max_width));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_solid_latin1(const char* text,
                                   color fg,
                                   Uint32 max_width)
@@ -734,7 +708,7 @@ namespace sdl::ttf {
     {
         auto surf = TTF_RenderText_Solid_Wrapped(raw, text, fg, max_width);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
@@ -745,14 +719,11 @@ namespace sdl::ttf {
                               color bg)
         const
     {
-        auto result = try_render_glyph_shaded(codepoint, fg, bg);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_render_glyph_shaded(codepoint, fg, bg));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_glyph_shaded(char32_t codepoint,
                                   color fg,
                                   color bg)
@@ -760,7 +731,7 @@ namespace sdl::ttf {
     {
         auto surf = TTF_RenderGlyph32_Shaded(raw, codepoint, fg, bg);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
@@ -771,14 +742,11 @@ namespace sdl::ttf {
                         color bg)
         const
     {
-        auto result = try_render_shaded(text, fg, bg);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_render_shaded(text, fg, bg));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_shaded(const char* text,
                             color fg,
                             color bg)
@@ -786,7 +754,7 @@ namespace sdl::ttf {
     {
         auto surf = TTF_RenderUTF8_Shaded(raw, text, fg, bg);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
@@ -797,11 +765,11 @@ namespace sdl::ttf {
                         color bg)
         const
     {
-        return render_shaded(reinterpret_cast<const char*>(text), fg, bg);
+        return value_or_throw(try_render_shaded(text, fg, bg));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_shaded(const char8_t* text,
                             color fg,
                             color bg)
@@ -817,14 +785,11 @@ namespace sdl::ttf {
                                color bg)
         const
     {
-        auto result = try_render_shaded_latin1(text, fg, bg);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_render_shaded_latin1(text, fg, bg));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_shaded_latin1(const char* text,
                                    color fg,
                                    color bg)
@@ -832,7 +797,7 @@ namespace sdl::ttf {
     {
         auto surf = TTF_RenderText_Shaded(raw, text, fg, bg);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
@@ -844,14 +809,11 @@ namespace sdl::ttf {
                         Uint32 max_width)
         const
     {
-        auto result = try_render_shaded(text, fg, bg, max_width);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_render_shaded(text, fg, bg, max_width));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_shaded(const char* text,
                             color fg,
                             color bg,
@@ -860,7 +822,7 @@ namespace sdl::ttf {
     {
         auto surf = TTF_RenderUTF8_Shaded_Wrapped(raw, text, fg, bg, max_width);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
@@ -872,11 +834,11 @@ namespace sdl::ttf {
                         Uint32 max_width)
         const
     {
-        return render_shaded(reinterpret_cast<const char*>(text), fg, bg, max_width);
+        return value_or_throw(try_render_shaded(text, fg, bg, max_width));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_shaded(const char8_t* text,
                             color fg,
                             color bg,
@@ -894,14 +856,11 @@ namespace sdl::ttf {
                                Uint32 max_width)
         const
     {
-        auto result = try_render_shaded_latin1(text, fg, bg, max_width);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_render_shaded_latin1(text, fg, bg, max_width));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_shaded_latin1(const char* text,
                                    color fg,
                                    color bg,
@@ -910,7 +869,7 @@ namespace sdl::ttf {
     {
         auto surf = TTF_RenderText_Shaded_Wrapped(raw, text, fg, bg, max_width);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
@@ -920,21 +879,18 @@ namespace sdl::ttf {
                                color fg)
         const
     {
-        auto result = try_render_glyph_blended(codepoint, fg);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_render_glyph_blended(codepoint, fg));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_glyph_blended(char32_t codepoint,
                                    color fg)
         const noexcept
     {
         auto surf = TTF_RenderGlyph32_Blended(raw, codepoint, fg);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
@@ -944,21 +900,18 @@ namespace sdl::ttf {
                          color fg)
         const
     {
-        auto result = try_render_blended(text, fg);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_render_blended(text, fg));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_blended(const char* text,
                              color fg)
         const noexcept
     {
         auto surf = TTF_RenderUTF8_Blended(raw, text, fg);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
@@ -968,11 +921,11 @@ namespace sdl::ttf {
                          color fg)
         const
     {
-        return render_blended(reinterpret_cast<const char*>(text), fg);
+        return value_or_throw(try_render_blended(text, fg));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_blended(const char8_t* text,
                              color fg)
         const noexcept
@@ -986,21 +939,18 @@ namespace sdl::ttf {
                                 color fg)
         const
     {
-        auto result = try_render_blended_latin1(text, fg);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_render_blended_latin1(text, fg));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_blended_latin1(const char* text,
                                     color fg)
         const noexcept
     {
         auto surf = TTF_RenderText_Blended(raw, text, fg);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
@@ -1011,14 +961,11 @@ namespace sdl::ttf {
                          Uint32 max_width)
         const
     {
-        auto result = try_render_blended(text, fg, max_width);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_render_blended(text, fg, max_width));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_blended(const char* text,
                              color fg,
                              Uint32 max_width)
@@ -1026,7 +973,7 @@ namespace sdl::ttf {
     {
         auto surf = TTF_RenderUTF8_Blended_Wrapped(raw, text, fg, max_width);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
@@ -1037,11 +984,11 @@ namespace sdl::ttf {
                          Uint32 max_width)
         const
     {
-        return render_blended(reinterpret_cast<const char*>(text), fg, max_width);
+        return value_or_throw(try_render_blended(text, fg, max_width));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_blended(const char8_t* text,
                              color fg,
                              Uint32 max_width)
@@ -1057,14 +1004,11 @@ namespace sdl::ttf {
                                 Uint32 max_width)
         const
     {
-        auto result = try_render_blended_latin1(text, fg, max_width);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_render_blended_latin1(text, fg, max_width));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_blended_latin1(const char* text,
                                     color fg,
                                     Uint32 max_width)
@@ -1072,7 +1016,7 @@ namespace sdl::ttf {
     {
         auto surf = TTF_RenderText_Blended_Wrapped(raw, text, fg, max_width);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
@@ -1085,14 +1029,11 @@ namespace sdl::ttf {
                            color bg)
         const
     {
-        auto result = try_render_glyph_lcd(codepoint, fg, bg);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_render_glyph_lcd(codepoint, fg, bg));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_glyph_lcd(char32_t codepoint,
                                color fg,
                                color bg)
@@ -1100,7 +1041,7 @@ namespace sdl::ttf {
     {
         auto surf = TTF_RenderGlyph32_LCD(raw, codepoint, fg, bg);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
@@ -1111,14 +1052,11 @@ namespace sdl::ttf {
                      color bg)
         const
     {
-        auto result = try_render_lcd(text, fg, bg);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_render_lcd(text, fg, bg));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_lcd(const char* text,
                          color fg,
                          color bg)
@@ -1126,7 +1064,7 @@ namespace sdl::ttf {
     {
         auto surf = TTF_RenderUTF8_LCD(raw, text, fg, bg);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
@@ -1137,11 +1075,11 @@ namespace sdl::ttf {
                      color bg)
         const
     {
-        return render_lcd(reinterpret_cast<const char*>(text), fg, bg);
+        return value_or_throw(try_render_lcd(text, fg, bg));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_lcd(const char8_t* text,
                          color fg,
                          color bg)
@@ -1157,14 +1095,11 @@ namespace sdl::ttf {
                             color bg)
         const
     {
-        auto result = try_render_lcd_latin1(text, fg, bg);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_render_lcd_latin1(text, fg, bg));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_lcd_latin1(const char* text,
                                 color fg,
                                 color bg)
@@ -1172,7 +1107,7 @@ namespace sdl::ttf {
     {
         auto surf = TTF_RenderText_LCD(raw, text, fg, bg);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
@@ -1184,14 +1119,11 @@ namespace sdl::ttf {
                      Uint32 max_width)
         const
     {
-        auto result = try_render_lcd(text, fg, bg, max_width);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_render_lcd(text, fg, bg, max_width));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_lcd(const char* text,
                          color fg,
                          color bg,
@@ -1200,7 +1132,7 @@ namespace sdl::ttf {
     {
         auto surf = TTF_RenderUTF8_LCD_Wrapped(raw, text, fg, bg, max_width);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
 
     }
@@ -1213,11 +1145,11 @@ namespace sdl::ttf {
                      Uint32 max_width)
         const
     {
-        return render_lcd(reinterpret_cast<const char*>(text), fg, bg, max_width);
+        return value_or_throw(try_render_lcd(text, fg, bg, max_width));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_lcd(const char8_t* text,
                          color fg,
                          color bg,
@@ -1235,14 +1167,11 @@ namespace sdl::ttf {
                             Uint32 max_width)
         const
     {
-        auto result = try_render_lcd_latin1(text, fg, bg, max_width);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_render_lcd_latin1(text, fg, bg, max_width));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     font::try_render_lcd_latin1(const char* text,
                                 color fg,
                                 color bg,
@@ -1251,7 +1180,7 @@ namespace sdl::ttf {
     {
         auto surf = TTF_RenderText_LCD_Wrapped(raw, text, fg, bg, max_width);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
@@ -1263,21 +1192,18 @@ namespace sdl::ttf {
                            char32_t codepoint)
         const
     {
-        auto result = try_get_kerning_size(prev_codepoint, codepoint);
-        if (!result)
-            throw result.error();
-        return *result;
+        return value_or_throw(try_get_kerning_size(prev_codepoint, codepoint));
     }
 
 
-    expected<int, error>
+    std::expected<int, error>
     font::try_get_kerning_size(char32_t prev_codepoint,
                                char32_t codepoint)
         const noexcept
     {
         int result = TTF_GetFontKerningSizeGlyphs32(raw, prev_codepoint, codepoint);
         if (result < 0)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return result;
     }
 
@@ -1285,18 +1211,16 @@ namespace sdl::ttf {
     void
     font::set_sdf(bool enable)
     {
-        auto result = try_set_sdf(enable);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_sdf(enable));
     }
 
 
-    expected<void, error>
+    std::expected<void, error>
     font::try_set_sdf(bool enable)
         noexcept
     {
         if (TTF_SetFontSDF(raw, enable ? SDL_TRUE : SDL_FALSE) < 0)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return {};
     }
 
@@ -1314,18 +1238,16 @@ namespace sdl::ttf {
     void
     font::set_direction(direction dir)
     {
-        auto result = try_set_direction(dir);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_direction(dir));
     }
 
 
-    expected<void, error>
+    std::expected<void, error>
     font::try_set_direction(direction dir)
         noexcept
     {
         if (TTF_SetFontDirection(raw, static_cast<TTF_Direction>(dir)) < 0)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return {};
     }
 
@@ -1333,22 +1255,19 @@ namespace sdl::ttf {
     void
     font::set_script(const char* script)
     {
-        auto result = try_set_script(script);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_set_script(script));
     }
 
 
-    expected<void, error>
+    std::expected<void, error>
     font::try_set_script(const char* script)
         noexcept
     {
         if (TTF_SetFontScriptName(raw, script) < 0)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return {};
     }
 
 #endif // SDL_TTF_VERSION_ATLEAST(2, 20, 0)
-
 
 } // namespace sdl::ttf

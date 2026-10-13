@@ -11,6 +11,8 @@
 
 #include <concepts>
 #include <filesystem>
+#include <string_view>
+#include <type_traits>
 #include <utility>
 
 #include <span>
@@ -27,29 +29,37 @@
 
 namespace sdl::audio {
 
-    using std::filesystem::path;
-
-
     using format = SDL_AudioFormat;
 
 
     struct spec : SDL_AudioSpec {
 
         // Ensure everything is zero-initialized.
+        inline
         constexpr
         spec()
             noexcept :
             SDL_AudioSpec{}
         {}
 
-    };
+
+        spec(int freq_,
+             sdl::audio::format fmt_,
+             Uint16 samples_,
+             SDL_AudioCallback callback_ = nullptr,
+             void* userdata_ = nullptr)
+            noexcept;
+
+    }; // struct spec
 
 
     enum class status {
+
         paused  = SDL_AUDIO_PAUSED,
         playing = SDL_AUDIO_PLAYING,
         stopped = SDL_AUDIO_STOPPED,
-    };
+
+    }; // enum class status
 
 
     string
@@ -57,13 +67,15 @@ namespace sdl::audio {
 
 
     enum class allow_change : Uint32 {
+
         any       = SDL_AUDIO_ALLOW_ANY_CHANGE,
         channels  = SDL_AUDIO_ALLOW_CHANNELS_CHANGE,
         format    = SDL_AUDIO_ALLOW_FORMAT_CHANGE,
         frequency = SDL_AUDIO_ALLOW_FREQUENCY_CHANGE,
         nothing   = 0,
         samples   = SDL_AUDIO_ALLOW_SAMPLES_CHANGE,
-    };
+
+    }; // enum class allow_change
 
 
     template<std::same_as<allow_change>... Allow>
@@ -72,10 +84,7 @@ namespace sdl::audio {
     constexpr
     Uint32
     convert(Allow... changes)
-        noexcept
-    {
-        return (static_cast<Uint32>(changes) | ...);
-    }
+        noexcept;
 
 
     [[nodiscard]]
@@ -84,19 +93,16 @@ namespace sdl::audio {
 
 
     [[nodiscard]]
-    const char*
+    std::string_view
     get_driver(unsigned index);
 
 
     void
     init(const char* driver);
 
-    inline
+
     void
-    init(const concepts::string auto& driver)
-    {
-        init(driver.data());
-    }
+    init(const concepts::string auto& driver);
 
 
     void
@@ -105,7 +111,7 @@ namespace sdl::audio {
 
 
     [[nodiscard]]
-    const char*
+    std::string_view
     get_current_driver();
 
 
@@ -115,7 +121,7 @@ namespace sdl::audio {
 
 
     [[nodiscard]]
-    const char*
+    std::string_view
     get_name(unsigned index,
              bool is_capture);
 
@@ -138,8 +144,6 @@ namespace sdl::audio {
         // Inherit constructors.
         using base_type::base_type;
 
-
-        // TODO: add obtained overloads
 
         // generic
         device(const char* name,
@@ -479,7 +483,7 @@ namespace sdl::audio {
 
     [[nodiscard]]
     std::pair<blob, spec>
-    load_wav(const path& filename);
+    load_wav(const std::filesystem::path& filename);
 
 
     struct converter : SDL_AudioCVT {
@@ -552,37 +556,22 @@ namespace sdl::audio {
 
 
         void
-        put(const void* buf,
-            std::size_t size);
+        put(std::span<const std::byte> samples);
+
 
         template<typename T,
                  std::size_t E>
+        requires (!std::same_as<std::remove_cv_t<T>, std::byte>)
         void
         put(std::span<const T, E> samples)
         {
-            put(samples.data(), samples.size_bytes());
+            put(as_bytes(samples));
         }
-
-        void
-        put(const blob& samples);
 
 
         [[nodiscard]]
-        std::size_t
-        get(void* buf,
-            std::size_t size);
-
-
-        template<typename T,
-                 std::size_t E>
-        std::size_t
-        get(std::span<T, E> buf)
-        {
-            return get(buf.data(), buf.size_bytes());
-        }
-
-        vector<Uint8>
-        get(std::size_t size);
+        std::span<std::byte>
+        get(std::span<std::byte> dst);
 
 
         [[nodiscard]]
@@ -626,7 +615,25 @@ namespace sdl::audio {
     }
 
 
-    // Implementation of templated methods.
+    // Implementation of templated functions.
+
+    template<std::same_as<allow_change>... Allow>
+    requires(sizeof...(Allow) > 0)
+    constexpr
+    Uint32
+    convert(Allow... changes)
+        noexcept
+    {
+        return (static_cast<Uint32>(changes) | ...);
+    }
+
+
+    inline
+    void
+    init(const concepts::string auto& driver)
+    {
+        init(driver.data());
+    }
 
 
     // stringy name

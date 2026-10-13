@@ -1,7 +1,7 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
@@ -26,9 +26,6 @@
 // TODO: implement try_ methods with expected results.
 
 namespace sdl {
-
-    using std::filesystem::path;
-
 
     class surface : public owner_wrapper<SDL_Surface*> {
 
@@ -483,7 +480,7 @@ namespace sdl {
         [[nodiscard]]
         static
         surface
-        load_bmp(const path& filename);
+        load_bmp(const std::filesystem::path& filename);
 
 
         void
@@ -494,7 +491,7 @@ namespace sdl {
         save_bmp(rwops& dst);
 
         void
-        save_bmp(const path& filename);
+        save_bmp(const std::filesystem::path& filename);
 
 
         void

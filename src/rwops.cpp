@@ -6,21 +6,36 @@
  * SPDX-License-Identifier: Zlib
  */
 
-#include <utility>
 #include <streambuf>
 
 #include <SDL_error.h>
 
 #include "sdl2xx/rwops.hpp"
 
+#include "impl/value_or_throw.hpp"
 
-using std::expected;
-using std::unexpected;
+
+using sdl::impl::value_or_throw;
 
 
 namespace sdl {
 
     namespace {
+
+        /*-----------------------*/
+        /* Function declarations */
+        /*-----------------------*/
+
+        int
+        streambuf_close(SDL_RWops* ctx)
+            noexcept;
+
+        std::size_t
+        streambuf_read(SDL_RWops* ctx,
+                       void* buf,
+                       std::size_t elem_size,
+                       std::size_t count)
+            noexcept;
 
         Sint64
         streambuf_seek(SDL_RWops* ctx,
@@ -30,87 +45,23 @@ namespace sdl {
 
         Sint64
         streambuf_size(SDL_RWops* ctx)
-            noexcept
-        {
-            auto pos = SDL_RWseek(ctx, 0, RW_SEEK_CUR);
-            if (pos < 0)
-                return -1;
-            auto size = SDL_RWseek(ctx, 0, RW_SEEK_END);
-            SDL_RWseek(ctx, pos, RW_SEEK_SET);
-            return size;
-        }
-
-
-        Sint64
-        streambuf_seek(SDL_RWops* ctx,
-                       Sint64 offset,
-                       int whence)
-            noexcept
-        {
-            auto stream = reinterpret_cast<std::streambuf*>(ctx->hidden.unknown.data1);
-            std::ios_base::seekdir dir;
-            switch (whence) {
-                case RW_SEEK_SET:
-                    dir = std::ios_base::beg;
-                    break;
-                case RW_SEEK_CUR:
-                    dir = std::ios_base::cur;
-                    break;
-                case RW_SEEK_END:
-                    dir = std::ios_base::end;
-                    break;
-                default:
-                    return SDL_SetError("streambuf_seek(): unknown value for 'whence'");
-            }
-            std::streamsize result;
-            // Test if read/write streambuf.
-            result = stream->pubseekoff(offset, dir);
-            if (result != -1)
-                return result;
-            // Test if read-only streambuf.
-            result = stream->pubseekoff(offset, dir, std::ios_base::in);
-            if (result != -1)
-                return result;
-            // Test if write-only streambuf.
-            result = stream->pubseekoff(offset, dir, std::ios_base::out);
-            if (result != -1)
-                return result;
-            return SDL_Error(SDL_EFSEEK);
-        }
-
-
-        std::size_t
-        streambuf_read(SDL_RWops* ctx,
-                       void* buf,
-                       std::size_t elem_size,
-                       std::size_t count)
-            noexcept
-        {
-            auto stream = reinterpret_cast<std::streambuf*>(ctx->hidden.unknown.data1);
-            auto size_bytes = elem_size * count;
-            std::size_t r = stream->sgetn(static_cast<char*>(buf), size_bytes);
-            // Note: EOF is not an error.
-            // if (size_bytes > 0 && r == 0)
-            //     SDL_SetError("streambuf_read(): sgetn() failed");
-            return r / elem_size;
-        }
-
+            noexcept;
 
         std::size_t
         streambuf_write(SDL_RWops* ctx,
                         const void* buf,
                         std::size_t elem_size,
                         std::size_t count)
-            noexcept
-        {
-            auto stream = reinterpret_cast<std::streambuf*>(ctx->hidden.unknown.data1);
-            auto size_bytes = elem_size * count;
-            std::size_t w = stream->sputn(static_cast<const char*>(buf), size_bytes);
-            if (size_bytes > 0 && w == 0)
-                SDL_SetError("streambuf_write(): sputn() failed");
-            return w / elem_size;
-        }
+            noexcept;
 
+        rwops::seekdir
+        to_sdl_seekdir(std::ios::seekdir dir)
+            noexcept;
+
+
+        /*----------------------*/
+        /* Function definitions */
+        /*----------------------*/
 
         int
         streambuf_close(SDL_RWops* ctx)
@@ -128,9 +79,141 @@ namespace sdl {
             return status;
         }
 
+
+        std::size_t
+        streambuf_read(SDL_RWops* ctx,
+                       void* buf,
+                       std::size_t elem_size,
+                       std::size_t count)
+            noexcept
+        {
+            auto stream = reinterpret_cast<std::streambuf*>(ctx->hidden.unknown.data1);
+            const auto request_size = elem_size * count;
+            const auto read_size = stream->sgetn(static_cast<char*>(buf), request_size);
+            // NOTE: EOF is not reported as an error.
+            if (read_size <= 0)
+                return 0;
+            const auto complete = read_size / elem_size;
+            const auto complete_size = complete * elem_size;
+            if (std::cmp_greater(read_size, complete_size)) {
+                // handle partial reads
+                auto partial_size = read_size - complete_size;
+                auto new_pos = stream->pubseekoff(
+                    -static_cast<std::streambuf::off_type>(partial_size),
+                    std::ios::cur,
+                    std::ios::in
+                );
+                if (new_pos == std::streambuf::pos_type(-1)) {
+                    SDL_SetError("streambuf_read(): could not undo partial read");
+                    return complete;
+                }
+            }
+            return complete;
+        }
+
+
+        Sint64
+        streambuf_seek(SDL_RWops* ctx,
+                       Sint64 offset,
+                       int whence)
+            noexcept
+        {
+            const auto invalid_pos = std::streambuf::pos_type(-1);
+            auto stream = reinterpret_cast<std::streambuf*>(ctx->hidden.unknown.data1);
+            std::ios::seekdir dir;
+            switch (whence) {
+                case RW_SEEK_SET:
+                    dir = std::ios::beg;
+                    break;
+                case RW_SEEK_CUR:
+                    dir = std::ios::cur;
+                    break;
+                case RW_SEEK_END:
+                    dir = std::ios::end;
+                    break;
+                default:
+                    return SDL_SetError("streambuf_seek(): unknown value for 'whence'");
+            }
+            std::streamsize result;
+            // Test if read/write streambuf.
+            result = stream->pubseekoff(offset, dir);
+            if (result != invalid_pos)
+                return result;
+            // Test if read-only streambuf.
+            result = stream->pubseekoff(offset, dir, std::ios::in);
+            if (result != invalid_pos)
+                return result;
+            // Test if write-only streambuf.
+            result = stream->pubseekoff(offset, dir, std::ios::out);
+            if (result != invalid_pos)
+                return result;
+            return SDL_Error(SDL_EFSEEK);
+        }
+
+
+        Sint64
+        streambuf_size(SDL_RWops* ctx)
+            noexcept
+        {
+            auto pos = SDL_RWseek(ctx, 0, RW_SEEK_CUR);
+            if (pos < 0)
+                return -1;
+            auto size = SDL_RWseek(ctx, 0, RW_SEEK_END);
+            SDL_RWseek(ctx, pos, RW_SEEK_SET);
+            return size;
+        }
+
+
+        std::size_t
+        streambuf_write(SDL_RWops* ctx,
+                        const void* buf,
+                        std::size_t elem_size,
+                        std::size_t count)
+            noexcept
+        {
+            if (elem_size == 0 || count == 0)
+                return 0;
+            auto stream = reinterpret_cast<std::streambuf*>(ctx->hidden.unknown.data1);
+            auto request_size = elem_size * count;
+            auto written_size = stream->sputn(static_cast<const char*>(buf),
+                                              request_size);
+            if (written_size <= 0) {
+                SDL_SetError("streambuf_write(): sputn() failed");
+                return 0;
+            }
+
+            const auto complete = written_size / elem_size;
+            const auto complete_size = complete * elem_size;
+
+            if (std::cmp_greater(written_size, complete_size))
+                SDL_SetError("streambuf_write(): partial write");
+
+            return complete;
+        }
+
+
+        rwops::seekdir
+        to_sdl_seekdir(std::ios::seekdir dir)
+            noexcept
+        {
+            switch (dir) {
+                case std::ios::beg:
+                    return rwops::seekdir::beg;
+                case std::ios::cur:
+                    return rwops::seekdir::cur;
+                case std::ios::end:
+                    return rwops::seekdir::end;
+                default:
+                    return rwops::seekdir::beg;
+            }
+        }
+
     } // namespace
 
 
+    /*------------------*/
+    /* Public functions */
+    /*------------------*/
 
     rwops::rwops(const path& filename,
                  const char* mode)
@@ -146,17 +229,15 @@ namespace sdl {
     }
 
 
-    rwops::rwops(void* mem,
-                 std::size_t size)
+    rwops::rwops(std::span<std::byte> content)
     {
-        create(mem, size);
+        create(content);
     }
 
 
-    rwops::rwops(const void* mem,
-                 std::size_t size)
+    rwops::rwops(std::span<const std::byte> content)
     {
-        create(mem, size);
+        create(content);
     }
 
 
@@ -204,10 +285,10 @@ namespace sdl {
 
 
     void
-    rwops::create(void* mem,
-                  std::size_t size)
+    rwops::create(std::span<std::byte> content)
     {
-        auto new_raw = SDL_RWFromMem(mem, static_cast<int>(size));
+        auto new_raw = SDL_RWFromMem(content.data(),
+                                     static_cast<int>(content.size()));
         if (!new_raw)
             throw error{};
         destroy();
@@ -216,10 +297,10 @@ namespace sdl {
 
 
     void
-    rwops::create(const void* mem,
-                  std::size_t size)
+    rwops::create(std::span<const std::byte> content)
     {
-        auto new_raw = SDL_RWFromConstMem(mem, static_cast<int>(size));
+        auto new_raw = SDL_RWFromConstMem(content.data(),
+                                          static_cast<int>(content.size()));
         if (!new_raw)
             throw error{};
         destroy();
@@ -266,20 +347,17 @@ namespace sdl {
     rwops::get_size()
         const
     {
-        auto result = try_get_size();
-        if (!result)
-            throw result.error();
-        return *result;
+        return value_or_throw(try_get_size());
     }
 
 
-    expected<Sint64, error>
+    std::expected<Sint64, error>
     rwops::try_get_size()
         const noexcept
     {
         auto sz = SDL_RWsize(raw);
         if (sz < -1)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return sz;
     }
 
@@ -288,63 +366,36 @@ namespace sdl {
     rwops::seek(Sint64 offset,
                 seekdir whence)
     {
-        auto result = try_seek(offset, whence);
-        if (!result)
-            throw result.error();
-        return *result;
+        return value_or_throw(try_seek(offset, whence));
     }
 
 
     Sint64
     rwops::seek(Sint64 offset,
-                std::ios_base::seekdir whence)
+                std::ios::seekdir whence)
     {
-        auto result = try_seek(offset, whence);
-        if (!result)
-            throw result.error();
-        return *result;
+        return value_or_throw(try_seek(offset, whence));
     }
 
 
-    expected<Sint64, error>
+    std::expected<Sint64, error>
     rwops::try_seek(Sint64 offset,
                     seekdir whence)
         noexcept
     {
-        auto result = SDL_RWseek(raw, offset, convert(whence));
+        auto result = SDL_RWseek(raw, offset, std::to_underlying(whence));
         if (result < 0)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return result;
     }
 
 
-    namespace {
-
-        rwops::seekdir
-        convert(std::ios_base::seekdir x)
-            noexcept
-        {
-            switch (x) {
-                case std::ios_base::beg:
-                    return rwops::seekdir::beg;
-                case std::ios_base::cur:
-                    return rwops::seekdir::cur;
-                case std::ios_base::end:
-                    return rwops::seekdir::end;
-                default:
-                    return rwops::seekdir::beg;
-            }
-        }
-
-    }
-
-
-    expected<Sint64, error>
+    std::expected<Sint64, error>
     rwops::try_seek(Sint64 offset,
-                    std::ios_base::seekdir whence)
+                    std::ios::seekdir whence)
         noexcept
     {
-        return try_seek(offset, convert(whence));
+        return try_seek(offset, to_sdl_seekdir(whence));
     }
 
 
@@ -361,14 +412,11 @@ namespace sdl {
                 std::size_t elem_size,
                 std::size_t count)
     {
-        auto result = try_read(buf, elem_size, count);
-        if (!result)
-            throw result.error();
-        return *result;
+        return value_or_throw(try_read(buf, elem_size, count));
     }
 
 
-    expected<std::size_t, error>
+    std::expected<std::size_t, error>
     rwops::try_read(void* buf,
                     std::size_t elem_size,
                     std::size_t count)
@@ -376,7 +424,7 @@ namespace sdl {
     {
         auto r = SDL_RWread(raw, buf, elem_size, count);
         if (r < 1) // TODO: should EOF be error?
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return r;
     }
 
@@ -386,14 +434,11 @@ namespace sdl {
                  std::size_t elem_size,
                  std::size_t count)
     {
-        auto result = try_write(buf, elem_size, count);
-        if (!result)
-            throw result.error();
-        return *result;
+        return value_or_throw(try_write(buf, elem_size, count));
     }
 
 
-    expected<std::size_t, error>
+    std::expected<std::size_t, error>
     rwops::try_write(const void* buf,
                      std::size_t elem_size,
                      std::size_t count)
@@ -401,7 +446,7 @@ namespace sdl {
     {
         auto w = SDL_RWwrite(raw, buf, elem_size, count);
         if (w < count) // TODO: even with error, maybe return w?
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return w;
     }
 
@@ -409,49 +454,43 @@ namespace sdl {
     blob
     rwops::load()
     {
-        auto result = try_load();
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load());
     }
 
 
-    expected<blob, error>
+    std::expected<blob, error>
     rwops::try_load()
         noexcept
     {
         std::size_t sz;
         auto ptr = SDL_LoadFile_RW(raw, &sz, false);
         if (!ptr)
-            return unexpected{error{}};
-        return blob{reinterpret_cast<Uint8*>(ptr), sz};
+            return std::unexpected{error{}};
+        return blob{reinterpret_cast<std::byte*>(ptr), sz};
     }
 
 
     Uint8
     rwops::read_u8()
     {
-        auto result = try_read_u8();
-        if (!result)
-            throw result.error();
-        return *result;
+        return value_or_throw(try_read_u8());
     }
 
 
-    expected<Uint8, error>
+    std::expected<Uint8, error>
     rwops::try_read_u8()
         noexcept
     {
         SDL_ClearError();
         auto r = SDL_ReadU8(raw);
         if (SDL_GetError()[0])
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return r;
     }
 
 
     template<>
-    expected<Uint8, error>
+    std::expected<Uint8, error>
     rwops::try_read_le<Uint8>()
         noexcept
     {
@@ -460,7 +499,7 @@ namespace sdl {
 
 
     template<>
-    expected<Uint8, error>
+    std::expected<Uint8, error>
     rwops::try_read_be<Uint8>()
         noexcept
     {
@@ -469,7 +508,7 @@ namespace sdl {
 
 
     template<>
-    expected<Sint8, error>
+    std::expected<Sint8, error>
     rwops::try_read_le<Sint8>()
         noexcept
     {
@@ -478,7 +517,7 @@ namespace sdl {
 
 
     template<>
-    expected<Sint8, error>
+    std::expected<Sint8, error>
     rwops::try_read_be<Sint8>()
         noexcept
     {
@@ -487,33 +526,33 @@ namespace sdl {
 
 
     template<>
-    expected<Uint16, error>
+    std::expected<Uint16, error>
     rwops::try_read_le<Uint16>()
         noexcept
     {
         SDL_ClearError();
         auto x = SDL_ReadLE16(raw);
         if (SDL_GetError()[0])
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return x;
     }
 
 
     template<>
-    expected<Uint16, error>
+    std::expected<Uint16, error>
     rwops::try_read_be<Uint16>()
         noexcept
     {
         SDL_ClearError();
         auto x = SDL_ReadBE16(raw);
         if (SDL_GetError()[0])
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return x;
     }
 
 
     template<>
-    expected<Sint16, error>
+    std::expected<Sint16, error>
     rwops::try_read_le<Sint16>()
         noexcept
     {
@@ -522,7 +561,7 @@ namespace sdl {
 
 
     template<>
-    expected<Sint16, error>
+    std::expected<Sint16, error>
     rwops::try_read_be<Sint16>()
         noexcept
     {
@@ -531,33 +570,33 @@ namespace sdl {
 
 
     template<>
-    expected<Uint32, error>
+    std::expected<Uint32, error>
     rwops::try_read_le<Uint32>()
         noexcept
     {
         SDL_ClearError();
         auto x = SDL_ReadLE32(raw);
         if (SDL_GetError()[0])
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return x;
     }
 
 
     template<>
-    expected<Uint32, error>
+    std::expected<Uint32, error>
     rwops::try_read_be<Uint32>()
         noexcept
     {
         SDL_ClearError();
         auto x = SDL_ReadBE32(raw);
         if (SDL_GetError()[0])
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return x;
     }
 
 
     template<>
-    expected<Sint32, error>
+    std::expected<Sint32, error>
     rwops::try_read_le<Sint32>()
         noexcept
     {
@@ -566,7 +605,7 @@ namespace sdl {
 
 
     template<>
-    expected<Sint32, error>
+    std::expected<Sint32, error>
     rwops::try_read_be<Sint32>()
         noexcept
     {
@@ -575,33 +614,33 @@ namespace sdl {
 
 
     template<>
-    expected<Uint64, error>
+    std::expected<Uint64, error>
     rwops::try_read_le<Uint64>()
         noexcept
     {
         SDL_ClearError();
         auto x = SDL_ReadLE64(raw);
         if (SDL_GetError()[0])
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return x;
     }
 
 
     template<>
-    expected<Uint64, error>
+    std::expected<Uint64, error>
     rwops::try_read_be<Uint64>()
         noexcept
     {
         SDL_ClearError();
         auto x = SDL_ReadBE64(raw);
         if (SDL_GetError()[0])
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return x;
     }
 
 
     template<>
-    expected<Sint64, error>
+    std::expected<Sint64, error>
     rwops::try_read_le<Sint64>()
         noexcept
     {
@@ -610,7 +649,7 @@ namespace sdl {
 
 
     template<>
-    expected<Sint64, error>
+    std::expected<Sint64, error>
     rwops::try_read_be<Sint64>()
         noexcept
     {
@@ -622,24 +661,22 @@ namespace sdl {
     void
     rwops::write_u8(Uint8 value)
     {
-        auto result = try_write_u8(value);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_write_u8(value));
     }
 
 
-    expected<void, error>
+    std::expected<void, error>
     rwops::try_write_u8(Uint8 value)
         noexcept
     {
         if (!SDL_WriteU8(raw, value))
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return {};
     }
 
 
     template<>
-    expected<void, error>
+    std::expected<void, error>
     rwops::try_write_le<Uint8>(Uint8 value)
         noexcept
     {
@@ -648,7 +685,7 @@ namespace sdl {
 
 
     template<>
-    expected<void, error>
+    std::expected<void, error>
     rwops::try_write_be<Uint8>(Uint8 value)
         noexcept
     {
@@ -657,7 +694,7 @@ namespace sdl {
 
 
     template<>
-    expected<void, error>
+    std::expected<void, error>
     rwops::try_write_le<Sint8>(Sint8 value)
         noexcept
     {
@@ -666,7 +703,7 @@ namespace sdl {
 
 
     template<>
-    expected<void, error>
+    std::expected<void, error>
     rwops::try_write_be<Sint8>(Sint8 value)
         noexcept
     {
@@ -675,133 +712,133 @@ namespace sdl {
 
 
     template<>
-    expected<void, error>
+    std::expected<void, error>
     rwops::try_write_le<Uint16>(Uint16 value)
         noexcept
     {
         if (!SDL_WriteLE16(raw, value))
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return {};
     }
 
 
     template<>
-    expected<void, error>
+    std::expected<void, error>
     rwops::try_write_be<Uint16>(Uint16 value)
         noexcept
     {
         if (!SDL_WriteBE16(raw, value))
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return {};
     }
 
 
     template<>
-    expected<void, error>
+    std::expected<void, error>
     rwops::try_write_le<Sint16>(Sint16 value)
         noexcept
     {
         if (!SDL_WriteLE16(raw, value))
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return {};
     }
 
 
     template<>
-    expected<void, error>
+    std::expected<void, error>
     rwops::try_write_be<Sint16>(Sint16 value)
         noexcept
     {
         if (!SDL_WriteBE16(raw, value))
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return {};
     }
 
 
     template<>
-    expected<void, error>
+    std::expected<void, error>
     rwops::try_write_le<Uint32>(Uint32 value)
         noexcept
     {
         if (!SDL_WriteLE32(raw, value))
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return {};
     }
 
 
     template<>
-    expected<void, error>
+    std::expected<void, error>
     rwops::try_write_be<Uint32>(Uint32 value)
         noexcept
     {
         if (!SDL_WriteBE32(raw, value))
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return {};
     }
 
 
     template<>
-    expected<void, error>
+    std::expected<void, error>
     rwops::try_write_le<Sint32>(Sint32 value)
         noexcept
     {
         if (!SDL_WriteLE32(raw, value))
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return {};
     }
 
 
     template<>
-    expected<void, error>
+    std::expected<void, error>
     rwops::try_write_be<Sint32>(Sint32 value)
         noexcept
     {
         if (!SDL_WriteBE32(raw, value))
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return {};
     }
 
 
     template<>
-    expected<void, error>
+    std::expected<void, error>
     rwops::try_write_le<Uint64>(Uint64 value)
         noexcept
     {
         if (!SDL_WriteLE64(raw, value))
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return {};
     }
 
 
     template<>
-    expected<void, error>
+    std::expected<void, error>
     rwops::try_write_be<Uint64>(Uint64 value)
         noexcept
     {
         if (!SDL_WriteBE64(raw, value))
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return {};
     }
 
 
     template<>
-    expected<void, error>
+    std::expected<void, error>
     rwops::try_write_le<Sint64>(Sint64 value)
         noexcept
     {
         if (!SDL_WriteLE64(raw, value))
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return {};
     }
 
 
     template<>
-    expected<void, error>
+    std::expected<void, error>
     rwops::try_write_be<Sint64>(Sint64 value)
         noexcept
     {
         if (!SDL_WriteBE64(raw, value))
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return {};
     }
 
@@ -809,23 +846,19 @@ namespace sdl {
     blob
     load_file(const path& filename)
     {
-        auto result = try_load_file(filename);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_file(filename));
     }
 
 
-    expected<blob, error>
+    std::expected<blob, error>
     try_load_file(const path& filename)
         noexcept
     {
         std::size_t sz;
         auto ptr = SDL_LoadFile(filename.c_str(), &sz);
         if (!ptr)
-            return unexpected{error{}};
-        return blob{reinterpret_cast<Uint8*>(ptr), sz};
+            return std::unexpected{error{}};
+        return blob{reinterpret_cast<std::byte*>(ptr), sz};
     }
-
 
 } // namespace sdl

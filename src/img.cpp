@@ -11,11 +11,11 @@
 
 #include "sdl2xx/img.hpp"
 
+#include "impl/value_or_throw.hpp"
 #include "sdl2xx/renderer.hpp"
 
 
-using std::expected;
-using std::unexpected;
+using sdl::impl::value_or_throw;
 
 
 namespace sdl::img {
@@ -71,10 +71,7 @@ namespace sdl::img {
          bool close_src,
          const char* type)
     {
-        auto result = try_load(src, close_src, type);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load(src, close_src, type));
     }
 
 
@@ -82,11 +79,11 @@ namespace sdl::img {
     load(rwops& src,
          const char* type)
     {
-        return load(src.data(), false, type);
+        return value_or_throw(try_load(src, type));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load(SDL_RWops* src,
              bool close_src,
              const char* type)
@@ -94,12 +91,12 @@ namespace sdl::img {
     {
         auto surf = IMG_LoadTyped_RW(src, close_src, type);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load(rwops& src,
              const char* type)
         noexcept
@@ -109,22 +106,19 @@ namespace sdl::img {
 
 
     surface
-    load(const path& filename)
+    load(const std::filesystem::path& filename)
     {
-        auto result = try_load(filename);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load(filename));
     }
 
 
-    expected<surface, error>
-    try_load(const path& filename)
+    std::expected<surface, error>
+    try_load(const std::filesystem::path& filename)
         noexcept
     {
         auto surf = IMG_Load(filename.c_str());
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
@@ -133,34 +127,31 @@ namespace sdl::img {
     load(SDL_RWops* src,
          bool close_src)
     {
-        auto result = try_load(src, close_src);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load(src, close_src));
     }
 
 
     surface
     load(rwops& src)
     {
-        return load(src.data(), false);
+        return value_or_throw(try_load(src));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load(SDL_RWops* src,
              bool close_src)
         noexcept
     {
         auto surf = IMG_Load_RW(src, close_src);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
 
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load(rwops& src)
         noexcept
     {
@@ -170,23 +161,20 @@ namespace sdl::img {
 
     texture
     load_texture(renderer& ren,
-                 const path& filename)
+                 const std::filesystem::path& filename)
     {
-        auto result = try_load_texture(ren, filename);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_texture(ren, filename));
     }
 
 
-    expected<texture, error>
+    std::expected<texture, error>
     try_load_texture(renderer& ren,
-                     const path& filename)
+                     const std::filesystem::path& filename)
         noexcept
     {
         auto tex = IMG_LoadTexture(ren.data(), filename.c_str());
         if (!tex)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return texture{tex};
     }
 
@@ -196,10 +184,7 @@ namespace sdl::img {
                  SDL_RWops* src,
                  bool close_src)
     {
-        auto result = try_load_texture(ren, src, close_src);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_texture(ren, src, close_src));
     }
 
 
@@ -207,11 +192,11 @@ namespace sdl::img {
     load_texture(renderer& ren,
                  rwops& src)
     {
-        return load_texture(ren, src.data(), false);
+        return value_or_throw(try_load_texture(ren, src));
     }
 
 
-    expected<texture, error>
+    std::expected<texture, error>
     try_load_texture(renderer& ren,
                      SDL_RWops* src,
                      bool close_src)
@@ -220,12 +205,12 @@ namespace sdl::img {
 
         auto tex = IMG_LoadTexture_RW(ren.data(), src, close_src);
         if (!tex)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return texture{tex};
     }
 
 
-    expected<texture, error>
+    std::expected<texture, error>
     try_load_texture(renderer& ren,
                      rwops& src)
         noexcept
@@ -240,10 +225,7 @@ namespace sdl::img {
                  bool close_src,
                  const char* type)
     {
-        auto result = try_load_texture(ren, src, close_src, type);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_texture(ren, src, close_src, type));
     }
 
 
@@ -252,11 +234,11 @@ namespace sdl::img {
                  rwops& src,
                  const char* type)
     {
-        return load_texture(ren, src.data(), false, type);
+        return value_or_throw(try_load_texture(ren, src, type));
     }
 
 
-    expected<texture, error>
+    std::expected<texture, error>
     try_load_texture(renderer& ren,
                      SDL_RWops* src,
                      bool close_src,
@@ -265,12 +247,12 @@ namespace sdl::img {
     {
         auto tex = IMG_LoadTextureTyped_RW(ren.data(), src, close_src, type);
         if (!tex)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return texture{tex};
     }
 
 
-    expected<texture, error>
+    std::expected<texture, error>
     try_load_texture(renderer& ren,
                      rwops& src,
                      const char* type)
@@ -589,42 +571,36 @@ namespace sdl::img {
     surface
     load_avif(SDL_RWops* src)
     {
-        auto result = try_load_avif(src);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_avif(src));
     }
 
 
     surface
     load_avif(rwops& src)
     {
-        return load_avif(src.data());
+        return value_or_throw(try_load_avif(src));
     }
 
 
     surface
-    load_avif(const path& filename)
+    load_avif(const std::filesystem::path& filename)
     {
-        auto result = try_load_avif(filename);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_avif(filename));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_avif(SDL_RWops* src)
         noexcept
     {
         auto surf = IMG_LoadAVIF_RW(src);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_avif(rwops& src)
         noexcept
     {
@@ -632,8 +608,8 @@ namespace sdl::img {
     }
 
 
-    expected<surface, error>
-    try_load_avif(const path& filename)
+    std::expected<surface, error>
+    try_load_avif(const std::filesystem::path& filename)
         noexcept
     {
         try {
@@ -641,7 +617,7 @@ namespace sdl::img {
             return try_load_avif(src);
         }
         catch (error& e) {
-            return unexpected{e};
+            return std::unexpected{e};
         }
     }
 
@@ -651,42 +627,36 @@ namespace sdl::img {
     surface
     load_bmp(SDL_RWops* src)
     {
-        auto result = try_load_bmp(src);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_bmp(src));
     }
 
 
     surface
     load_bmp(rwops& src)
     {
-        return load_bmp(src.data());
+        return value_or_throw(try_load_bmp(src));
     }
 
 
     surface
-    load_bmp(const path& filename)
+    load_bmp(const std::filesystem::path& filename)
     {
-        auto result = try_load_bmp(filename);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_bmp(filename));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_bmp(SDL_RWops* src)
         noexcept
     {
         auto surf = IMG_LoadBMP_RW(src);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_bmp(rwops& src)
         noexcept
     {
@@ -694,8 +664,8 @@ namespace sdl::img {
     }
 
 
-    expected<surface, error>
-    try_load_bmp(const path& filename)
+    std::expected<surface, error>
+    try_load_bmp(const std::filesystem::path& filename)
         noexcept
     {
         try {
@@ -703,7 +673,7 @@ namespace sdl::img {
             return try_load_bmp(src);
         }
         catch (error& e) {
-            return unexpected{e};
+            return std::unexpected{e};
         }
     }
 
@@ -711,42 +681,36 @@ namespace sdl::img {
     surface
     load_cur(SDL_RWops* src)
     {
-        auto result = try_load_cur(src);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_cur(src));
     }
 
 
     surface
     load_cur(rwops& src)
     {
-        return load_cur(src.data());
+        return value_or_throw(try_load_cur(src));
     }
 
 
     surface
-    load_cur(const path& filename)
+    load_cur(const std::filesystem::path& filename)
     {
-        auto result = try_load_cur(filename);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_cur(filename));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_cur(SDL_RWops* src)
         noexcept
     {
         auto surf = IMG_LoadCUR_RW(src);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_cur(rwops& src)
         noexcept
     {
@@ -754,8 +718,8 @@ namespace sdl::img {
     }
 
 
-    expected<surface, error>
-    try_load_cur(const path& filename)
+    std::expected<surface, error>
+    try_load_cur(const std::filesystem::path& filename)
         noexcept
     {
         try {
@@ -763,7 +727,7 @@ namespace sdl::img {
             return try_load_cur(src);
         }
         catch (error& e) {
-            return unexpected{e};
+            return std::unexpected{e};
         }
     }
 
@@ -771,42 +735,36 @@ namespace sdl::img {
     surface
     load_gif(SDL_RWops* src)
     {
-        auto result = try_load_gif(src);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_gif(src));
     }
 
 
     surface
     load_gif(rwops& src)
     {
-        return load_gif(src.data());
+        return value_or_throw(try_load_gif(src));
     }
 
 
     surface
-    load_gif(const path& filename)
+    load_gif(const std::filesystem::path& filename)
     {
-        auto result = try_load_gif(filename);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_gif(filename));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_gif(SDL_RWops* src)
         noexcept
     {
         auto surf = IMG_LoadGIF_RW(src);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_gif(rwops& src)
         noexcept
     {
@@ -814,8 +772,8 @@ namespace sdl::img {
     }
 
 
-    expected<surface, error>
-    try_load_gif(const path& filename)
+    std::expected<surface, error>
+    try_load_gif(const std::filesystem::path& filename)
         noexcept
     {
         try {
@@ -823,7 +781,7 @@ namespace sdl::img {
             return try_load_gif(src);
         }
         catch (error& e) {
-            return unexpected{e};
+            return std::unexpected{e};
         }
     }
 
@@ -831,42 +789,36 @@ namespace sdl::img {
     surface
     load_ico(SDL_RWops* src)
     {
-        auto result = try_load_ico(src);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_ico(src));
     }
 
 
     surface
     load_ico(rwops& src)
     {
-        return load_ico(src.data());
+        return value_or_throw(try_load_ico(src));
     }
 
 
     surface
-    load_ico(const path& filename)
+    load_ico(const std::filesystem::path& filename)
     {
-        auto result = try_load_ico(filename);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_ico(filename));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_ico(SDL_RWops* src)
         noexcept
     {
         auto surf = IMG_LoadICO_RW(src);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_ico(rwops& src)
         noexcept
     {
@@ -874,8 +826,8 @@ namespace sdl::img {
     }
 
 
-    expected<surface, error>
-    try_load_ico(const path& filename)
+    std::expected<surface, error>
+    try_load_ico(const std::filesystem::path& filename)
         noexcept
     {
         try {
@@ -883,7 +835,7 @@ namespace sdl::img {
             return try_load_ico(src);
         }
         catch (error& e) {
-            return unexpected{e};
+            return std::unexpected{e};
         }
     }
 
@@ -891,42 +843,36 @@ namespace sdl::img {
     surface
     load_jpg(SDL_RWops* src)
     {
-        auto result = try_load_jpg(src);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_jpg(src));
     }
 
 
     surface
     load_jpg(rwops& src)
     {
-        return load_jpg(src.data());
+        return value_or_throw(try_load_jpg(src));
     }
 
 
     surface
-    load_jpg(const path& filename)
+    load_jpg(const std::filesystem::path& filename)
     {
-        auto result = try_load_jpg(filename);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_jpg(filename));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_jpg(SDL_RWops* src)
         noexcept
     {
         auto surf = IMG_LoadJPG_RW(src);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_jpg(rwops& src)
         noexcept
     {
@@ -934,8 +880,8 @@ namespace sdl::img {
     }
 
 
-    expected<surface, error>
-    try_load_jpg(const path& filename)
+    std::expected<surface, error>
+    try_load_jpg(const std::filesystem::path& filename)
         noexcept
     {
         try {
@@ -943,7 +889,7 @@ namespace sdl::img {
             return try_load_jpg(src);
         }
         catch (error& e) {
-            return unexpected{e};
+            return std::unexpected{e};
         }
     }
 
@@ -953,42 +899,36 @@ namespace sdl::img {
     surface
     load_jxl(SDL_RWops* src)
     {
-        auto result = try_load_jxl(src);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_jxl(src));
     }
 
 
     surface
     load_jxl(rwops& src)
     {
-        return load_jxl(src.data());
+        return value_or_throw(try_load_jxl(src));
     }
 
 
     surface
-    load_jxl(const path& filename)
+    load_jxl(const std::filesystem::path& filename)
     {
-        auto result = try_load_jxl(filename);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_jxl(filename));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_jxl(SDL_RWops* src)
         noexcept
     {
         auto surf = IMG_LoadJXL_RW(src);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_jxl(rwops& src)
         noexcept
     {
@@ -996,8 +936,8 @@ namespace sdl::img {
     }
 
 
-    expected<surface, error>
-    try_load_jxl(const path& filename)
+    std::expected<surface, error>
+    try_load_jxl(const std::filesystem::path& filename)
         noexcept
     {
         try {
@@ -1005,7 +945,7 @@ namespace sdl::img {
             return try_load_jxl(src);
         }
         catch (error& e) {
-            return unexpected{e};
+            return std::unexpected{e};
         }
     }
 
@@ -1015,42 +955,36 @@ namespace sdl::img {
     surface
     load_lbm(SDL_RWops* src)
     {
-        auto result = try_load_lbm(src);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_lbm(src));
     }
 
 
     surface
     load_lbm(rwops& src)
     {
-        return load_lbm(src.data());
+        return value_or_throw(try_load_lbm(src));
     }
 
 
     surface
-    load_lbm(const path& filename)
+    load_lbm(const std::filesystem::path& filename)
     {
-        auto result = try_load_lbm(filename);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_lbm(filename));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_lbm(SDL_RWops* src)
         noexcept
     {
         auto surf = IMG_LoadLBM_RW(src);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_lbm(rwops& src)
         noexcept
     {
@@ -1058,8 +992,8 @@ namespace sdl::img {
     }
 
 
-    expected<surface, error>
-    try_load_lbm(const path& filename)
+    std::expected<surface, error>
+    try_load_lbm(const std::filesystem::path& filename)
         noexcept
     {
         try {
@@ -1067,7 +1001,7 @@ namespace sdl::img {
             return try_load_lbm(src);
         }
         catch (error& e) {
-            return unexpected{e};
+            return std::unexpected{e};
         }
     }
 
@@ -1075,42 +1009,36 @@ namespace sdl::img {
     surface
     load_pcx(SDL_RWops* src)
     {
-        auto result = try_load_pcx(src);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_pcx(src));
     }
 
 
     surface
     load_pcx(rwops& src)
     {
-        return load_pcx(src.data());
+        return value_or_throw(try_load_pcx(src));
     }
 
 
     surface
-    load_pcx(const path& filename)
+    load_pcx(const std::filesystem::path& filename)
     {
-        auto result = try_load_pcx(filename);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_pcx(filename));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_pcx(SDL_RWops* src)
         noexcept
     {
         auto surf = IMG_LoadPCX_RW(src);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_pcx(rwops& src)
         noexcept
     {
@@ -1118,8 +1046,8 @@ namespace sdl::img {
     }
 
 
-    expected<surface, error>
-    try_load_pcx(const path& filename)
+    std::expected<surface, error>
+    try_load_pcx(const std::filesystem::path& filename)
         noexcept
     {
         try {
@@ -1127,7 +1055,7 @@ namespace sdl::img {
             return try_load_pcx(src);
         }
         catch (error& e) {
-            return unexpected{e};
+            return std::unexpected{e};
         }
     }
 
@@ -1135,42 +1063,36 @@ namespace sdl::img {
     surface
     load_png(SDL_RWops* src)
     {
-        auto result = try_load_png(src);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_png(src));
     }
 
 
     surface
     load_png(rwops& src)
     {
-        return load_png(src.data());
+        return value_or_throw(try_load_png(src));
     }
 
 
     surface
-    load_png(const path& filename)
+    load_png(const std::filesystem::path& filename)
     {
-        auto result = try_load_png(filename);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_png(filename));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_png(SDL_RWops* src)
         noexcept
     {
         auto surf = IMG_LoadPNG_RW(src);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_png(rwops& src)
         noexcept
     {
@@ -1178,8 +1100,8 @@ namespace sdl::img {
     }
 
 
-    expected<surface, error>
-    try_load_png(const path& filename)
+    std::expected<surface, error>
+    try_load_png(const std::filesystem::path& filename)
         noexcept
     {
         try {
@@ -1187,7 +1109,7 @@ namespace sdl::img {
             return try_load_png(src);
         }
         catch (error& e) {
-            return unexpected{e};
+            return std::unexpected{e};
         }
     }
 
@@ -1195,42 +1117,36 @@ namespace sdl::img {
     surface
     load_pnm(SDL_RWops* src)
     {
-        auto result = try_load_pnm(src);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_pnm(src));
     }
 
 
     surface
     load_pnm(rwops& src)
     {
-        return load_pnm(src.data());
+        return value_or_throw(try_load_pnm(src));
     }
 
 
     surface
-    load_pnm(const path& filename)
+    load_pnm(const std::filesystem::path& filename)
     {
-        auto result = try_load_pnm(filename);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_pnm(filename));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_pnm(SDL_RWops* src)
         noexcept
     {
         auto surf = IMG_LoadPNM_RW(src);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_pnm(rwops& src)
         noexcept
     {
@@ -1238,8 +1154,8 @@ namespace sdl::img {
     }
 
 
-    expected<surface, error>
-    try_load_pnm(const path& filename)
+    std::expected<surface, error>
+    try_load_pnm(const std::filesystem::path& filename)
         noexcept
     {
         try {
@@ -1247,7 +1163,7 @@ namespace sdl::img {
             return try_load_pnm(src);
         }
         catch (error& e) {
-            return unexpected{e};
+            return std::unexpected{e};
         }
     }
 
@@ -1257,42 +1173,36 @@ namespace sdl::img {
     surface
     load_svg(SDL_RWops* src)
     {
-        auto result = try_load_svg(src);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_svg(src));
     }
 
 
     surface
     load_svg(rwops& src)
     {
-        return load_svg(src.data());
+        return value_or_throw(try_load_svg(src));
     }
 
 
     surface
-    load_svg(const path& filename)
+    load_svg(const std::filesystem::path& filename)
     {
-        auto result = try_load_svg(filename);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_svg(filename));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_svg(SDL_RWops* src)
         noexcept
     {
         auto surf = IMG_LoadSVG_RW(src);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_svg(rwops& src)
         noexcept
     {
@@ -1300,8 +1210,8 @@ namespace sdl::img {
     }
 
 
-    expected<surface, error>
-    try_load_svg(const path& filename)
+    std::expected<surface, error>
+    try_load_svg(const std::filesystem::path& filename)
         noexcept
     {
         try {
@@ -1309,7 +1219,7 @@ namespace sdl::img {
             return try_load_svg(src);
         }
         catch (error& e) {
-            return unexpected{e};
+            return std::unexpected{e};
         }
     }
 
@@ -1323,10 +1233,7 @@ namespace sdl::img {
              int width,
              int height)
     {
-        auto result = try_load_svg(src, width, height);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_svg(src, width, height));
     }
 
 
@@ -1335,7 +1242,7 @@ namespace sdl::img {
              int width,
              int height)
     {
-        return load_svg(src.data(), width, height);
+        return value_or_throw(try_load_svg(src, width, height));
     }
 
 
@@ -1343,7 +1250,7 @@ namespace sdl::img {
     load_svg(SDL_RWops* src,
              vec2 size)
     {
-        return load_svg(src, size.x, size.y);
+        return value_or_throw(try_load_svg(src, size));
     }
 
 
@@ -1351,31 +1258,28 @@ namespace sdl::img {
     load_svg(rwops& src,
              vec2 size)
     {
-        return load_svg(src.data(), size);
+        return value_or_throw(try_load_svg(src, size));
     }
 
 
     surface
-    load_svg(const path& filename,
+    load_svg(const std::filesystem::path& filename,
              int width,
              int height)
     {
-        auto result = try_load_svg(filename, width, height);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_svg(filename, width, height));
     }
 
 
     surface
-    load_svg(const path& filename,
+    load_svg(const std::filesystem::path& filename,
              vec2 size)
     {
-        return load_svg(filename, size.x, size.y);
+        return value_or_throw(try_load_svg(filename, size));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_svg(SDL_RWops* src,
                  int width,
                  int height)
@@ -1383,12 +1287,12 @@ namespace sdl::img {
     {
         auto surf = IMG_LoadSizedSVG_RW(src, width, height);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_svg(rwops& src,
                  int width,
                  int height)
@@ -1398,7 +1302,7 @@ namespace sdl::img {
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_svg(SDL_RWops* src,
                   vec2 size)
         noexcept
@@ -1407,7 +1311,7 @@ namespace sdl::img {
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_svg(rwops& src,
                  vec2 size)
         noexcept
@@ -1416,8 +1320,8 @@ namespace sdl::img {
     }
 
 
-    expected<surface, error>
-    try_load_svg(const path& filename,
+    std::expected<surface, error>
+    try_load_svg(const std::filesystem::path& filename,
                  int width,
                  int height)
         noexcept
@@ -1427,13 +1331,13 @@ namespace sdl::img {
             return try_load_svg(src, width, height);
         }
         catch (error& e) {
-            return unexpected{e};
+            return std::unexpected{e};
         }
     }
 
 
-    expected<surface, error>
-    try_load_svg(const path& filename,
+    std::expected<surface, error>
+    try_load_svg(const std::filesystem::path& filename,
                   vec2 size)
         noexcept
     {
@@ -1448,42 +1352,36 @@ namespace sdl::img {
     surface
     load_qoi(SDL_RWops* src)
     {
-        auto result = try_load_qoi(src);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_qoi(src));
     }
 
 
     surface
     load_qoi(rwops& src)
     {
-        return load_qoi(src.data());
+        return value_or_throw(try_load_qoi(src));
     }
 
 
     surface
-    load_qoi(const path& filename)
+    load_qoi(const std::filesystem::path& filename)
     {
-        auto result = try_load_qoi(filename);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_qoi(filename));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_qoi(SDL_RWops* src)
         noexcept
     {
         auto surf = IMG_LoadQOI_RW(src);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_qoi(rwops& src)
         noexcept
     {
@@ -1491,8 +1389,8 @@ namespace sdl::img {
     }
 
 
-    expected<surface, error>
-    try_load_qoi(const path& filename)
+    std::expected<surface, error>
+    try_load_qoi(const std::filesystem::path& filename)
         noexcept
     {
         try {
@@ -1500,7 +1398,7 @@ namespace sdl::img {
             return try_load_qoi(src);
         }
         catch (error& e) {
-            return unexpected{e};
+            return std::unexpected{e};
         }
     }
 
@@ -1510,42 +1408,36 @@ namespace sdl::img {
     surface
     load_tif(SDL_RWops* src)
     {
-        auto result = try_load_tif(src);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_tif(src));
     }
 
 
     surface
     load_tif(rwops& src)
     {
-        return load_tif(src.data());
+        return value_or_throw(try_load_tif(src));
     }
 
 
     surface
-    load_tif(const path& filename)
+    load_tif(const std::filesystem::path& filename)
     {
-        auto result = try_load_tif(filename);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_tif(filename));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_tif(SDL_RWops* src)
         noexcept
     {
         auto surf = IMG_LoadTIF_RW(src);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_tif(rwops& src)
         noexcept
     {
@@ -1553,8 +1445,8 @@ namespace sdl::img {
     }
 
 
-    expected<surface, error>
-    try_load_tif(const path& filename)
+    std::expected<surface, error>
+    try_load_tif(const std::filesystem::path& filename)
         noexcept
     {
         try {
@@ -1562,7 +1454,7 @@ namespace sdl::img {
             return try_load_tif(src);
         }
         catch (error& e) {
-            return unexpected{e};
+            return std::unexpected{e};
         }
     }
 
@@ -1570,42 +1462,36 @@ namespace sdl::img {
     surface
     load_webp(SDL_RWops* src)
     {
-        auto result = try_load_webp(src);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_webp(src));
     }
 
 
     surface
     load_webp(rwops& src)
     {
-        return load_webp(src.data());
+        return value_or_throw(try_load_webp(src));
     }
 
 
     surface
-    load_webp(const path& filename)
+    load_webp(const std::filesystem::path& filename)
     {
-        auto result = try_load_webp(filename);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_webp(filename));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_webp(SDL_RWops* src)
         noexcept
     {
         auto surf = IMG_LoadWEBP_RW(src);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_webp(rwops& src)
         noexcept
     {
@@ -1613,8 +1499,8 @@ namespace sdl::img {
     }
 
 
-    expected<surface, error>
-    try_load_webp(const path& filename)
+    std::expected<surface, error>
+    try_load_webp(const std::filesystem::path& filename)
         noexcept
     {
         try {
@@ -1622,7 +1508,7 @@ namespace sdl::img {
             return try_load_webp(src);
         }
         catch (error& e) {
-            return unexpected{e};
+            return std::unexpected{e};
         }
     }
 
@@ -1630,42 +1516,36 @@ namespace sdl::img {
     surface
     load_xcf(SDL_RWops* src)
     {
-        auto result = try_load_xcf(src);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_xcf(src));
     }
 
 
     surface
     load_xcf(rwops& src)
     {
-        return load_xcf(src.data());
+        return value_or_throw(try_load_xcf(src));
     }
 
 
     surface
-    load_xcf(const path& filename)
+    load_xcf(const std::filesystem::path& filename)
     {
-        auto result = try_load_xcf(filename);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_xcf(filename));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_xcf(SDL_RWops* src)
         noexcept
     {
         auto surf = IMG_LoadXCF_RW(src);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_xcf(rwops& src)
         noexcept
     {
@@ -1673,8 +1553,8 @@ namespace sdl::img {
     }
 
 
-    expected<surface, error>
-    try_load_xcf(const path& filename)
+    std::expected<surface, error>
+    try_load_xcf(const std::filesystem::path& filename)
         noexcept
     {
         try {
@@ -1682,7 +1562,7 @@ namespace sdl::img {
             return try_load_xcf(src);
         }
         catch (error& e) {
-            return unexpected{e};
+            return std::unexpected{e};
         }
     }
 
@@ -1690,52 +1570,43 @@ namespace sdl::img {
     surface
     load_xpm(SDL_RWops* src)
     {
-        auto result = try_load_xpm(src);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_xpm(src));
     }
 
 
     surface
     load_xpm(rwops& src)
     {
-        return load_xpm(src.data());
+        return value_or_throw(try_load_xpm(src));
     }
 
 
     surface
-    load_xpm(const path& filename)
+    load_xpm(const std::filesystem::path& filename)
     {
-        auto result = try_load_xpm(filename);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_xpm(filename));
     }
 
 
     surface
     load_xpm(char* xpm[])
     {
-        auto result = try_load_xpm(xpm);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_xpm(xpm));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_xpm(SDL_RWops* src)
         noexcept
     {
         auto surf = IMG_LoadXPM_RW(src);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_xpm(rwops& src)
         noexcept
     {
@@ -1743,8 +1614,8 @@ namespace sdl::img {
     }
 
 
-    expected<surface, error>
-    try_load_xpm(const path& filename)
+    std::expected<surface, error>
+    try_load_xpm(const std::filesystem::path& filename)
         noexcept
     {
         try {
@@ -1752,18 +1623,18 @@ namespace sdl::img {
             return try_load_xpm(src);
         }
         catch (error& e) {
-            return unexpected{e};
+            return std::unexpected{e};
         }
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_xpm(char* xpm[])
         noexcept
     {
         auto surf = IMG_ReadXPMFromArray(xpm);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
@@ -1773,20 +1644,17 @@ namespace sdl::img {
     surface
     load_xpm_to_rgb888(char* xpm[])
     {
-        auto result = try_load_xpm_to_rgb888(xpm);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_xpm_to_rgb888(xpm));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_xpm_to_rgb888(char* xpm[])
         noexcept
     {
         auto surf = IMG_ReadXPMFromArrayToRGB888(xpm);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
@@ -1796,42 +1664,36 @@ namespace sdl::img {
     surface
     load_xv(SDL_RWops* src)
     {
-        auto result = try_load_xv(src);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_xv(src));
     }
 
 
     surface
     load_xv(rwops& src)
     {
-        return load_xv(src.data());
+        return value_or_throw(try_load_xv(src));
     }
 
 
     surface
-    load_xv(const path& filename)
+    load_xv(const std::filesystem::path& filename)
     {
-        auto result = try_load_xv(filename);
-        if (!result)
-            throw result.error();
-        return std::move(*result);
+        return value_or_throw(try_load_xv(filename));
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_xv(SDL_RWops* src)
         noexcept
     {
         auto surf = IMG_LoadXV_RW(src);
         if (!surf)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return surface{surf};
     }
 
 
-    expected<surface, error>
+    std::expected<surface, error>
     try_load_xv(rwops& src)
         noexcept
     {
@@ -1839,8 +1701,8 @@ namespace sdl::img {
     }
 
 
-    expected<surface, error>
-    try_load_xv(const path& filename)
+    std::expected<surface, error>
+    try_load_xv(const std::filesystem::path& filename)
         noexcept
     {
         try {
@@ -1848,7 +1710,7 @@ namespace sdl::img {
             return try_load_xv(src);
         }
         catch (error& e) {
-            return unexpected{e};
+            return std::unexpected{e};
         }
     }
 
@@ -1857,12 +1719,10 @@ namespace sdl::img {
 
     void
     save_jpg(const surface& src,
-             const path& filename,
+             const std::filesystem::path& filename,
              int quality)
     {
-        auto result = try_save_jpg(src, filename, quality);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_save_jpg(src, filename, quality));
     }
 
 
@@ -1872,9 +1732,7 @@ namespace sdl::img {
              bool close_dst,
              int quality)
     {
-        auto result = try_save_jpg(src, dst, close_dst, quality);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_save_jpg(src, dst, close_dst, quality));
     }
 
 
@@ -1883,25 +1741,25 @@ namespace sdl::img {
              rwops& dst,
              int quality)
     {
-        save_jpg(src, dst.data(), false, quality);
+        return value_or_throw(try_save_jpg(src, dst, quality));
     }
 
 
-    expected<void, error>
+    std::expected<void, error>
     try_save_jpg(const surface& src,
-                 const path& filename,
+                 const std::filesystem::path& filename,
                  int quality)
         noexcept
     {
         if (IMG_SaveJPG(const_cast<SDL_Surface*>(src.data()),
                         filename.c_str(),
                         quality) < 0)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return {};
     }
 
 
-    expected<void, error>
+    std::expected<void, error>
     try_save_jpg(const surface& src,
                  SDL_RWops* dst,
                  bool close_dst,
@@ -1912,12 +1770,12 @@ namespace sdl::img {
                            dst,
                            close_dst,
                            quality) < 0)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return {};
     }
 
 
-    expected<void, error>
+    std::expected<void, error>
     try_save_jpg(const surface& src,
                  rwops& dst,
                  int quality)
@@ -1931,11 +1789,9 @@ namespace sdl::img {
 
     void
     save_png(const surface& src,
-             const path& filename)
+             const std::filesystem::path& filename)
     {
-        auto result = try_save_png(src, filename);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_save_png(src, filename));
     }
 
 
@@ -1944,9 +1800,7 @@ namespace sdl::img {
              SDL_RWops* dst,
              bool close_dst)
     {
-        auto result = try_save_png(src, dst, close_dst);
-        if (!result)
-            throw result.error();
+        return value_or_throw(try_save_png(src, dst, close_dst));
     }
 
 
@@ -1954,23 +1808,23 @@ namespace sdl::img {
     save_png(const surface& src,
              rwops& dst)
     {
-        save_png(src, dst.data(), false);
+        return value_or_throw(try_save_png(src, dst));
     }
 
 
-    expected<void, error>
+    std::expected<void, error>
     try_save_png(const surface& src,
-                 const path& filename)
+                 const std::filesystem::path& filename)
         noexcept
     {
         if (IMG_SavePNG(const_cast<SDL_Surface*>(src.data()),
                         filename.c_str()) < 0)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return {};
     }
 
 
-    expected<void, error>
+    std::expected<void, error>
     try_save_png(const surface& src,
                  SDL_RWops* dst,
                  bool close_dst)
@@ -1979,12 +1833,12 @@ namespace sdl::img {
         if (IMG_SavePNG_RW(const_cast<SDL_Surface*>(src.data()),
                            dst,
                            close_dst) < 0)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         return {};
     }
 
 
-    expected<void, error>
+    std::expected<void, error>
     try_save_png(const surface& src,
                  rwops& dst)
         noexcept
@@ -1994,6 +1848,45 @@ namespace sdl::img {
 
 
 #if SDL_IMAGE_VERSION_ATLEAST(2, 6, 0)
+
+    animation
+    load_animation(const std::filesystem::path& filename)
+    {
+        return value_or_throw(try_load_animation(filename));
+    }
+
+
+    animation
+    load_animation(SDL_RWops* src,
+                   bool close_src)
+    {
+        return value_or_throw(try_load_animation(src, close_src));
+    }
+
+
+    animation
+    load_animation(rwops& src)
+    {
+        return value_or_throw(try_load_animation(src));
+    }
+
+
+    animation
+    load_animation(SDL_RWops* src,
+                   bool close_src,
+                   const char* type)
+    {
+        return value_or_throw(try_load_animation(src, close_src, type));
+    }
+
+
+    animation
+    load_animation(rwops& src,
+                   const char* type)
+    {
+        return value_or_throw(try_load_animation(src, type));
+    }
+
 
     namespace {
 
@@ -2024,88 +1917,40 @@ namespace sdl::img {
     } // namespace
 
 
-    animation
-    load_animation(const path& filename)
-    {
-        auto anim = IMG_LoadAnimation(filename.c_str());
-        if (!anim)
-            throw unexpected{error{}};
-        return convert_and_free(anim);
-    }
-
-
-    animation
-    load_animation(SDL_RWops* src,
-                   bool close_src)
-    {
-        auto anim = IMG_LoadAnimation_RW(src, close_src);
-        if (!anim)
-            throw error{};
-        return convert_and_free(anim);
-    }
-
-
-    animation
-    load_animation(rwops& src)
-    {
-        return load_animation(src.data(), false);
-    }
-
-
-    animation
-    load_animation(SDL_RWops* src,
-                   bool close_src,
-                   const char* type)
-    {
-        auto anim = IMG_LoadAnimationTyped_RW(src, close_src, type);
-        if (!anim)
-            throw error{};
-        return convert_and_free(anim);
-    }
-
-
-    animation
-    load_animation(rwops& src,
-                   const char* type)
-    {
-        return load_animation(src.data(), false, type);
-    }
-
-
-    expected<animation, error>
-    try_load_animation(const path& filename)
+    std::expected<animation, error>
+    try_load_animation(const std::filesystem::path& filename)
         noexcept
     {
         auto anim = IMG_LoadAnimation(filename.c_str());
         if (!anim)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         try {
             return convert_and_free(anim);
         }
         catch (std::exception& e) {
-            return unexpected{error{e}};
+            return std::unexpected{error{e}};
         }
     }
 
 
-    expected<animation, error>
+    std::expected<animation, error>
     try_load_animation(SDL_RWops* src,
                        bool close_src)
         noexcept
     {
         auto anim = IMG_LoadAnimation_RW(src, close_src);
         if (!anim)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         try {
             return convert_and_free(anim);
         }
         catch (std::exception& e) {
-            return unexpected{error{e}};
+            return std::unexpected{error{e}};
         }
     }
 
 
-    expected<animation, error>
+    std::expected<animation, error>
     try_load_animation(rwops& src)
         noexcept
     {
@@ -2113,7 +1958,7 @@ namespace sdl::img {
     }
 
 
-    expected<animation, error>
+    std::expected<animation, error>
     try_load_animation(SDL_RWops* src,
                        bool close_src,
                        const char* type)
@@ -2121,17 +1966,17 @@ namespace sdl::img {
     {
         auto anim = IMG_LoadAnimationTyped_RW(src, close_src, type);
         if (!anim)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         try {
             return convert_and_free(anim);
         }
         catch (std::exception& e) {
-            return unexpected{error{e}};
+            return std::unexpected{error{e}};
         }
     }
 
 
-    expected<animation, error>
+    std::expected<animation, error>
     try_load_animation(rwops& src,
                        const char* type)
         noexcept
@@ -2143,37 +1988,34 @@ namespace sdl::img {
     animation
     load_gif_animation(SDL_RWops* src)
     {
-        auto anim = IMG_LoadGIFAnimation_RW(src);
-        if (!anim)
-            throw error{};
-        return convert_and_free(anim);
+        return value_or_throw(try_load_gif_animation(src));
     }
 
 
     animation
     load_gif_animation(rwops& src)
     {
-        return load_gif_animation(src.data());
+        return value_or_throw(try_load_gif_animation(src));
     }
 
 
-    expected<animation, error>
+    std::expected<animation, error>
     try_load_gif_animation(SDL_RWops* src)
         noexcept
     {
         auto anim = IMG_LoadGIFAnimation_RW(src);
         if (!anim)
-            return unexpected{error{}};
+            return std::unexpected{error{}};
         try {
             return convert_and_free(anim);
         }
         catch (std::exception& e) {
-            return unexpected{error{e}};
+            return std::unexpected{error{e}};
         }
     }
 
 
-    expected<animation, error>
+    std::expected<animation, error>
     try_load_gif_animation(rwops& src)
         noexcept
     {

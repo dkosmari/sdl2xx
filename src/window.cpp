@@ -19,9 +19,11 @@
 #include "sdl2xx/surface.hpp"
 
 
+using sdl::impl::value_or_throw;
+
+
 namespace sdl {
 
-    using impl::value_or_throw;
 
 
     static const char* wrapper_key = "wrapper";
@@ -230,12 +232,11 @@ namespace sdl {
         const
     {
         std::size_t icc_size;
-        Uint8* icc_data = reinterpret_cast<Uint8*>(SDL_GetWindowICCProfile(raw,
-                                                                           &icc_size));
+        auto icc_data = SDL_GetWindowICCProfile(raw, &icc_size);
         if (!icc_data)
             throw error{};
 
-        return blob{icc_data, icc_size};
+        return blob{reinterpret_cast<std::byte*>(icc_data), icc_size};
     }
 
 

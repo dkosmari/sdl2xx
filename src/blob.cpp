@@ -10,15 +10,15 @@
 
 namespace sdl {
 
-    blob::blob(std::size_t size) :
-        ptr{make_unique<Uint8[]>(size)}
+    blob::blob(std::size_t size_) :
+        ptr{size_ ? make_unique<std::byte[]>(size_) : storage_type{}}
     {}
 
 
-    blob::blob(Uint8* raw_data,
-               std::size_t size)
+    blob::blob(std::byte* data_,
+               std::size_t size_)
         noexcept :
-        ptr{raw_data, size}
+        ptr{data_, size_}
     {}
 
 
@@ -30,40 +30,49 @@ namespace sdl {
     }
 
 
-    std::span<Uint8>
+    std::size_t
+    blob::size()
+        const noexcept
+    {
+        return ptr ? ptr.get_deleter().size : 0;
+    }
+
+
+    std::byte*
     blob::data()
         noexcept
     {
         if (!ptr)
-            return {};
-        return {ptr.get(), ptr.get_deleter().size};
+            return nullptr;
+        return ptr.get();
     }
 
 
-    std::span<const Uint8>
+    const std::byte*
     blob::data()
         const noexcept
     {
         if (!ptr)
-            return {};
-        return {ptr.get(), ptr.get_deleter().size};
+            return nullptr;
+        return ptr.get();
     }
 
 
-
-    std::span<std::byte>
-    blob::bytes()
+    blob::operator std::span<std::byte>()
         noexcept
     {
-        return as_writable_bytes(data());
+        if (!ptr)
+            return {};
+        return {data(), size()};
     }
 
 
-    std::span<const std::byte>
-    blob::bytes()
+    blob::operator std::span<const std::byte>()
         const noexcept
     {
-        return as_bytes(data());
+        if (!ptr)
+            return {};
+        return {data(), size()};
     }
 
 } // namespace sdl

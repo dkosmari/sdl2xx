@@ -1,7 +1,7 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
@@ -9,11 +9,15 @@
 #ifndef SDL2XX_RWOPS_HPP
 #define SDL2XX_RWOPS_HPP
 
+#include <concepts>
+#include <cstddef>
 #include <cstdio>
 #include <expected>
 #include <filesystem>
 #include <iosfwd>
 #include <span>
+#include <type_traits>
+#include <utility>
 
 #include <SDL_rwops.h>
 
@@ -51,28 +55,32 @@ namespace sdl {
               bool close_fp = true);
 
 
-        rwops(void* mem,
-              std::size_t size);
-
-        rwops(const void* mem,
-              std::size_t size);
-
+        explicit
+        rwops(std::span<std::byte> content);
 
         template<typename T,
                  std::size_t E>
+        requires (!std::same_as<std::remove_cv_t<T>, std::byte>)
         explicit
-        rwops(std::span<T, E> mem) :
-            rwops{static_cast<void*>(mem.data()), mem.size_bytes()}
+        rwops(std::span<T, E> content) :
+            rwops{as_writable_bytes(content)}
         {}
+
+
+        explicit
+        rwops(std::span<const std::byte> content);
 
         template<typename T,
                  std::size_t E>
+        requires (!std::same_as<std::remove_cv_t<T>, std::byte>)
         explicit
-        rwops(std::span<const T, E> mem) :
-            rwops{static_cast<const void*>(mem.data()), mem.size_bytes()}
+        rwops(std::span<const T, E> content) :
+            rwops{as_bytes(content)}
         {}
+
 
         rwops(std::streambuf& stream);
+
 
         rwops(std::streambuf* stream);
 
@@ -111,28 +119,28 @@ namespace sdl {
 
 
         void
-        create(void* mem,
-               std::size_t size);
-
-        void
-        create(const void* mem,
-               std::size_t size);
-
+        create(std::span<std::byte> content);
 
         template<typename T,
                  std::size_t E>
+        requires (!std::same_as<std::remove_cv_t<T>, std::byte>)
         void
-        create(std::span<T, E> mem)
+        create(std::span<T, E> content)
         {
-            create(static_cast<void*>(mem.data()), mem.size_bytes());
+            create(as_writable_bytes(content));
         }
 
+
+        void
+        create(std::span<const std::byte> content);
+
         template<typename T,
                  std::size_t E>
+        requires (!std::same_as<std::remove_cv_t<T>, std::byte>)
         void
-        create(std::span<const T, E> mem)
+        create(std::span<const T, E> content)
         {
-            create(static_cast<const void*>(mem.data()), mem.size_bytes());
+            create(as_bytes(content));
         }
 
 
@@ -159,7 +167,7 @@ namespace sdl {
             const noexcept;
 
 
-        enum class seekdir :int {
+        enum class seekdir : int {
             beg = RW_SEEK_SET,
             cur = RW_SEEK_CUR,
             end = RW_SEEK_END,
@@ -171,7 +179,7 @@ namespace sdl {
 
         Sint64
         seek(Sint64 offset,
-             std::ios_base::seekdir whence);
+             std::ios::seekdir whence);
 
         std::expected<Sint64, error>
         try_seek(Sint64 offset,
@@ -180,7 +188,7 @@ namespace sdl {
 
         std::expected<Sint64, error>
         try_seek(Sint64 offset,
-                 std::ios_base::seekdir whence)
+                 std::ios::seekdir whence)
             noexcept;
 
 
@@ -196,13 +204,15 @@ namespace sdl {
              std::size_t elem_size,
              std::size_t count);
 
+
         template<typename T,
                  std::size_t E>
         [[nodiscard]]
-        std::size_t
+        std::span<T>
         read(std::span<T, E> buf)
         {
-            return read(buf.data(), sizeof(T), buf.size());
+            auto r = read(buf.data(), sizeof(T), buf.size());
+            return buf.subspan(0, r);
         }
 
 
@@ -217,11 +227,14 @@ namespace sdl {
         template<typename T,
                  std::size_t E>
         [[nodiscard]]
-        std::expected<std::size_t, error>
+        std::expected<std::span<T>, error>
         try_read(std::span<T, E> buf)
             noexcept
         {
-            return try_read(buf.data(), sizeof(T), buf.size());
+            auto r = try_read(buf.data(), sizeof(T), buf.size());
+            if (!r)
+                return std::unexpected{std::move(r.error())};
+            return buf.subspan(0, *r);
         }
 
 
@@ -231,14 +244,17 @@ namespace sdl {
               std::size_t elem_size,
               std::size_t count);
 
+
         template<typename T,
                  std::size_t E>
         [[nodiscard]]
-        std::size_t
+        std::span<T>
         write(std::span<T, E> buf)
         {
-            return write(buf.data(), sizeof(T), buf.size());
+            auto w = write(buf.data(), sizeof(T), buf.size());
+            return buf.subspan(0, w);
         }
+
 
         [[nodiscard]]
         std::expected<std::size_t, error>
@@ -250,10 +266,14 @@ namespace sdl {
         template<typename T,
                  std::size_t E>
         [[nodiscard]]
-        std::expected<std::size_t, error>
+        std::expected<std::span<T>, error>
         try_write(std::span<T, E> buf)
+            noexcept
         {
-            return try_write(buf.data(), sizeof(T), buf.size());
+            auto w = try_write(buf.data(), sizeof(T), buf.size());
+            if (!w)
+                return std::unexpected{std::move(w.error())};
+            return buf.subspan(0, *w);
         }
 
 
@@ -355,25 +375,15 @@ namespace sdl {
     };
 
 
-    constexpr
-    int
-    convert(rwops::seekdir x)
-        noexcept
-    {
-        return static_cast<int>(x);
-    }
-
-
-    // TODO: should move this to another header?
     [[nodiscard]]
     blob
     load_file(const path& filename);
+
 
     [[nodiscard]]
     std::expected<blob, error>
     try_load_file(const path& filename)
         noexcept;
-
 
 } // namespace sdl
 

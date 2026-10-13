@@ -1,7 +1,7 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
@@ -12,8 +12,10 @@
 #include <chrono>
 #include <concepts>
 #include <filesystem>
+#include <functional>
 #include <optional>
 #include <span>
+#include <string_view>
 
 #include <SDL_mixer.h>
 
@@ -26,10 +28,6 @@
 
 
 namespace sdl::mix {
-
-    using std::chrono::milliseconds;
-
-    using std::filesystem::path;
 
     using audio::format;
 
@@ -338,7 +336,7 @@ namespace sdl::mix {
         using base_type::base_type;
 
 
-        chunk(const path& filename);
+        chunk(const std::filesystem::path& filename);
 
         chunk(SDL_RWops* src,
               bool close_src);
@@ -376,7 +374,7 @@ namespace sdl::mix {
 
 
         void
-        create(const path& filename);
+        create(const std::filesystem::path& filename);
 
         void
         create(SDL_RWops* src,
@@ -447,38 +445,38 @@ namespace sdl::mix {
 
         unsigned
         play_on(unsigned channel,
-                milliseconds max_duration,
+                std::chrono::milliseconds max_duration,
                 int loops = 0)
             noexcept;
 
         std::optional<unsigned>
-        play(milliseconds max_duration,
+        play(std::chrono::milliseconds max_duration,
              int loops = 0)
             noexcept;
 
 
         unsigned
         fade_in_on(unsigned channel,
-                   milliseconds fade_duration,
+                   std::chrono::milliseconds fade_duration,
                    int loops = 0)
             noexcept;
 
         std::optional<unsigned>
-        fade_in(milliseconds fade_duration,
+        fade_in(std::chrono::milliseconds fade_duration,
                 int loops = 0)
             noexcept;
 
 
         unsigned
         fade_in_on(unsigned channel,
-                   milliseconds fade_duration,
-                   milliseconds max_duration,
+                   std::chrono::milliseconds fade_duration,
+                   std::chrono::milliseconds max_duration,
                    int loops = 0)
             noexcept;
 
         std::optional<unsigned>
-        fade_in(milliseconds fade_duration,
-                milliseconds max_duration,
+        fade_in(std::chrono::milliseconds fade_duration,
+                std::chrono::milliseconds max_duration,
                 int loops = 0)
             noexcept;
 
@@ -526,7 +524,7 @@ namespace sdl::mix {
         };
 
 
-        music(const path& filename);
+        music(const std::filesystem::path& filename);
 
         music(SDL_RWops* src,
               bool close_src);
@@ -556,7 +554,7 @@ namespace sdl::mix {
 
 
         void
-        create(const path& filename);
+        create(const std::filesystem::path& filename);
 
         void
         create(SDL_RWops* src,
@@ -679,12 +677,12 @@ namespace sdl::mix {
 
 
         void
-        fade_in(milliseconds duration,
+        fade_in(std::chrono::milliseconds duration,
                 int loops = 0);
 
 
         void
-        fade_in(milliseconds duration,
+        fade_in(std::chrono::milliseconds duration,
                 dbl_seconds position,
                 int loops = 0);
 
@@ -707,7 +705,7 @@ namespace sdl::mix {
 
 
         bool
-        fade_out(milliseconds fade_duration)
+        fade_out(std::chrono::milliseconds fade_duration)
             noexcept;
 
 
@@ -829,7 +827,6 @@ namespace sdl::mix {
         {
             return set_cmd(cmd.data());
         }
-
 
     }; // struct music
 
@@ -1016,11 +1013,11 @@ namespace sdl::mix {
 
     unsigned
     expire(unsigned channel,
-           milliseconds duration)
+           std::chrono::milliseconds duration)
         noexcept;
 
     unsigned
-    expire(milliseconds duration)
+    expire(std::chrono::milliseconds duration)
         noexcept;
 
 
@@ -1035,12 +1032,12 @@ namespace sdl::mix {
 
     void
     fade_out(unsigned channel,
-             milliseconds fade_duration);
+             std::chrono::milliseconds fade_duration);
 
 
     unsigned
     fade_out_group(int tag,
-                   milliseconds fade_duration)
+                   std::chrono::milliseconds fade_duration)
         noexcept;
 
 
@@ -1094,21 +1091,29 @@ namespace sdl::mix {
         noexcept;
 
 
+    bool
+    set_sound_fonts(const concepts::string auto& paths)
+    {
+        return set_sound_fonts(paths.data());
+    }
+
+
     [[nodiscard]]
-    const char*
-    get_sound_fonts();
+    std::string_view
+    get_sound_fonts()
+        noexcept;
 
 
-    using sound_font_function = int (SDLCALL *)(const char*, void*);
+    using sound_font_callback_signature = bool (std::string_view path);
+    using sound_font_function = std::function<sound_font_callback_signature>;
 
     bool
-    for_eac_sound_font(sound_font_function func,
-                       void* ctx)
+    for_each_sound_font(const sound_font_function& func)
         noexcept;
 
 
     void
-    set_timidity_cfg(const path& cfg_filename);
+    set_timidity_cfg(const std::filesystem::path& cfg_filename);
 
 
     const char*

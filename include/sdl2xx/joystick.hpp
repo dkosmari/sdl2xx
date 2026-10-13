@@ -1,7 +1,7 @@
 /*
  * SDL2XX - a C++23 wrapper for SDL2.
  *
- * Copyright 2025  Daniel K. O. <dkosmari>
+ * Copyright 2025-2026  Daniel K. O. <dkosmari>
  *
  * SPDX-License-Identifier: Zlib
  */
@@ -28,8 +28,6 @@
 
 
 namespace sdl::joystick {
-
-    using std::chrono::milliseconds;
 
     using guid = sdl::guid;
 
@@ -549,7 +547,7 @@ namespace sdl::joystick {
         bool
         rumble(float low,
                float high,
-               milliseconds duration)
+               std::chrono::milliseconds duration)
             noexcept;
 
 #endif // SDL_VERSION_ATLEAST(2, 0, 9)
@@ -560,7 +558,7 @@ namespace sdl::joystick {
         bool
         rumble_triggers(float left,
                         float right,
-                        milliseconds duration)
+                        std::chrono::milliseconds duration)
             noexcept;
 
 

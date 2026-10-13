@@ -25,9 +25,6 @@
 
 namespace sdl::img {
 
-    using std::filesystem::path;
-
-
     [[nodiscard]]
     SDL_version
     linked_version()
@@ -184,11 +181,11 @@ namespace sdl::img {
 
     [[nodiscard]]
     surface
-    load(const path& filename);
+    load(const std::filesystem::path& filename);
 
     [[nodiscard]]
     std::expected<surface, error>
-    try_load(const path& filename)
+    try_load(const std::filesystem::path& filename)
         noexcept;
 
 
@@ -216,12 +213,12 @@ namespace sdl::img {
     [[nodiscard]]
     texture
     load_texture(renderer& ren,
-                 const path& filename);
+                 const std::filesystem::path& filename);
 
     [[nodiscard]]
     std::expected<texture, error>
     try_load_texture(renderer& ren,
-                     const path& filename)
+                     const std::filesystem::path& filename)
         noexcept;
 
 
@@ -552,7 +549,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     surface
-    load_avif(const path& filename);
+    load_avif(const std::filesystem::path& filename);
 
     [[nodiscard]]
     std::expected<surface, error>
@@ -565,7 +562,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     std::expected<surface, error>
-    try_load_avif(const path& filename)
+    try_load_avif(const std::filesystem::path& filename)
         noexcept;
 
 #endif // SDL_IMAGE_VERSION_ATLEAST(2, 6, 0)
@@ -581,7 +578,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     surface
-    load_bmp(const path& filename);
+    load_bmp(const std::filesystem::path& filename);
 
     [[nodiscard]]
     std::expected<surface, error>
@@ -595,7 +592,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     std::expected<surface, error>
-    try_load_bmp(const path& filename)
+    try_load_bmp(const std::filesystem::path& filename)
         noexcept;
 
 
@@ -609,7 +606,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     surface
-    load_cur(const path& filename);
+    load_cur(const std::filesystem::path& filename);
 
     [[nodiscard]]
     std::expected<surface, error>
@@ -623,7 +620,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     std::expected<surface, error>
-    try_load_cur(const path& filename)
+    try_load_cur(const std::filesystem::path& filename)
         noexcept;
 
 
@@ -637,7 +634,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     surface
-    load_gif(const path& filename);
+    load_gif(const std::filesystem::path& filename);
 
     [[nodiscard]]
     std::expected<surface, error>
@@ -651,7 +648,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     std::expected<surface, error>
-    try_load_gif(const path& filename)
+    try_load_gif(const std::filesystem::path& filename)
         noexcept;
 
 
@@ -665,7 +662,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     surface
-    load_ico(const path& filename);
+    load_ico(const std::filesystem::path& filename);
 
     [[nodiscard]]
     std::expected<surface, error>
@@ -679,7 +676,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     std::expected<surface, error>
-    try_load_ico(const path& filename)
+    try_load_ico(const std::filesystem::path& filename)
         noexcept;
 
 
@@ -693,7 +690,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     surface
-    load_jpg(const path& filename);
+    load_jpg(const std::filesystem::path& filename);
 
     [[nodiscard]]
     std::expected<surface, error>
@@ -707,7 +704,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     std::expected<surface, error>
-    try_load_jpg(const path& filename)
+    try_load_jpg(const std::filesystem::path& filename)
         noexcept;
 
 
@@ -723,7 +720,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     surface
-    load_jxl(const path& filename);
+    load_jxl(const std::filesystem::path& filename);
 
     [[nodiscard]]
     std::expected<surface, error>
@@ -737,7 +734,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     std::expected<surface, error>
-    try_load_jxl(const path& filename)
+    try_load_jxl(const std::filesystem::path& filename)
         noexcept;
 
 #endif // SDL_IMAGE_VERSION_ATLEAST(2, 6, 0)
@@ -753,7 +750,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     surface
-    load_lbm(const path& filename);
+    load_lbm(const std::filesystem::path& filename);
 
     [[nodiscard]]
     std::expected<surface, error>
@@ -767,7 +764,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     std::expected<surface, error>
-    try_load_lbm(const path& filename)
+    try_load_lbm(const std::filesystem::path& filename)
         noexcept;
 
 
@@ -781,7 +778,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     surface
-    load_pcx(const path& filename);
+    load_pcx(const std::filesystem::path& filename);
 
     [[nodiscard]]
     std::expected<surface, error>
@@ -795,7 +792,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     std::expected<surface, error>
-    try_load_pcx(const path& filename)
+    try_load_pcx(const std::filesystem::path& filename)
         noexcept;
 
 
@@ -809,7 +806,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     surface
-    load_png(const path& filename);
+    load_png(const std::filesystem::path& filename);
 
     [[nodiscard]]
     std::expected<surface, error>
@@ -823,7 +820,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     std::expected<surface, error>
-    try_load_png(const path& filename)
+    try_load_png(const std::filesystem::path& filename)
         noexcept;
 
 
@@ -837,7 +834,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     surface
-    load_pnm(const path& filename);
+    load_pnm(const std::filesystem::path& filename);
 
     [[nodiscard]]
     std::expected<surface, error>
@@ -851,7 +848,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     std::expected<surface, error>
-    try_load_pnm(const path& filename)
+    try_load_pnm(const std::filesystem::path& filename)
         noexcept;
 
 
@@ -867,7 +864,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     surface
-    load_svg(const path& filename);
+    load_svg(const std::filesystem::path& filename);
 
     [[nodiscard]]
     std::expected<surface, error>
@@ -881,7 +878,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     std::expected<surface, error>
-    try_load_svg(const path& filename)
+    try_load_svg(const std::filesystem::path& filename)
         noexcept;
 
 #endif // SDL_IMAGE_VERSION_ATLEAST(2, 0, 2)
@@ -913,13 +910,13 @@ namespace sdl::img {
 
     [[nodiscard]]
     surface
-    load_svg(const path& filename,
+    load_svg(const std::filesystem::path& filename,
              int width,
              int height);
 
     [[nodiscard]]
     surface
-    load_svg(const path& filename,
+    load_svg(const std::filesystem::path& filename,
              vec2 size);
 
 
@@ -951,14 +948,14 @@ namespace sdl::img {
 
     [[nodiscard]]
     std::expected<surface, error>
-    try_load_svg(const path& filename,
+    try_load_svg(const std::filesystem::path& filename,
                  int width,
                  int height)
         noexcept;
 
     [[nodiscard]]
     std::expected<surface, error>
-    try_load_svg(const path& filename,
+    try_load_svg(const std::filesystem::path& filename,
                  vec2 size)
         noexcept;
 
@@ -977,7 +974,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     surface
-    load_qoi(const path& filename);
+    load_qoi(const std::filesystem::path& filename);
 
     [[nodiscard]]
     std::expected<surface, error>
@@ -991,7 +988,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     std::expected<surface, error>
-    try_load_qoi(const path& filename)
+    try_load_qoi(const std::filesystem::path& filename)
         noexcept;
 
 #endif // SDL_IMAGE_VERSION_ATLEAST(2, 6, 0)
@@ -1007,7 +1004,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     surface
-    load_tif(const path& filename);
+    load_tif(const std::filesystem::path& filename);
 
     [[nodiscard]]
     std::expected<surface, error>
@@ -1021,7 +1018,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     std::expected<surface, error>
-    try_load_tif(const path& filename)
+    try_load_tif(const std::filesystem::path& filename)
         noexcept;
 
 
@@ -1035,7 +1032,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     surface
-    load_webp(const path& filename);
+    load_webp(const std::filesystem::path& filename);
 
     [[nodiscard]]
     std::expected<surface, error>
@@ -1049,7 +1046,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     std::expected<surface, error>
-    try_load_webp(const path& filename)
+    try_load_webp(const std::filesystem::path& filename)
         noexcept;
 
 
@@ -1063,7 +1060,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     surface
-    load_xcf(const path& filename);
+    load_xcf(const std::filesystem::path& filename);
 
     [[nodiscard]]
     std::expected<surface, error>
@@ -1077,7 +1074,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     std::expected<surface, error>
-    try_load_xcf(const path& filename)
+    try_load_xcf(const std::filesystem::path& filename)
         noexcept;
 
 
@@ -1091,7 +1088,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     surface
-    load_xpm(const path& filename);
+    load_xpm(const std::filesystem::path& filename);
 
     [[nodiscard]]
     surface
@@ -1109,7 +1106,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     std::expected<surface, error>
-    try_load_xpm(const path& filename)
+    try_load_xpm(const std::filesystem::path& filename)
         noexcept;
 
     [[nodiscard]]
@@ -1141,7 +1138,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     surface
-    load_xv(const path& filename);
+    load_xv(const std::filesystem::path& filename);
 
     [[nodiscard]]
     std::expected<surface, error>
@@ -1155,7 +1152,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     std::expected<surface, error>
-    try_load_xv(const path& filename)
+    try_load_xv(const std::filesystem::path& filename)
         noexcept;
 
 
@@ -1163,7 +1160,7 @@ namespace sdl::img {
 
     void
     save_jpg(const surface& src,
-             const path& filename,
+             const std::filesystem::path& filename,
              int quality);
 
     void
@@ -1179,7 +1176,7 @@ namespace sdl::img {
 
     std::expected<void, error>
     try_save_jpg(const surface& src,
-                 const path& filename,
+                 const std::filesystem::path& filename,
                  int quality)
         noexcept;
 
@@ -1201,7 +1198,7 @@ namespace sdl::img {
 
     void
     save_png(const surface& src,
-             const path& filename);
+             const std::filesystem::path& filename);
 
     void
     save_png(const surface& src,
@@ -1214,7 +1211,7 @@ namespace sdl::img {
 
     std::expected<void, error>
     try_save_png(const surface& src,
-                 const path& filename)
+                 const std::filesystem::path& filename)
         noexcept;
 
     std::expected<void, error>
@@ -1242,7 +1239,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     animation
-    load_animation(const path& filename);
+    load_animation(const std::filesystem::path& filename);
 
     [[nodiscard]]
     animation
@@ -1289,7 +1286,7 @@ namespace sdl::img {
 
     [[nodiscard]]
     std::expected<animation, error>
-    try_load_animation(const path& filename)
+    try_load_animation(const std::filesystem::path& filename)
         noexcept;
 
     [[nodiscard]]

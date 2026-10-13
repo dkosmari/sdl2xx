@@ -725,7 +725,7 @@ namespace sdl::joystick {
     bool
     device::rumble(float low,
                    float high,
-                   milliseconds duration)
+                   std::chrono::milliseconds duration)
         noexcept
     {
         return !SDL_JoystickRumble(raw,
@@ -742,7 +742,7 @@ namespace sdl::joystick {
     bool
     device::rumble_triggers(float left,
                             float right,
-                            milliseconds duration)
+                            std::chrono::milliseconds duration)
         noexcept
     {
         return !SDL_JoystickRumbleTriggers(raw,
